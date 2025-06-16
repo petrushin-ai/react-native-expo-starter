@@ -1,74 +1,82 @@
+import { Modal } from '@/components/ui/Modal';
 import { useSession } from '@/contexts/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import React from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ProfileScreen() {
     const { signOut, session, isAuthEnabled } = useSession();
+    const [showSignOutModal, setShowSignOutModal] = useState(false);
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
 
     const handleSignOut = () => {
-        Alert.alert(
-            'Sign Out',
-            'Are you sure you want to sign out?',
-            [
-                {
-                    text: 'Cancel',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Sign Out',
-                    style: 'destructive',
-                    onPress: () => {
-                        signOut();
-                        // Navigation will be handled automatically by the protected route
-                    },
-                },
-            ],
-        );
+        setShowSignOutModal(true);
+    };
+
+    const confirmSignOut = () => {
+        setShowSignOutModal(false);
+        // Small delay to ensure modal closes before navigation
+        setTimeout(() => {
+            signOut();
+            // Navigation will be handled automatically by the protected route
+        }, 100);
     };
 
     return (
-        <View style={[styles.container, isDark && styles.containerDark]}>
-            <View style={styles.content}>
-                <Text style={[styles.title, isDark && styles.textDark]}>Profile</Text>
+        <>
+            <View style={[styles.container, isDark && styles.containerDark]}>
+                <View style={styles.content}>
+                    <Text style={[styles.title, isDark && styles.textDark]}>Profile</Text>
 
-                <View style={styles.infoSection}>
-                    <Text style={[styles.label, isDark && styles.textDark]}>Authentication Status</Text>
-                    <Text style={[styles.value, isDark && styles.textDark]}>
-                        {isAuthEnabled ? 'Enabled' : 'Disabled'}
-                    </Text>
-                </View>
-
-                {isAuthEnabled && session && (
-                    <>
-                        <View style={styles.infoSection}>
-                            <Text style={[styles.label, isDark && styles.textDark]}>Session</Text>
-                            <Text style={[styles.value, isDark && styles.textDark]} numberOfLines={1}>
-                                {session.substring(0, 20)}...
-                            </Text>
-                        </View>
-
-                        <TouchableOpacity
-                            style={styles.signOutButton}
-                            onPress={handleSignOut}
-                        >
-                            <Text style={styles.signOutButtonText}>Sign Out</Text>
-                        </TouchableOpacity>
-                    </>
-                )}
-
-                {!isAuthEnabled && (
-                    <View style={styles.noteContainer}>
-                        <Text style={[styles.note, isDark && styles.textDark]}>
-                            Authentication is currently disabled.{'\n'}
-                            Set EXPO_PUBLIC_AUTH_ENABLED=true in your environment to enable it.
+                    <View style={styles.infoSection}>
+                        <Text style={[styles.label, isDark && styles.textDark]}>Authentication Status</Text>
+                        <Text style={[styles.value, isDark && styles.textDark]}>
+                            {isAuthEnabled ? 'Enabled' : 'Disabled'}
                         </Text>
                     </View>
-                )}
+
+                    {isAuthEnabled && session && (
+                        <>
+                            <View style={styles.infoSection}>
+                                <Text style={[styles.label, isDark && styles.textDark]}>Session</Text>
+                                <Text style={[styles.value, isDark && styles.textDark]} numberOfLines={1}>
+                                    {session.substring(0, 20)}...
+                                </Text>
+                            </View>
+
+                            <TouchableOpacity
+                                style={styles.signOutButton}
+                                onPress={handleSignOut}
+                            >
+                                <Text style={styles.signOutButtonText}>Sign Out</Text>
+                            </TouchableOpacity>
+                        </>
+                    )}
+
+                    {!isAuthEnabled && (
+                        <View style={styles.noteContainer}>
+                            <Text style={[styles.note, isDark && styles.textDark]}>
+                                Authentication is currently disabled.{'\n'}
+                                Set EXPO_PUBLIC_AUTH_ENABLED=true in your environment to enable it.
+                            </Text>
+                        </View>
+                    )}
+                </View>
             </View>
-        </View>
+
+            <Modal
+                visible={showSignOutModal}
+                onClose={() => setShowSignOutModal(false)}
+                title="Sign Out"
+                message="Are you sure you want to sign out of your account?"
+                type="warning"
+                primaryButtonText="Sign Out"
+                secondaryButtonText="Cancel"
+                onPrimaryPress={confirmSignOut}
+                onSecondaryPress={() => setShowSignOutModal(false)}
+            />
+        </>
     );
 }
 

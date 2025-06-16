@@ -1,7 +1,7 @@
 import { useSession } from '@/contexts/AuthContext';
 import { Redirect, Stack } from 'expo-router';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 export default function ProtectedLayout() {
     const { session, isLoading, isAuthEnabled } = useSession();
@@ -10,6 +10,7 @@ export default function ProtectedLayout() {
     if (isLoading) {
         return (
             <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#2563EB" />
                 <Text style={styles.loadingText}>Loading...</Text>
             </View>
         );
@@ -30,9 +31,11 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#f5f5f5',
     },
     loadingText: {
-        fontSize: 18,
-        color: '#666',
+        marginTop: 12,
+        fontSize: 16,
+        color: '#6B7280',
     },
 }); 
