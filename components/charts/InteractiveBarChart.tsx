@@ -34,6 +34,14 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     gradientOpacity = 0.3, // Default 30% opacity for gradient end
     showTooltip = true,
     tooltipConfig = {},
+    // Chart layout configuration
+    padding,
+    domainPadding,
+    // Grid display configuration
+    showGrid = false,
+    showXAxis = true,
+    showYAxis = true,
+    showFrame = false,
 }) => {
     // Load font using Skia's useFont hook
     const font = useFont(SpaceMono, 12);
@@ -246,15 +254,15 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     // Default configuration with enhanced padding for tooltips
     const defaultConfig = {
         height: 220,
-        // Enhanced padding to accommodate tooltips
-        padding: {
+        // Use provided padding or enhanced defaults
+        padding: padding || {
             left: Math.max(12, responsiveDims.spacing),
             right: Math.max(12, responsiveDims.spacing),
             top: showTooltip ? 50 : 30, // Increased top padding when tooltips are enabled
             bottom: 16
         },
-        // Enhanced domain padding for tooltips
-        domainPadding: {
+        // Use provided domainPadding or enhanced defaults
+        domainPadding: domainPadding || {
             left: Math.max(8, responsiveDims.spacing / 2),
             right: Math.max(8, responsiveDims.spacing / 2),
             top: showTooltip ? 60 : 30, // Increased top domain padding for tooltips
@@ -271,9 +279,9 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
         },
         xAxisConfig: {
             font,
-            labelColor: theme === 'dark' ? '#ccc' : '#666',
-            lineColor: theme === 'dark' ? '#444' : '#e0e0e0',
-            lineWidth: 1,
+            labelColor: showXAxis ? (theme === 'dark' ? '#ccc' : '#666') : 'transparent',
+            lineColor: showGrid ? (theme === 'dark' ? '#333' : '#f0f0f0') : 'transparent',
+            lineWidth: showGrid ? 1 : 0,
             // Ensure we show all labels
             tickCount: data.length,
             formatXLabel: (value: any) => {
@@ -286,11 +294,11 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
                 return String(value);
             },
         },
-        yAxisConfig: {
+        yAxisConfig: showYAxis ? {
             font,
             labelColor: theme === 'dark' ? '#ccc' : '#666',
-            lineColor: theme === 'dark' ? '#444' : '#e0e0e0',
-            lineWidth: 1,
+            lineColor: showGrid ? (theme === 'dark' ? '#333' : '#f0f0f0') : 'transparent',
+            lineWidth: showGrid ? 1 : 0,
             tickCount: 6,
             formatYLabel: (value: any) => {
                 if (typeof value === 'number') {
@@ -301,6 +309,17 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
                 }
                 return String(value);
             },
+        } : {
+            font,
+            labelColor: 'transparent',
+            lineColor: 'transparent',
+            lineWidth: 0,
+            tickCount: 6,
+            formatYLabel: () => '',
+        },
+        frameConfig: {
+            lineColor: showFrame ? (theme === 'dark' ? '#444' : '#ddd') : 'transparent',
+            lineWidth: showFrame ? 1 : 0,
         },
         isAnimated: true,
         animationDuration: 800,
@@ -491,6 +510,7 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
                     xAxis={mergedConfig.xAxisConfig}
                     yAxis={[mergedConfig.yAxisConfig]}
                     chartPressState={state}
+                    frame={mergedConfig.frameConfig}
                 >
                     {({ points, chartBounds }) => (
                         <Bar

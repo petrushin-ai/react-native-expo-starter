@@ -266,11 +266,77 @@ export default function ChartsScreen() {
                     data={lineData}
                     config={lineConfig}
                     title="Performance Trends"
-                    description="Area chart • Smooth curves • Interactive data points"
+                    description="Area chart • Default data points (4px) • Static tooltips"
                     theme={colorScheme}
                     onDataPointPress={handleLineDataPointPress}
                     showDataPointsToggle={true}
                     initialShowDataPoints={true}
+                    interpolationType="natural"
+                    dataPointSize={4}
+                    showDataPointTooltip={true}
+                />
+
+                {/* Gesture Line Chart with Cardinal Interpolation */}
+                <GestureLineChart
+                    data={lineData}
+                    config={{
+                        ...lineConfig,
+                        areaChart: false,
+                        thickness: 3,
+                        startFillColor: isDark ? '#F59E0B' : '#F59E0B',
+                        endFillColor: isDark ? 'rgba(245, 158, 11, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                    }}
+                    title="Cardinal Interpolation Example"
+                    description="Cardinal splines • Small data points (3px) • No static tooltips"
+                    theme={colorScheme}
+                    onDataPointPress={handleLineDataPointPress}
+                    showDataPointsToggle={true}
+                    initialShowDataPoints={false}
+                    interpolationType="cardinal"
+                    dataPointSize={3}
+                    showDataPointTooltip={false}
+                />
+
+                {/* Gesture Line Chart with Step Interpolation */}
+                <GestureLineChart
+                    data={lineData}
+                    config={{
+                        ...lineConfig,
+                        areaChart: true,
+                        thickness: 2,
+                        startFillColor: isDark ? '#10B981' : '#10B981',
+                        endFillColor: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                    }}
+                    title="Step Interpolation Example"
+                    description="Step function • Large data points (6px) • Static tooltips"
+                    theme={colorScheme}
+                    onDataPointPress={handleLineDataPointPress}
+                    showDataPointsToggle={true}
+                    initialShowDataPoints={true}
+                    interpolationType="step"
+                    dataPointSize={6}
+                    showDataPointTooltip={true}
+                />
+
+                {/* Gesture Line Chart with Linear Interpolation */}
+                <GestureLineChart
+                    data={lineData}
+                    config={{
+                        ...lineConfig,
+                        areaChart: false,
+                        thickness: 3,
+                        startFillColor: isDark ? '#8B5CF6' : '#8B5CF6',
+                        endFillColor: isDark ? 'rgba(139, 92, 246, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+                    }}
+                    title="Linear Interpolation Example"
+                    description="Straight lines • Extra large data points (8px) • No static tooltips"
+                    theme={colorScheme}
+                    onDataPointPress={handleLineDataPointPress}
+                    showDataPointsToggle={true}
+                    initialShowDataPoints={false}
+                    interpolationType="linear"
+                    dataPointSize={8}
+                    showDataPointTooltip={false}
                 />
 
                 {/* Interactive Pie Chart */}
@@ -306,7 +372,7 @@ export default function ChartsScreen() {
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
                 title="Interactive Charts Showcase"
-                message="This page demonstrates interactive chart components with gesture support, animations, and theme awareness. Use the refresh button in the header to regenerate chart data and restart animations."
+                message="This page demonstrates interactive chart components with gesture support, animations, and theme awareness. Features include multiple interpolation types (natural, cardinal, step, linear), configurable data point sizes (3px to 8px), static data point tooltips that hide during dragging, enhanced dynamic tooltips, real-time selection feedback, responsive design, and individual data point toggles for each chart. Use the refresh button to regenerate data and each chart's toggle button to control static data points visibility."
                 type="info"
                 primaryButtonText="Got it"
                 secondaryButtonText="Close"

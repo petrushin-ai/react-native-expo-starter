@@ -32,6 +32,18 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
     showDataPointsToggle = true,
     initialShowDataPoints = true,
     showTooltip = true,
+    interpolationType,
+    showStaticDataPoints,
+    dataPointSize,
+    showDataPointTooltip = false,
+    // Chart layout configuration
+    padding,
+    domainPadding,
+    // Grid display configuration
+    showGrid = false,
+    showXAxis = true,
+    showYAxis = true,
+    showFrame = false,
 }) => {
     // Load font using Skia's useFont hook
     const font = useFont(SpaceMono, 12);
@@ -43,15 +55,17 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
     });
 
     // State management
-    const [showDataPoints, setShowDataPoints] = useState(initialShowDataPoints);
+    const [showDataPoints, setShowDataPoints] = useState(showStaticDataPoints ?? initialShowDataPoints);
     const [tooltipValue, setTooltipValue] = useState('');
     const [isManuallyActive, setIsManuallyActive] = useState(false);
     const [manualTooltipValue, setManualTooltipValue] = useState('');
     const [previousDataIndex, setPreviousDataIndex] = useState<number | null>(null);
+    const [staticTooltipPositions, setStaticTooltipPositions] = useState<Array<{ x: number, y: number, value: number }>>([]);
 
     // Chart container ref for measuring
     const chartContainerRef = useRef<View>(null);
     const [chartDimensions, setChartDimensions] = useState({ width: 300, height: 220 });
+    const chartPointsRef = useRef<any>(null);
 
     // Responsive dimensions calculation
     const { width: screenWidth } = Dimensions.get('window');
@@ -86,15 +100,15 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
         areaChart: config.areaChart !== false, // Default to true
         color1: config.color1 || (theme === 'dark' ? '#4FC3F7' : '#2196F3'),
         thickness: config.thickness || 3,
-        // Proper padding for chart visibility
-        padding: {
+        // Use provided padding or defaults
+        padding: padding || {
             left: 10,
             right: 10,
             top: 10,
             bottom: 10
         },
-        // Domain padding for proper spacing
-        domainPadding: {
+        // Use provided domainPadding or defaults
+        domainPadding: domainPadding || {
             left: 20,
             right: 20,
             top: 20,
@@ -112,6 +126,68 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
         isAnimated: config.isAnimated !== false,
         animationDuration: config.animationDuration || 1000,
     };
+
+    // Helper function to determine curve type based on interpolation
+    const getCurveType = () => {
+        // Priority: 1. Direct prop, 2. Config prop, 3. Legacy curved boolean, 4. Default
+        if (interpolationType) {
+            return interpolationType;
+        }
+
+        if (config.interpolationType) {
+            return config.interpolationType;
+        }
+
+        // Legacy support for curved prop
+        if (config.curved !== undefined) {
+            return config.curved ? 'monotoneX' : 'linear';
+        }
+
+        // Default
+        return 'monotoneX';
+    };
+
+    const curveType = getCurveType();
+
+    // Helper function to determine data point size
+    const getDataPointSize = (): number => {
+        // Priority: 1. Direct prop, 2. Config prop, 3. Default
+        if (dataPointSize !== undefined) {
+            return dataPointSize;
+        }
+
+        if (config.dataPointSize !== undefined) {
+            return config.dataPointSize;
+        }
+
+        // Legacy support for dataPointsRadius prop
+        if (config.dataPointsRadius !== undefined) {
+            return config.dataPointsRadius;
+        }
+
+        // Default
+        return 4;
+    };
+
+    const pointSize = getDataPointSize();
+
+    // Update static tooltip positions when data or settings change
+    useEffect(() => {
+        if (showDataPoints && showDataPointTooltip && chartPointsRef.current) {
+            const positions = chartPointsRef.current
+                .filter((point: any): point is { x: number; y: number; xValue: number; yValue: number } =>
+                    typeof point.x === 'number' && typeof point.y === 'number'
+                )
+                .map((point: any, index: number) => ({
+                    x: point.x,
+                    y: point.y,
+                    value: data[index]?.value || 0
+                }));
+            setStaticTooltipPositions(positions);
+        } else {
+            setStaticTooltipPositions([]);
+        }
+    }, [showDataPoints, showDataPointTooltip, data]);
 
     // Default tooltip configuration
     const defaultTooltipConfig = {
@@ -454,91 +530,111 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
                             return data[clampedIndex]?.label || '';
                         },
                         tickCount: data.length,
-                        labelColor: theme === 'dark' ? '#ccc' : '#666',
-                        lineColor: 'transparent',
-                        lineWidth: 0,
+                        labelColor: showXAxis ? (theme === 'dark' ? '#ccc' : '#666') : 'transparent',
+                        lineColor: showGrid ? (theme === 'dark' ? '#333' : '#f0f0f0') : 'transparent',
+                        lineWidth: showGrid ? 1 : 0,
                     }}
-                    yAxis={[{
+                    yAxis={showYAxis ? [{
                         font,
-                        lineColor: 'transparent',
-                        lineWidth: 0,
+                        lineColor: showGrid ? (theme === 'dark' ? '#333' : '#f0f0f0') : 'transparent',
+                        lineWidth: showGrid ? 1 : 0,
                         labelColor: theme === 'dark' ? '#ccc' : '#666',
                         formatYLabel: (value) => formatValueForAxis(value),
-                    }]}
+                    }] : []}
                     frame={{
-                        lineColor: 'transparent',
-                        lineWidth: 0,
+                        lineColor: showFrame ? (theme === 'dark' ? '#444' : '#ddd') : 'transparent',
+                        lineWidth: showFrame ? 1 : 0,
                     }}
                 >
-                    {({ points, chartBounds }) => (
-                        <>
-                            {/* Enhanced Gradient Area fill */}
-                            {defaultConfig.areaChart && (
-                                <Area
+                    {({ points, chartBounds }) => {
+                        // Store chart points for static tooltips
+                        chartPointsRef.current = points.y;
+
+                        return (
+                            <>
+                                {/* Enhanced Gradient Area fill */}
+                                {defaultConfig.areaChart && (
+                                    <Area
+                                        points={points.y}
+                                        y0={chartBounds.bottom}
+                                        curveType={curveType}
+                                        animate={{ type: "timing", duration: defaultConfig.animationDuration }}
+                                        connectMissingData={true}
+                                    >
+                                        <LinearGradient
+                                            start={vec(0, chartBounds.top)}
+                                            end={vec(0, chartBounds.bottom)}
+                                            colors={[
+                                                defaultConfig.startFillColor + Math.round(defaultConfig.startOpacity * 255).toString(16),
+                                                defaultConfig.endFillColor
+                                            ]}
+                                        />
+                                    </Area>
+                                )}
+
+                                {/* Smooth Line */}
+                                <Line
                                     points={points.y}
-                                    y0={chartBounds.bottom}
-                                    curveType={defaultConfig.curved ? "monotoneX" : "linear"}
+                                    color={defaultConfig.color1}
+                                    strokeWidth={defaultConfig.thickness}
+                                    curveType={curveType}
                                     animate={{ type: "timing", duration: defaultConfig.animationDuration }}
                                     connectMissingData={true}
-                                >
-                                    <LinearGradient
-                                        start={vec(0, chartBounds.top)}
-                                        end={vec(0, chartBounds.bottom)}
-                                        colors={[
-                                            defaultConfig.startFillColor + Math.round(defaultConfig.startOpacity * 255).toString(16),
-                                            defaultConfig.endFillColor
-                                        ]}
-                                    />
-                                </Area>
-                            )}
+                                    strokeCap="round"
+                                    strokeJoin="round"
+                                />
 
-                            {/* Smooth Line */}
-                            <Line
-                                points={points.y}
-                                color={defaultConfig.color1}
-                                strokeWidth={defaultConfig.thickness}
-                                curveType={defaultConfig.curved ? "monotoneX" : "linear"}
-                                animate={{ type: "timing", duration: defaultConfig.animationDuration }}
-                                connectMissingData={true}
-                                strokeCap="round"
-                                strokeJoin="round"
-                            />
+                                {/* Static Data Points */}
+                                {showDataPoints && points.y
+                                    .filter((point): point is { x: number; y: number; xValue: number; yValue: number } =>
+                                        typeof point.x === 'number' && typeof point.y === 'number'
+                                    )
+                                    .map((point, index) => (
+                                        <Circle
+                                            key={`static-point-${index}`}
+                                            cx={point.x}
+                                            cy={point.y}
+                                            r={pointSize}
+                                            color={defaultConfig.color1}
+                                        />
+                                    ))}
 
-                            {/* Enhanced Active point indicator */}
-                            {((isActive || isManuallyActive) && showDataPoints) && (
-                                <>
-                                    {/* Large outer glow */}
-                                    <Circle
-                                        cx={state.x.position}
-                                        cy={state.y.y.position}
-                                        r={12}
-                                        color={defaultConfig.color1 + '26'} // 15% opacity
-                                    />
-                                    {/* Medium ring */}
-                                    <Circle
-                                        cx={state.x.position}
-                                        cy={state.y.y.position}
-                                        r={8}
-                                        color={defaultConfig.color1 + '4D'} // 30% opacity
-                                    />
-                                    {/* Main dot */}
-                                    <Circle
-                                        cx={state.x.position}
-                                        cy={state.y.y.position}
-                                        r={5}
-                                        color={defaultConfig.color1}
-                                    />
-                                    {/* White center */}
-                                    <Circle
-                                        cx={state.x.position}
-                                        cy={state.y.y.position}
-                                        r={2}
-                                        color={Colors[theme].background}
-                                    />
-                                </>
-                            )}
-                        </>
-                    )}
+                                {/* Enhanced Active point indicator */}
+                                {(isActive || isManuallyActive) && (
+                                    <>
+                                        {/* Large outer glow */}
+                                        <Circle
+                                            cx={state.x.position}
+                                            cy={state.y.y.position}
+                                            r={pointSize * 3} // 3x the data point size
+                                            color={defaultConfig.color1 + '26'} // 15% opacity
+                                        />
+                                        {/* Medium ring */}
+                                        <Circle
+                                            cx={state.x.position}
+                                            cy={state.y.y.position}
+                                            r={pointSize * 2} // 2x the data point size
+                                            color={defaultConfig.color1 + '4D'} // 30% opacity
+                                        />
+                                        {/* Main dot */}
+                                        <Circle
+                                            cx={state.x.position}
+                                            cy={state.y.y.position}
+                                            r={pointSize * 1.25} // 1.25x the data point size
+                                            color={defaultConfig.color1}
+                                        />
+                                        {/* White center */}
+                                        <Circle
+                                            cx={state.x.position}
+                                            cy={state.y.y.position}
+                                            r={pointSize * 0.5} // 0.5x the data point size
+                                            color={Colors[theme].background}
+                                        />
+                                    </>
+                                )}
+                            </>
+                        );
+                    }}
                 </CartesianChart>
 
                 {/* Enhanced Tooltip with platform-specific styling */}
@@ -565,6 +661,43 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
                             {isActive ? tooltipValue : manualTooltipValue}
                         </Text>
                     </Animated.View>
+                )}
+
+                {/* Static Data Point Tooltips */}
+                {showDataPoints && showDataPointTooltip && !isActive && !isManuallyActive && (
+                    <>
+                        {staticTooltipPositions.map((position, index) => (
+                            <View
+                                key={`static-tooltip-${index}`}
+                                style={[
+                                    Platform.OS === 'ios' ? styles.iosTooltip : styles.tooltip,
+                                    {
+                                        position: 'absolute',
+                                        left: position.x - (defaultTooltipConfig.minWidth / 2),
+                                        top: position.y - 40, // Offset above the data point
+                                        backgroundColor: defaultTooltipConfig.backgroundColor,
+                                        borderRadius: defaultTooltipConfig.borderRadius,
+                                        paddingHorizontal: defaultTooltipConfig.paddingHorizontal,
+                                        paddingVertical: defaultTooltipConfig.paddingVertical,
+                                        minWidth: defaultTooltipConfig.minWidth,
+                                        opacity: 0.8,
+                                        zIndex: 100,
+                                    }
+                                ]}
+                            >
+                                <Text style={[
+                                    Platform.OS === 'ios' ? styles.iosTooltipText : styles.tooltipText,
+                                    {
+                                        color: defaultTooltipConfig.textColor,
+                                        fontSize: defaultTooltipConfig.fontSize - 2, // Slightly smaller for static tooltips
+                                        fontWeight: defaultTooltipConfig.fontWeight as any,
+                                    }
+                                ]}>
+                                    {formatValue(position.value)}
+                                </Text>
+                            </View>
+                        ))}
+                    </>
                 )}
             </View>
         </ThemedView>

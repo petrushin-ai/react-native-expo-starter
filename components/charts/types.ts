@@ -1,4 +1,20 @@
 // Chart Data Types for Victory Native XL
+
+// Interpolation types available in Victory Native XL
+export type InterpolationType =
+    | 'linear'
+    | 'natural'
+    | 'bumpX'
+    | 'bumpY'
+    | 'cardinal'
+    | 'cardinal50'
+    | 'catmullRom'
+    | 'catmullRom0'
+    | 'catmullRom100'
+    | 'step'
+    | 'monotoneX'
+    | 'basis';
+
 export interface BarDataItem {
     label: string;      // x-axis value (string or number)
     value: number;      // y-axis value (must be number)
@@ -79,12 +95,14 @@ export interface LineChartConfig {
     spacing?: number;
     initialSpacing?: number;
     curved?: boolean;
+    interpolationType?: InterpolationType;
     areaChart?: boolean;
     color1?: string;
     thickness?: number;
     hideDataPoints?: boolean;
     dataPointsColor?: string;
     dataPointsRadius?: number;
+    dataPointSize?: number;
     textColor1?: string;
     textShiftY?: number;
     textShiftX?: number;
@@ -158,6 +176,14 @@ export interface InteractiveBarChartProps {
         autoHide?: boolean;
         autoHideDelay?: number;
     };
+    // Chart layout configuration
+    padding?: number | { left?: number; right?: number; top?: number; bottom?: number };
+    domainPadding?: number | { left?: number; right?: number; top?: number; bottom?: number };
+    // Grid display configuration
+    showGrid?: boolean;
+    showXAxis?: boolean;
+    showYAxis?: boolean;
+    showFrame?: boolean;
 }
 
 export interface GestureLineChartProps {
@@ -170,6 +196,18 @@ export interface GestureLineChartProps {
     showDataPointsToggle?: boolean;
     initialShowDataPoints?: boolean;
     showTooltip?: boolean;
+    interpolationType?: InterpolationType;
+    showStaticDataPoints?: boolean;
+    dataPointSize?: number;
+    showDataPointTooltip?: boolean;
+    // Chart layout configuration
+    padding?: number | { left?: number; right?: number; top?: number; bottom?: number };
+    domainPadding?: number | { left?: number; right?: number; top?: number; bottom?: number };
+    // Grid display configuration
+    showGrid?: boolean;
+    showXAxis?: boolean;
+    showYAxis?: boolean;
+    showFrame?: boolean;
 }
 
 export interface InteractivePieChartProps {
