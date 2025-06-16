@@ -8,6 +8,9 @@ alwaysApply: true
 - Always try to fit in conventional architecture, if it's possible do not create additional files
 - If file length exceeding 500 lines consider refactoring it to some helpers \ hooks or anyhow reasonable
 - Create usefull universall functional-style helpers, and if you need new always check against existing ones
+- Carefully consider fixing all typescript and linter errors as it guarantees app starts
+- Follow architectural patterns where it's possible and needed, but consider size of project every time
+- Use Sequential thinking MCP to analyze task and implement action plan sequentially
 
 
 ### Do's and DONT's
