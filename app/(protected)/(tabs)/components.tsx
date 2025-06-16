@@ -404,6 +404,90 @@ export default function ComponentsScreen() {
 
                         <View style={styles.componentGroup}>
                             <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Color Variations
+                            </Text>
+                            <View style={styles.lottieRow}>
+                                <View style={styles.lottieItem}>
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Default</Text>
+                                    <LottieAnimation
+                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        size="medium"
+                                        autoPlay={lottieAutoPlay}
+                                        loop={lottieLoop}
+                                    />
+                                </View>
+                                <View style={styles.lottieItem}>
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Blue Theme</Text>
+                                    <LottieAnimation
+                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        size="medium"
+                                        autoPlay={lottieAutoPlay}
+                                        loop={lottieLoop}
+                                        backgroundColor="rgba(59, 130, 246, 0.1)"
+                                        colorFilters={[
+                                            { keypath: "**", color: isDark ? "#60A5FA" : "#3B82F6" }
+                                        ]}
+                                    />
+                                </View>
+                                <View style={styles.lottieItem}>
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Green Theme</Text>
+                                    <LottieAnimation
+                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        size="medium"
+                                        autoPlay={lottieAutoPlay}
+                                        loop={lottieLoop}
+                                        backgroundColor="rgba(16, 185, 129, 0.1)"
+                                        colorFilters={[
+                                            { keypath: "**", color: isDark ? "#34D399" : "#10B981" }
+                                        ]}
+                                    />
+                                </View>
+                            </View>
+                            <View style={styles.lottieRow}>
+                                <View style={styles.lottieItem}>
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Red Theme</Text>
+                                    <LottieAnimation
+                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        size="medium"
+                                        autoPlay={lottieAutoPlay}
+                                        loop={lottieLoop}
+                                        backgroundColor="rgba(239, 68, 68, 0.1)"
+                                        colorFilters={[
+                                            { keypath: "**", color: isDark ? "#F87171" : "#EF4444" }
+                                        ]}
+                                    />
+                                </View>
+                                <View style={styles.lottieItem}>
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Purple Theme</Text>
+                                    <LottieAnimation
+                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        size="medium"
+                                        autoPlay={lottieAutoPlay}
+                                        loop={lottieLoop}
+                                        backgroundColor="rgba(139, 92, 246, 0.1)"
+                                        colorFilters={[
+                                            { keypath: "**", color: isDark ? "#A78BFA" : "#8B5CF6" }
+                                        ]}
+                                    />
+                                </View>
+                                <View style={styles.lottieItem}>
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Orange Theme</Text>
+                                    <LottieAnimation
+                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        size="medium"
+                                        autoPlay={lottieAutoPlay}
+                                        loop={lottieLoop}
+                                        backgroundColor="rgba(249, 115, 22, 0.1)"
+                                        colorFilters={[
+                                            { keypath: "**", color: isDark ? "#FB923C" : "#F97316" }
+                                        ]}
+                                    />
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
                                 Settings
                             </Text>
                             <View style={styles.switchRow}>
