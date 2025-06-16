@@ -12,16 +12,31 @@ alwaysApply: true
 - Follow architectural patterns where it's possible and needed, but consider size of project every time
 - Use Sequential thinking MCP to analyze task and implement action plan sequentially
 
-
 ### Do's and DONT's
 
 Never write documentation or tests unless explicitly asked
-
 Do not ever try to run the project, it's user's duty
-
 Do not use default or fallback values, instead use guards to throw exception
-
 Use web search and docs to understand which is the best native implementation option and develop own implementation if there's nothing found in docs or web
+
+### Performance Optimization:
+
+- Minimize `useEffect`, `useState`, and heavy computations inside render methods.
+- Use `React.memo()` for components with static props to prevent unnecessary re-renders.
+- Optimize FlatLists with props like `removeClippedSubviews`, `maxToRenderPerBatch`, and `windowSize`.
+- Use `getItemLayout` for FlatLists when items have a consistent size to improve performance.
+- Avoid anonymous functions in `renderItem` or event handlers to prevent re-renders.
+
+### UI and Styling:
+
+- Use consistent styling, either through `StyleSheet.create()` or Styled Components.
+- Ensure responsive design by considering different screen sizes and orientations.
+- Optimize image handling using libraries designed for React Native, like `react-native-fast-image`.
+
+### Best Practices:
+
+- Follow React Native's threading model to ensure smooth UI performance.
+- Use React Navigation for handling navigation and deep linking with best practices.
 
 ### Docs
 @Expo-Latest-Docs @React-Native-0.79 
