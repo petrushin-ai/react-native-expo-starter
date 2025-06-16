@@ -9,7 +9,8 @@ import {
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { usePermissions } from '@/hooks/usePermissions';
-import React, { useState } from 'react';
+import { useStartupPermissions } from '@/hooks/useStartupPermissions';
+import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -30,7 +31,9 @@ export default function SettingsScreen() {
         devicePushToken,
         isLoadingToken,
         tokenError,
+        notificationPermissionStatus,
         requestPermissions: requestNotificationPermissions,
+        checkPermissions: checkNotificationPermissions,
         sendTestNotification,
         isSupported: notificationsSupported
     } = useNotificationContext();
@@ -39,30 +42,55 @@ export default function SettingsScreen() {
         permissions,
         isLoading: permissionsLoading,
         requestPermission,
-        resetPermissions
+        resetPermissions,
+        checkPermissions
     } = usePermissions();
 
-    const [isSendingTest, setIsSendingTest] = useState(false);
+    const {
+        recheckPermissions
+    } = useStartupPermissions();
 
-    const handleNotificationPermissionToggle = async () => {
-        const granted = await requestNotificationPermissions();
-        if (!granted) {
-            Alert.alert(
-                'Permission Required',
-                'Please enable notifications in your device settings to receive push notifications.',
-                [
-                    { text: 'Cancel', style: 'cancel' },
-                    {
-                        text: 'Open Settings', onPress: () => {
-                            if (Platform.OS === 'ios') {
-                                Linking.openURL('app-settings:');
-                            } else {
-                                Linking.openSettings();
+    const [isSendingTest, setIsSendingTest] = useState(false);
+    const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+
+    // Refresh permissions when screen comes into focus (less frequent than before)
+    useEffect(() => {
+        const refreshPermissions = () => {
+            checkPermissions();
+            checkNotificationPermissions();
+        };
+
+        // Check on mount
+        refreshPermissions();
+
+        // Check again when app becomes active (handled by contexts, but good to be explicit)
+        // No more frequent polling here since contexts handle it efficiently
+    }, [checkPermissions, checkNotificationPermissions]);
+
+    const handleRequestNotificationPermission = async () => {
+        setIsRequestingPermission(true);
+        try {
+            const granted = await requestNotificationPermissions();
+            if (!granted) {
+                Alert.alert(
+                    'Permission Required',
+                    'Please enable notifications in your device settings to receive push notifications.',
+                    [
+                        { text: 'Cancel', style: 'cancel' },
+                        {
+                            text: 'Open Settings', onPress: () => {
+                                if (Platform.OS === 'ios') {
+                                    Linking.openURL('app-settings:');
+                                } else {
+                                    Linking.openSettings();
+                                }
                             }
-                        }
-                    },
-                ]
-            );
+                        },
+                    ]
+                );
+            }
+        } finally {
+            setIsRequestingPermission(false);
         }
     };
 
@@ -94,6 +122,26 @@ export default function SettingsScreen() {
         }
     };
 
+    const handleRecheckPermissions = async () => {
+        Alert.alert(
+            'Recheck Permissions',
+            'This will check all app permissions again and may show permission requests if needed.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Continue',
+                    onPress: async () => {
+                        try {
+                            await recheckPermissions();
+                        } catch (error) {
+                            Alert.alert('Error', 'Failed to recheck permissions');
+                        }
+                    }
+                },
+            ]
+        );
+    };
+
     // Get list of enabled permissions from config
     const enabledPermissions = (Object.keys(permissionsConfig) as Array<keyof PermissionConfig>)
         .filter(key => permissionsConfig[key]);
@@ -110,45 +158,41 @@ export default function SettingsScreen() {
                             Push Notifications
                         </Text>
 
-                        <View style={styles.permissionRow}>
-                            <View style={styles.permissionInfo}>
-                                <Text style={[styles.permissionName, isDark && styles.textDark]}>
-                                    Enable Notifications
-                                </Text>
-                                <Text style={[styles.permissionDescription, isDark && styles.textDark]}>
-                                    Receive push notifications for important updates
-                                </Text>
-                            </View>
-                            <Switch
-                                value={!!expoPushToken}
-                                onValueChange={handleNotificationPermissionToggle}
-                                disabled={isLoadingToken}
-                            />
-                        </View>
-
-                        {isLoadingToken && (
-                            <ActivityIndicator size="small" color="#2563EB" style={styles.loader} />
-                        )}
-
-                        {tokenError && (
-                            <Text style={[styles.errorText, isDark && styles.errorTextDark]}>
-                                Error: {tokenError}
-                            </Text>
-                        )}
-
-                        {expoPushToken && (
+                        {notificationPermissionStatus !== 'granted' ? (
                             <>
-                                <View style={styles.tokenContainer}>
-                                    <Text style={[styles.tokenLabel, isDark && styles.textDark]}>
-                                        Push Token:
+                                <Text style={[styles.permissionDescription, isDark && styles.textDark, styles.notificationPrompt]}>
+                                    Enable push notifications to receive important updates and reminders.
+                                </Text>
+
+                                <TouchableOpacity
+                                    style={[styles.enableButton, isRequestingPermission && styles.enableButtonDisabled]}
+                                    onPress={handleRequestNotificationPermission}
+                                    disabled={isRequestingPermission || isLoadingToken}
+                                >
+                                    {isRequestingPermission || isLoadingToken ? (
+                                        <ActivityIndicator size="small" color="#fff" />
+                                    ) : (
+                                        <Text style={styles.enableButtonText}>Enable Notifications</Text>
+                                    )}
+                                </TouchableOpacity>
+                            </>
+                        ) : (
+                            <>
+                                <View style={styles.notificationStatus}>
+                                    <Text style={[styles.statusText, isDark && styles.textDark]}>
+                                        ✓ Notifications Enabled
                                     </Text>
-                                    <Text
-                                        style={[styles.tokenValue, isDark && styles.textDark]}
-                                        numberOfLines={2}
-                                        ellipsizeMode="middle"
-                                    >
-                                        {expoPushToken}
-                                    </Text>
+                                    <TouchableOpacity onPress={() => {
+                                        if (Platform.OS === 'ios') {
+                                            Linking.openURL('app-settings:');
+                                        } else {
+                                            Linking.openSettings();
+                                        }
+                                    }}>
+                                        <Text style={[styles.manageText, isDark && styles.manageDark]}>
+                                            Manage in Settings
+                                        </Text>
+                                    </TouchableOpacity>
                                 </View>
 
                                 <TouchableOpacity
@@ -157,16 +201,44 @@ export default function SettingsScreen() {
                                     disabled={isSendingTest}
                                 >
                                     {isSendingTest ? (
-                                        <ActivityIndicator size="small" color="#fff" />
+                                        <ActivityIndicator size="small" color="#2563EB" />
                                     ) : (
-                                        <Text style={styles.testButtonText}>Send Test Notification</Text>
+                                        <Text style={[styles.testButtonText, isDark && styles.testButtonTextDark]}>
+                                            Send Test Notification
+                                        </Text>
                                     )}
                                 </TouchableOpacity>
+
+                                {permissionsDebugMode && expoPushToken && (
+                                    <View style={[styles.debugSection, isDark && styles.debugSectionDark]}>
+                                        <Text style={[styles.debugTitle, isDark && styles.textDark]}>
+                                            Expo Push Token:
+                                        </Text>
+                                        <Text style={[styles.debugText, isDark && styles.textDark]}>
+                                            {expoPushToken}
+                                        </Text>
+                                    </View>
+                                )}
+
+                                {isLoadingToken ? (
+                                    <View style={styles.loadingContainer}>
+                                        <ActivityIndicator size="small" color="#2563EB" />
+                                        <Text style={[styles.loadingText, isDark && styles.textDark]}>
+                                            Generating push token...
+                                        </Text>
+                                    </View>
+                                ) : null}
                             </>
                         )}
 
+                        {tokenError && (
+                            <Text style={[styles.errorText, isDark && styles.errorTextDark]}>
+                                Error: {tokenError}
+                            </Text>
+                        )}
+
                         {permissionsDebugMode && devicePushToken && (
-                            <View style={styles.debugSection}>
+                            <View style={[styles.debugSection, isDark && styles.debugSectionDark]}>
                                 <Text style={[styles.debugTitle, isDark && styles.textDark]}>
                                     Device Token:
                                 </Text>
@@ -212,12 +284,21 @@ export default function SettingsScreen() {
                                 ))}
 
                                 {permissionsDebugMode && (
-                                    <TouchableOpacity
-                                        style={styles.resetButton}
-                                        onPress={resetPermissions}
-                                    >
-                                        <Text style={styles.resetButtonText}>Reset All Permissions</Text>
-                                    </TouchableOpacity>
+                                    <View style={styles.debugActions}>
+                                        <TouchableOpacity
+                                            style={styles.resetButton}
+                                            onPress={resetPermissions}
+                                        >
+                                            <Text style={styles.resetButtonText}>Reset All Permissions</Text>
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                            style={styles.recheckButton}
+                                            onPress={handleRecheckPermissions}
+                                        >
+                                            <Text style={styles.recheckButtonText}>Recheck Permissions</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 )}
                             </>
                         )}
@@ -282,82 +363,131 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#666',
     },
-    loader: {
-        marginVertical: 16,
+    notificationPrompt: {
+        marginBottom: 16,
     },
-    errorText: {
-        fontSize: 14,
-        color: '#FF3B30',
-        marginTop: 8,
-    },
-    errorTextDark: {
-        color: '#FF6B6B',
-    },
-    tokenContainer: {
-        marginTop: 16,
-        padding: 12,
-        backgroundColor: '#F3F4F6',
-        borderRadius: 8,
-    },
-    tokenLabel: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#333',
-        marginBottom: 4,
-    },
-    tokenValue: {
-        fontSize: 12,
-        fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-        color: '#666',
-    },
-    testButton: {
+    enableButton: {
         backgroundColor: '#2563EB',
         borderRadius: 8,
         paddingVertical: 14,
         alignItems: 'center',
         marginTop: 16,
     },
+    enableButtonDisabled: {
+        opacity: 0.6,
+    },
+    enableButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    notificationStatus: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    statusText: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#333',
+    },
+    manageText: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#2563EB',
+    },
+    manageDark: {
+        color: '#6B7280',
+    },
+    testButton: {
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: '#2563EB',
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+        marginBottom: 16,
+    },
     testButtonDisabled: {
         opacity: 0.6,
     },
     testButtonText: {
-        color: '#fff',
+        color: '#2563EB',
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: '500',
+    },
+    testButtonTextDark: {
+        color: '#6B7280',
+    },
+    loadingContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    loadingText: {
+        marginLeft: 8,
+        fontSize: 14,
+        color: '#666',
+    },
+    errorText: {
+        fontSize: 14,
+        color: '#DC2626',
+        marginTop: 8,
+    },
+    errorTextDark: {
+        color: '#EF4444',
     },
     debugSection: {
-        marginTop: 16,
-        padding: 12,
         backgroundColor: '#F3F4F6',
         borderRadius: 8,
+        padding: 12,
+        marginTop: 12,
+    },
+    debugSectionDark: {
+        backgroundColor: '#374151',
     },
     debugTitle: {
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: '600',
-        marginBottom: 8,
-        color: '#333',
+        color: '#374151',
+        marginBottom: 4,
     },
     debugText: {
-        fontSize: 12,
-        fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-        color: '#666',
-        marginBottom: 4,
+        fontSize: 10,
+        color: '#6B7280',
+        fontFamily: 'monospace',
     },
     debugInfo: {
         fontSize: 12,
-        color: '#999',
-        marginTop: 2,
+        color: '#6B7280',
+        marginTop: 4,
+        fontStyle: 'italic',
+    },
+    debugActions: {
+        marginTop: 16,
     },
     resetButton: {
-        backgroundColor: '#6B7280',
+        backgroundColor: '#DC2626',
         borderRadius: 8,
-        paddingVertical: 12,
+        paddingVertical: 10,
         alignItems: 'center',
-        marginTop: 16,
+        marginBottom: 8,
     },
     resetButtonText: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    recheckButton: {
+        backgroundColor: '#059669',
+        borderRadius: 8,
+        paddingVertical: 10,
+        alignItems: 'center',
+    },
+    recheckButtonText: {
+        color: '#fff',
+        fontSize: 14,
         fontWeight: '500',
     },
 }); 

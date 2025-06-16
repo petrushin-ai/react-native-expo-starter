@@ -1,10 +1,17 @@
+import { PermissionModal } from '@/components/ui/PermissionModal';
 import { useSession } from '@/contexts/AuthContext';
+import { useStartupPermissions } from '@/hooks/useStartupPermissions';
 import { Redirect, Stack } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 export default function ProtectedLayout() {
     const { session, isLoading, isAuthEnabled } = useSession();
+    const {
+        permissionModal,
+        closePermissionModal,
+        handleOpenSettings,
+    } = useStartupPermissions();
 
     // Show loading screen while checking authentication state
     if (isLoading) {
@@ -24,23 +31,34 @@ export default function ProtectedLayout() {
 
     // Render the protected routes
     return (
-        <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            {/* Example: Using native assets for custom back button
-            <Stack.Screen 
-                name="details" 
-                options={{
-                    // On iOS, this will use the native asset from the asset catalog
-                    // On Android, you'll need to provide a fallback
-                    headerBackImageSource: { 
-                        uri: "chevron-left", 
-                        width: 24, 
-                        height: 24 
-                    },
-                }} 
+        <>
+            <Stack>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                {/* Example: Using native assets for custom back button
+                <Stack.Screen 
+                    name="details" 
+                    options={{
+                        // On iOS, this will use the native asset from the asset catalog
+                        // On Android, you'll need to provide a fallback
+                        headerBackImageSource: { 
+                            uri: "chevron-left", 
+                            width: 24, 
+                            height: 24 
+                        },
+                    }} 
+                />
+                */}
+            </Stack>
+
+            <PermissionModal
+                visible={permissionModal.visible}
+                onClose={closePermissionModal}
+                title={permissionModal.title}
+                message={permissionModal.message}
+                permissionType={permissionModal.permissionType}
+                onOpenSettings={handleOpenSettings}
             />
-            */}
-        </Stack>
+        </>
     );
 }
 
@@ -52,8 +70,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5',
     },
     loadingText: {
-        marginTop: 12,
+        marginTop: 10,
         fontSize: 16,
-        color: '#6B7280',
+        color: '#666',
     },
 }); 
