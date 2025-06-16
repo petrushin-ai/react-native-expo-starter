@@ -23,7 +23,25 @@ export default function ProtectedLayout() {
     }
 
     // Render the protected routes
-    return <Stack screenOptions={{ headerShown: false }} />;
+    return (
+        <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            {/* Example: Using native assets for custom back button
+            <Stack.Screen 
+                name="details" 
+                options={{
+                    // On iOS, this will use the native asset from the asset catalog
+                    // On Android, you'll need to provide a fallback
+                    headerBackImageSource: { 
+                        uri: "chevron-left", 
+                        width: 24, 
+                        height: 24 
+                    },
+                }} 
+            />
+            */}
+        </Stack>
+    );
 }
 
 const styles = StyleSheet.create({
