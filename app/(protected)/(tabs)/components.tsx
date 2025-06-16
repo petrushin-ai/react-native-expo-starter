@@ -1,12 +1,13 @@
 import { Button } from '@/components/ui/Button';
 import ExpandableView from '@/components/ui/ExpandableView';
 import { Input } from '@/components/ui/Input';
+import { LottieAnimation, LottieView } from '@/components/ui/LottieAnimation';
 import { Modal } from '@/components/ui/Modal';
 import { Switch } from '@/components/ui/Switch';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useFormValidation, validationRules } from '@/hooks/useFormValidation';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     ScrollView,
     StatusBar,
@@ -26,6 +27,12 @@ export default function ComponentsScreen() {
     const [switchValue, setSwitchValue] = useState(false);
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
     const [darkModeEnabled, setDarkModeEnabled] = useState(isDark);
+    const [lottieAutoPlay, setLottieAutoPlay] = useState(true);
+    const [lottieLoop, setLottieLoop] = useState(true);
+
+    // Lottie animation refs for manual control
+    const lottieRef1 = useRef<LottieView>(null);
+    const lottieRef2 = useRef(null);
 
     // Demo form for input showcase
     const demoForm = useFormValidation({
@@ -318,6 +325,108 @@ export default function ComponentsScreen() {
                             </View>
                         </View>
                     </View>
+
+                    {/* Lottie Animation Component */}
+                    <View style={styles.section}>
+                        <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+                            Lottie Animation
+                        </Text>
+                        <Text style={[styles.description, isDark && styles.descriptionDark]}>
+                            Showcase of Lottie animations with different sizes, controls, and the spinner.lottie file.
+                        </Text>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Different Sizes
+                            </Text>
+                            <View style={styles.lottieRow}>
+                                <View style={styles.lottieItem}>
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Small</Text>
+                                    <LottieAnimation
+                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        size="small"
+                                        autoPlay={lottieAutoPlay}
+                                        loop={lottieLoop}
+                                    />
+                                </View>
+                                <View style={styles.lottieItem}>
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Medium</Text>
+                                    <LottieAnimation
+                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        size="medium"
+                                        autoPlay={lottieAutoPlay}
+                                        loop={lottieLoop}
+                                    />
+                                </View>
+                                <View style={styles.lottieItem}>
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Large</Text>
+                                    <LottieAnimation
+                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        size="large"
+                                        autoPlay={lottieAutoPlay}
+                                        loop={lottieLoop}
+                                    />
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Interactive Controls
+                            </Text>
+                            <View style={styles.lottieControlContainer}>
+                                <LottieAnimation
+                                    ref={lottieRef1}
+                                    source={require('@/assets/lottie/spinner.lottie')}
+                                    size="medium"
+                                    autoPlay={false}
+                                    loop={false}
+                                />
+                                <View style={styles.lottieButtons}>
+                                    <Button
+                                        title="Play"
+                                        size="small"
+                                        onPress={() => lottieRef1.current?.play()}
+                                    />
+                                    <Button
+                                        title="Pause"
+                                        size="small"
+                                        onPress={() => lottieRef1.current?.pause()}
+                                    />
+                                    <Button
+                                        title="Reset"
+                                        size="small"
+                                        onPress={() => lottieRef1.current?.reset()}
+                                    />
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Settings
+                            </Text>
+                            <View style={styles.switchRow}>
+                                <Text style={[styles.switchLabel, isDark && styles.switchLabelDark]}>
+                                    Auto Play
+                                </Text>
+                                <Switch
+                                    value={lottieAutoPlay}
+                                    onValueChange={setLottieAutoPlay}
+                                />
+                            </View>
+
+                            <View style={styles.switchRow}>
+                                <Text style={[styles.switchLabel, isDark && styles.switchLabelDark]}>
+                                    Loop Animation
+                                </Text>
+                                <Switch
+                                    value={lottieLoop}
+                                    onValueChange={setLottieLoop}
+                                />
+                            </View>
+                        </View>
+                    </View>
                 </View>
             </ScrollView>
 
@@ -465,5 +574,25 @@ const styles = StyleSheet.create({
     },
     switchLabelDark: {
         color: '#D1D5DB',
+    },
+    lottieRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 16,
+    },
+    lottieItem: {
+        alignItems: 'center',
+        gap: 8,
+    },
+    lottieControlContainer: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 16,
+    },
+    lottieButtons: {
+        flexDirection: 'row',
+        gap: 8,
     },
 }); 
