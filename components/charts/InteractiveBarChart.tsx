@@ -31,6 +31,7 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     onBarPress,
     selectedIndex,
     showSelectionInfo = true,
+    gradientOpacity = 0.3, // Default 30% opacity for gradient end
     showTooltip = true,
     tooltipConfig = {},
 }) => {
@@ -104,6 +105,13 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             return `${formatted}k`;
         }
         return value.toFixed(1);
+    };
+
+    // Convert opacity (0-1) to hex transparency (00-FF)
+    const opacityToHex = (opacity: number): string => {
+        const clampedOpacity = Math.max(0, Math.min(1, opacity));
+        const hex = Math.round(clampedOpacity * 255).toString(16);
+        return hex.length === 1 ? `0${hex}` : hex;
     };
 
     // Format value for tooltip - WORKLET VERSION
@@ -255,7 +263,7 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
         barColor: Colors[theme].tint || '#177AD5',
         gradientColors: [
             Colors[theme].tint || '#177AD5',
-            (Colors[theme].tint || '#177AD5') + '50'
+            (Colors[theme].tint || '#177AD5') + opacityToHex(gradientOpacity)
         ] as [string, string],
         roundedCorners: {
             topLeft: 4,
@@ -301,6 +309,27 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
 
     // Merge default config with provided config
     const mergedConfig = { ...defaultConfig, ...config };
+
+    // Apply gradient opacity to gradient colors if specified
+    if (mergedConfig.gradientColors && (gradientOpacity !== 0.3 || config.gradientOpacity !== undefined)) {
+        const finalOpacity = config.gradientOpacity !== undefined ? config.gradientOpacity : gradientOpacity;
+        const baseColor = mergedConfig.gradientColors[0];
+        const secondColor = mergedConfig.gradientColors[1];
+
+        if (secondColor) {
+            // Remove existing transparency if present (8-character hex colors have alpha)
+            const colorWithoutTransparency = secondColor.length === 9 && secondColor.startsWith('#')
+                ? secondColor.substring(0, 7)
+                : secondColor;
+            mergedConfig.gradientColors[1] = colorWithoutTransparency + opacityToHex(finalOpacity);
+        } else {
+            // If no second color, use the first color with opacity
+            const baseColorWithoutTransparency = baseColor.length === 9 && baseColor.startsWith('#')
+                ? baseColor.substring(0, 7)
+                : baseColor;
+            mergedConfig.gradientColors[1] = baseColorWithoutTransparency + opacityToHex(finalOpacity);
+        }
+    }
 
     // Prepare data for Victory Native XL (ensure proper format)
     const formattedData = data.map((item, index) => ({

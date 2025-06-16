@@ -39,6 +39,7 @@ export interface VictoryBarChartConfig {
     // Bar styling
     barColor?: string;
     gradientColors?: [string, string];
+    gradientOpacity?: number; // 0-1, controls the transparency of the gradient end color
     roundedCorners?: {
         topLeft?: number;
         topRight?: number;
@@ -138,6 +139,8 @@ export interface InteractiveBarChartProps {
     onBarPress?: (item: BarDataItem, index: number) => void;
     selectedIndex?: number | null;
     showSelectionInfo?: boolean;
+    // Gradient configuration
+    gradientOpacity?: number; // 0-1, controls the transparency of the gradient end color
     // Tooltip configuration
     showTooltip?: boolean;
     tooltipConfig?: {
