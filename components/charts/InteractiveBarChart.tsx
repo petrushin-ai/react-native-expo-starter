@@ -31,6 +31,8 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     onBarPress,
     selectedIndex,
     showSelectionInfo = true,
+    showTooltip = true,
+    tooltipConfig = {},
 }) => {
     // Load font using Skia's useFont hook
     const font = useFont(SpaceMono, 12);
@@ -64,95 +66,190 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
         y: { value: 0 }
     });
 
-    // Tooltip state
+    // Enhanced tooltip state
     const [tooltipValue, setTooltipValue] = useState('');
     const [previousDataIndex, setPreviousDataIndex] = useState<number | null>(null);
+    const [isManuallyActive, setIsManuallyActive] = useState(false);
+    const [manualTooltipValue, setManualTooltipValue] = useState('');
 
-    // Smooth transition for tooltip
+    // Enhanced animation values
     const smoothTransition = useSharedValue(0);
+    const gestureVelocity = useSharedValue(0);
+    const lastGestureTime = useSharedValue(0);
+    const lastSelectionUpdateTime = useSharedValue(0);
 
-    // Format value for tooltip - WORKLET VERSION
-    const formatValue = (value: number): string => {
+    // Default tooltip configuration
+    const defaultTooltipConfig = {
+        currencySymbol: '',
+        currencyPosition: 'before' as const,
+        backgroundColor: Colors[theme].tint || '#177AD5',
+        textColor: '#ffffff',
+        borderRadius: 12,
+        fontSize: Platform.OS === 'ios' ? 16 : 14,
+        fontWeight: '500',
+        paddingHorizontal: Platform.OS === 'ios' ? 12 : 10,
+        paddingVertical: Platform.OS === 'ios' ? 6 : 5,
+        minWidth: Platform.OS === 'ios' ? 50 : 45,
+        autoHide: true,
+        autoHideDelay: 3000,
+        ...tooltipConfig
+    };
+
+    // Format thousands to 'k' abbreviation - worklet version
+    const formatThousands = (value: number): string => {
         'worklet';
         if (value >= 1000) {
             const thousands = value / 1000;
             const formatted = thousands % 1 === 0 ? thousands.toString() : thousands.toFixed(1);
             return `${formatted}k`;
         }
-        return String(value);
+        return value.toFixed(1);
     };
 
-    // Update tooltip value
+    // Format value for tooltip - WORKLET VERSION
+    const formatValue = (value: number): string => {
+        'worklet';
+        if (defaultTooltipConfig.formatValue) {
+            // Note: Custom formatValue function can't be used in worklet context
+            // We'll handle this in the JS thread
+            return formatThousands(value);
+        }
+
+        const formattedValue = formatThousands(value);
+        const { currencySymbol, currencyPosition } = defaultTooltipConfig;
+
+        if (!currencySymbol) return formattedValue;
+
+        return currencyPosition === 'before'
+            ? `${currencySymbol}${formattedValue}`
+            : `${formattedValue}${currencySymbol}`;
+    };
+
+    // JS thread format function for custom formatters
+    const formatValueJS = (value: number): string => {
+        if (defaultTooltipConfig.formatValue) {
+            return defaultTooltipConfig.formatValue(value);
+        }
+        return formatValue(value);
+    };
+
+    // Update tooltip value with enhanced haptic feedback
     const updateTooltipValueWithHaptic = (value: string, dataIndex: number) => {
         setTooltipValue(value);
-        // Only trigger haptic if we moved to a different data point
+        // Enhanced haptic feedback - only trigger if we moved to a different data point
         if (previousDataIndex !== null && previousDataIndex !== dataIndex && Platform.OS !== 'web') {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            const feedbackStyle = Math.abs(dataIndex - previousDataIndex) > 1
+                ? Haptics.ImpactFeedbackStyle.Medium
+                : Haptics.ImpactFeedbackStyle.Light;
+            Haptics.impactAsync(feedbackStyle);
         }
         setPreviousDataIndex(dataIndex);
     };
 
-    // Function to update tooltip from UI thread - WORKLET
-    const updateTooltip = (xValue: number, yValue: number) => {
+    // Manual tooltip activation with auto-hide
+    const activateManualTooltip = (value: string) => {
+        if (!showTooltip) return;
+
+        setIsManuallyActive(true);
+        setManualTooltipValue(value);
+
+        if (defaultTooltipConfig.autoHide) {
+            setTimeout(() => {
+                setIsManuallyActive(false);
+                setManualTooltipValue('');
+            }, defaultTooltipConfig.autoHideDelay);
+        }
+    };
+
+    // Function to update tooltip and selected state from UI thread - WORKLET
+    const updateTooltipAndSelection = (xValue: number, yValue: number) => {
         'worklet';
+
         // Get the closest data point index
         const index = Math.round(xValue);
         const clampedIndex = Math.max(0, Math.min(index, data.length - 1));
         const dataPoint = data[clampedIndex];
 
         if (dataPoint) {
-            const formattedValue = formatValue(dataPoint.value); // Use actual data value, not yValue
-            runOnJS(updateTooltipValueWithHaptic)(formattedValue, clampedIndex);
+            // Track gesture velocity for smooth transitions
+            const currentTime = Date.now();
+            if (lastGestureTime.value > 0) {
+                const timeDelta = currentTime - lastGestureTime.value;
+                if (timeDelta > 0) {
+                    gestureVelocity.value = Math.abs(index - (previousDataIndex || 0)) / timeDelta;
+                }
+            }
+            lastGestureTime.value = currentTime;
+
+            // Update tooltip if enabled
+            if (showTooltip) {
+                const formattedValue = formatValue(dataPoint.value); // Use actual data value, not yValue
+                runOnJS(updateTooltipValueWithHaptic)(formattedValue, clampedIndex);
+            }
+
+            // Update selected state during dragging with throttling for performance
+            if (onBarPress && clampedIndex !== previousDataIndex) {
+                const currentTime = Date.now();
+                // Throttle selection updates to every 50ms for smooth performance
+                if (currentTime - lastSelectionUpdateTime.value > 50) {
+                    lastSelectionUpdateTime.value = currentTime;
+                    runOnJS(onBarPress)(dataPoint, clampedIndex);
+                }
+            }
         }
     };
 
-    // Use derived value to track changes and update tooltip
+    // Use derived value to track changes and update tooltip and selection
     useDerivedValue(() => {
         if (isActive && data.length > 0) {
             const xValue = state.x.value.value;
             const yValue = state.y.value.value.value;
-            updateTooltip(xValue, yValue);
+            updateTooltipAndSelection(xValue, yValue);
         }
         return null;
     });
 
-    // Handle press events with haptic feedback
+    // Enhanced gesture state management for instant response
     useEffect(() => {
         if (!isActive) {
             setTooltipValue('');
             setPreviousDataIndex(null);
-            smoothTransition.value = withSpring(0, { damping: 15, stiffness: 120 });
+
+            // Platform-specific gesture state transitions
+            gestureVelocity.value = withSpring(0, { damping: 15, stiffness: 120 });
+
+            // Instant hide for iOS, smooth for Android
+            const hideConfig = Platform.OS === 'ios'
+                ? { damping: 30, stiffness: 500 }
+                : { damping: 12, stiffness: 100 };
+            smoothTransition.value = withSpring(0, hideConfig);
         } else {
+            // Instant show for iOS, smooth for Android
             const showConfig = Platform.OS === 'ios'
                 ? { damping: 30, stiffness: 500 }
                 : { damping: 15, stiffness: 150 };
             smoothTransition.value = withSpring(1, showConfig);
         }
 
-        // Call the provided callback if available
-        if (isActive && onBarPress && state.x.value !== undefined) {
-            const index = Math.round(state.x.value.value);
-            if (index >= 0 && index < data.length) {
-                onBarPress(data[index], index);
-            }
-        }
-    }, [isActive, state.x.value, data, onBarPress]);
+        // Note: onBarPress is now called during dragging in updateTooltipAndSelection
+        // This ensures real-time selection updates while dragging
+    }, [isActive, state.x.value, data, onBarPress, showTooltip]);
 
-    // Default configuration with optimized space usage
+    // Default configuration with enhanced padding for tooltips
     const defaultConfig = {
         height: 220,
-        // Minimal responsive padding for maximum chart space
+        // Enhanced padding to accommodate tooltips
         padding: {
-            left: Math.max(12, responsiveDims.spacing), // Reduced from 20
-            right: Math.max(12, responsiveDims.spacing), // Reduced from 20
-            top: 30, // Reduced from 40
-            bottom: 16 // Reduced from 20
+            left: Math.max(12, responsiveDims.spacing),
+            right: Math.max(12, responsiveDims.spacing),
+            top: showTooltip ? 50 : 30, // Increased top padding when tooltips are enabled
+            bottom: 16
         },
-        // Minimal domain padding for maximum bar space
+        // Enhanced domain padding for tooltips
         domainPadding: {
-            left: Math.max(8, responsiveDims.spacing / 2), // Reduced from 15
-            right: Math.max(8, responsiveDims.spacing / 2), // Reduced from 15
-            top: 30, // Reduced from 40
+            left: Math.max(8, responsiveDims.spacing / 2),
+            right: Math.max(8, responsiveDims.spacing / 2),
+            top: showTooltip ? 60 : 30, // Increased top domain padding for tooltips
             bottom: 0
         },
         barColor: Colors[theme].tint || '#177AD5',
@@ -215,15 +312,25 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
 
     const selectedItem = selectedIndex !== null && selectedIndex !== undefined ? data[selectedIndex] : null;
 
-    // Tooltip animated style
+    // Enhanced tooltip animated style with velocity-based animations
     const tooltipAnimatedStyle = useAnimatedStyle(() => {
-        const tooltipWidth = 80;
+        const tooltipWidth = defaultTooltipConfig.minWidth;
 
+        // Platform-specific animation timing - iOS instant, Android smooth
         const animationDuration = Platform.OS === 'ios' ? 0 : 150;
         const springConfig = Platform.OS === 'ios'
-            ? { damping: 30, stiffness: 500 }
-            : { damping: 15, stiffness: 150 };
+            ? { damping: 30, stiffness: 500 } // Very fast spring for iOS
+            : { damping: 15, stiffness: 150 }; // Smooth spring for Android
 
+        // Velocity-based scale for natural feel
+        const velocityScale = interpolate(
+            gestureVelocity.value,
+            [0, 0.5, 1.5],
+            [1, 1.05, 1.1],
+            Extrapolate.CLAMP
+        );
+
+        // Smooth transition opacity with platform-specific timing
         const transitionOpacity = interpolate(
             smoothTransition.value,
             [0, 0.3, 1],
@@ -233,7 +340,7 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
 
         return {
             opacity: withTiming(
-                isActive ? transitionOpacity : 0,
+                ((isActive || isManuallyActive) && showTooltip) ? transitionOpacity : 0,
                 { duration: animationDuration }
             ),
             transform: [
@@ -241,11 +348,11 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
                     translateX: state.x.position.value - tooltipWidth / 2,
                 },
                 {
-                    translateY: state.y.value.position.value - 55,
+                    translateY: state.y.value.position.value - 65, // Increased offset for better positioning
                 },
                 {
                     scale: withSpring(
-                        isActive ? 1 : 0.8,
+                        ((isActive || isManuallyActive) && showTooltip) ? velocityScale : 0.8,
                         springConfig
                     ),
                 },
@@ -291,21 +398,40 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             fontSize: 12,
             fontWeight: '500',
         },
+        // iOS-specific tooltip - larger size
+        iosTooltip: {
+            position: 'absolute',
+            backgroundColor: Colors[theme].tint || '#177AD5',
+            paddingHorizontal: 12, // Larger padding for iOS
+            paddingVertical: 6, // Larger padding for iOS
+            borderRadius: 15, // border-radius: 15px from web
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: 50,
+            zIndex: 1000,
+        },
+        iosTooltipText: {
+            color: '#ffffff',
+            fontSize: 16, // Larger font for iOS
+            fontWeight: '400',
+            textAlign: 'center',
+        },
+        // Android tooltip - original size
         tooltip: {
             position: 'absolute',
             backgroundColor: Colors[theme].tint || '#177AD5',
-            paddingHorizontal: 10, // Reduced from 12px
-            paddingVertical: 5, // Reduced from 6px
-            borderRadius: 12, // Reduced from 15px
+            paddingHorizontal: 9, // Original Android size
+            paddingVertical: 3, // Original Android size
+            borderRadius: 15, // border-radius: 15px from web
             alignItems: 'center',
             justifyContent: 'center',
-            minWidth: 45, // Reduced from 50px
+            minWidth: 40,
             zIndex: 1000,
         },
         tooltipText: {
             color: '#ffffff',
-            fontSize: 13, // Reduced from 14px
-            fontWeight: '500',
+            fontSize: 14, // Original Android size
+            fontWeight: '400',
             textAlign: 'center',
         },
     });
@@ -351,11 +477,28 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
                     )}
                 </CartesianChart>
 
-                {/* Tooltip */}
-                {isActive && tooltipValue && (
-                    <Animated.View style={[styles.tooltip, tooltipAnimatedStyle]}>
-                        <Text style={styles.tooltipText}>
-                            {tooltipValue}
+                {/* Enhanced Tooltip with platform-specific styling */}
+                {showTooltip && ((isActive && tooltipValue) || (isManuallyActive && manualTooltipValue)) && (
+                    <Animated.View style={[
+                        Platform.OS === 'ios' ? styles.iosTooltip : styles.tooltip,
+                        tooltipAnimatedStyle,
+                        {
+                            backgroundColor: defaultTooltipConfig.backgroundColor,
+                            borderRadius: defaultTooltipConfig.borderRadius,
+                            paddingHorizontal: defaultTooltipConfig.paddingHorizontal,
+                            paddingVertical: defaultTooltipConfig.paddingVertical,
+                            minWidth: defaultTooltipConfig.minWidth,
+                        }
+                    ]}>
+                        <Text style={[
+                            Platform.OS === 'ios' ? styles.iosTooltipText : styles.tooltipText,
+                            {
+                                color: defaultTooltipConfig.textColor,
+                                fontSize: defaultTooltipConfig.fontSize,
+                                fontWeight: defaultTooltipConfig.fontWeight as any,
+                            }
+                        ]}>
+                            {isActive ? tooltipValue : manualTooltipValue}
                         </Text>
                     </Animated.View>
                 )}

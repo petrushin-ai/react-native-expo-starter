@@ -138,6 +138,23 @@ export interface InteractiveBarChartProps {
     onBarPress?: (item: BarDataItem, index: number) => void;
     selectedIndex?: number | null;
     showSelectionInfo?: boolean;
+    // Tooltip configuration
+    showTooltip?: boolean;
+    tooltipConfig?: {
+        currencySymbol?: string;
+        currencyPosition?: 'before' | 'after';
+        formatValue?: (value: number) => string;
+        backgroundColor?: string;
+        textColor?: string;
+        borderRadius?: number;
+        fontSize?: number;
+        fontWeight?: string;
+        paddingHorizontal?: number;
+        paddingVertical?: number;
+        minWidth?: number;
+        autoHide?: boolean;
+        autoHideDelay?: number;
+    };
 }
 
 export interface GestureLineChartProps {

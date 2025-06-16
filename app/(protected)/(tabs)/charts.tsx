@@ -148,10 +148,10 @@ export default function ChartsScreen() {
     const lineConfig = useMemo(() => createLineChartConfig(theme), [theme]);
     const pieConfig = useMemo(() => createPieChartConfig(theme), [theme]);
 
-    // Event handlers
+    // Enhanced event handlers with real-time selection updates
     const handleBarPress = (item: BarDataItem, index: number) => {
         setSelectedBarIndex(index);
-        console.log('Bar pressed:', item.label, item.value);
+        console.log('Bar selected during drag:', item.label, item.value);
     };
 
     const handleLineDataPointPress = (item: LineDataItem, index: number) => {
@@ -234,16 +234,31 @@ export default function ChartsScreen() {
                     </ThemedText>
                 </ThemedView>
 
-                {/* Interactive Bar Chart */}
+                {/* Interactive Bar Chart with Enhanced Tooltips */}
                 <InteractiveBarChart
                     data={barData}
                     config={barConfig}
                     title="Sales Performance Dashboard"
-                    description="Touch bars to see values • Animated gradients • Victory Native XL"
+                    description="Drag to see real-time selection • Enhanced tooltips • Currency formatting"
                     theme={theme}
                     onBarPress={handleBarPress}
                     selectedIndex={selectedBarIndex}
                     showSelectionInfo={true}
+                    showTooltip={true}
+                    tooltipConfig={{
+                        currencySymbol: '$',
+                        currencyPosition: 'before',
+                        backgroundColor: theme === 'dark' ? '#1F2937' : '#3B82F6',
+                        textColor: '#ffffff',
+                        borderRadius: 12,
+                        fontSize: 16,
+                        fontWeight: '600',
+                        paddingHorizontal: 14,
+                        paddingVertical: 8,
+                        minWidth: 60,
+                        autoHide: true,
+                        autoHideDelay: 2500,
+                    }}
                 />
 
                 {/* Gesture Line Chart */}
