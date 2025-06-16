@@ -169,6 +169,7 @@ export interface GestureLineChartProps {
     onDataPointPress?: (item: LineDataItem, index: number) => void;
     showDataPointsToggle?: boolean;
     initialShowDataPoints?: boolean;
+    showTooltip?: boolean;
 }
 
 export interface InteractivePieChartProps {

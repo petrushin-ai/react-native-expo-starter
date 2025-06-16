@@ -1,12 +1,26 @@
+import { Circle, LinearGradient, useFont, vec } from '@shopify/react-native-skia';
 import * as Haptics from 'expo-haptics';
-import React, { memo, useState } from 'react';
-import { Dimensions, Platform, StyleSheet, TouchableOpacity } from 'react-native';
-import { LineChart } from 'react-native-gifted-charts';
+import React, { memo, useEffect, useRef, useState } from 'react';
+import { Dimensions, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, {
+    Extrapolate,
+    interpolate,
+    runOnJS,
+    useAnimatedStyle,
+    useDerivedValue,
+    useSharedValue,
+    withSpring,
+    withTiming
+} from 'react-native-reanimated';
+import { Area, CartesianChart, Line, useChartPressState } from 'victory-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
-import type { GestureLineChartProps, LineDataItem } from './types';
+import type { GestureLineChartProps } from './types';
+
+// We'll use require for the font to avoid TypeScript issues with .ttf imports
+const SpaceMono = require('../../assets/fonts/SpaceMono-Regular.ttf');
 
 const GestureLineChart: React.FC<GestureLineChartProps> = ({
     data,
@@ -17,68 +31,272 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
     onDataPointPress,
     showDataPointsToggle = true,
     initialShowDataPoints = true,
+    showTooltip = true,
 }) => {
+    // Load font using Skia's useFont hook
+    const font = useFont(SpaceMono, 12);
+
+    // Chart press state for gestures
+    const { state, isActive } = useChartPressState({
+        x: 0,
+        y: { y: 0 }
+    });
+
+    // State management
     const [showDataPoints, setShowDataPoints] = useState(initialShowDataPoints);
+    const [tooltipValue, setTooltipValue] = useState('');
+    const [isManuallyActive, setIsManuallyActive] = useState(false);
+    const [manualTooltipValue, setManualTooltipValue] = useState('');
+    const [previousDataIndex, setPreviousDataIndex] = useState<number | null>(null);
 
-    // Get responsive dimensions
+    // Chart container ref for measuring
+    const chartContainerRef = useRef<View>(null);
+    const [chartDimensions, setChartDimensions] = useState({ width: 300, height: 220 });
+
+    // Responsive dimensions calculation
     const { width: screenWidth } = Dimensions.get('window');
-    const containerWidth = screenWidth - 72; // Account for margins and padding
-    const defaultWidth = Math.min(containerWidth, 300);
 
-    // Default configuration with responsive sizing
+    // Better responsive calculation with grid-based approach
+    const responsiveCalculations = () => {
+        const baseMargins = 20; // Total horizontal margins (10px each side)
+        const cardPadding = 24; // Card internal padding (12px each side)
+        const availableWidth = screenWidth - baseMargins - cardPadding;
+
+        return {
+            containerWidth: availableWidth,
+        };
+    };
+
+    const responsiveDims = responsiveCalculations();
+
+    // Fixed height following Victory Native XL best practices
+    const chartHeight = config.height || 220;
+
+    // Enhanced gesture state for smooth UX
+    const gestureVelocity = useSharedValue(0);
+    const gestureActive = useSharedValue(false);
+    const lastGestureTime = useSharedValue(0);
+    const smoothTransition = useSharedValue(0);
+    const lastSelectionUpdateTime = useSharedValue(0);
+
+    // Default configuration with Victory Native XL settings
     const defaultConfig = {
-        width: defaultWidth,
-        height: 220,
-        spacing: Math.max(20, containerWidth / 12), // Dynamic spacing
-        initialSpacing: 20,
-        curved: true,
-        areaChart: true,
-        color1: theme === 'dark' ? '#4FC3F7' : '#2196F3',
-        thickness: 3,
-        hideDataPoints: false,
-        dataPointsColor: theme === 'dark' ? '#4FC3F7' : '#2196F3',
-        dataPointsRadius: 6,
-        textColor1: theme === 'dark' ? '#ccc' : '#666',
-        textShiftY: -8,
-        textShiftX: -5,
-        textFontSize: 12,
-        // Animation settings
-        isAnimated: true,
-        animateOnDataChange: true,
-        animationDuration: 1000,
-        onDataChangeAnimationDuration: 300,
+        height: chartHeight,
+        curved: config.curved !== false, // Default to true
+        areaChart: config.areaChart !== false, // Default to true
+        color1: config.color1 || (theme === 'dark' ? '#4FC3F7' : '#2196F3'),
+        thickness: config.thickness || 3,
+        // Proper padding for chart visibility
+        padding: {
+            left: 10,
+            right: 10,
+            top: 10,
+            bottom: 10
+        },
+        // Domain padding for proper spacing
+        domainPadding: {
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: 1
+        },
         // Area chart styling
-        startFillColor: theme === 'dark' ? '#4FC3F7' : '#2196F3',
-        endFillColor: theme === 'dark' ? 'rgba(79, 195, 247, 0.1)' : 'rgba(33, 150, 243, 0.1)',
-        startOpacity: 0.8,
-        endOpacity: 0.3,
+        startFillColor: config.startFillColor || (theme === 'dark' ? '#4FC3F7' : '#2196F3'),
+        endFillColor: config.endFillColor || (theme === 'dark' ? 'rgba(79, 195, 247, 0.1)' : 'rgba(33, 150, 243, 0.1)'),
+        startOpacity: config.startOpacity || 0.8,
+        endOpacity: config.endOpacity || 0.3,
         // Axes styling
-        yAxisColor: theme === 'dark' ? '#444' : '#ddd',
-        xAxisColor: theme === 'dark' ? '#444' : '#ddd',
-        yAxisTextStyle: { color: theme === 'dark' ? '#ccc' : '#666' },
-        xAxisLabelTextStyle: { color: theme === 'dark' ? '#ccc' : '#666' },
-        showVerticalLines: true,
-        verticalLinesColor: theme === 'dark' ? '#333' : '#f0f0f0',
+        yAxisColor: config.yAxisColor || (theme === 'dark' ? '#444' : '#ddd'),
+        xAxisColor: config.xAxisColor || (theme === 'dark' ? '#444' : '#ddd'),
+        // Animation settings
+        isAnimated: config.isAnimated !== false,
+        animationDuration: config.animationDuration || 1000,
     };
 
-    // Merge default config with provided config
-    const mergedConfig = { ...defaultConfig, ...config };
-
-    // Override hideDataPoints based on local state
-    const finalConfig = {
-        ...mergedConfig,
-        hideDataPoints: !showDataPoints,
+    // Default tooltip configuration
+    const defaultTooltipConfig = {
+        currencySymbol: '',
+        currencyPosition: 'before' as const,
+        backgroundColor: defaultConfig.color1, // Use the line color for consistency
+        textColor: '#ffffff',
+        borderRadius: 15,
+        fontSize: Platform.OS === 'ios' ? 16 : 14,
+        fontWeight: '400',
+        paddingHorizontal: Platform.OS === 'ios' ? 12 : 9,
+        paddingVertical: Platform.OS === 'ios' ? 6 : 3,
+        minWidth: Platform.OS === 'ios' ? 50 : 40,
+        autoHide: true,
+        autoHideDelay: 3000,
     };
 
-    const handleDataPointPress = (item: LineDataItem, index: number) => {
-        // Trigger haptic feedback on mobile platforms
-        if (Platform.OS !== 'web') {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Format thousands to 'k' abbreviation - worklet version
+    const formatThousands = (value: number): string => {
+        'worklet';
+        if (value >= 1000) {
+            const thousands = value / 1000;
+            const formatted = thousands % 1 === 0 ? thousands.toString() : thousands.toFixed(1);
+            return `${formatted}k`;
         }
-
-        // Call the provided callback if available
-        onDataPointPress?.(item, index);
+        return value.toFixed(1);
     };
+
+    const formatValue = (value: number) => {
+        'worklet';
+        return formatThousands(value);
+    };
+
+    // Non-worklet version for Y-axis labels
+    const formatValueForAxis = (value: number) => {
+        const formatThousandsJS = (val: number): string => {
+            if (val >= 1000) {
+                const thousands = val / 1000;
+                const formatted = thousands % 1 === 0 ? thousands.toString() : thousands.toFixed(1);
+                return `${formatted}k`;
+            }
+            return val.toFixed(1);
+        };
+        return formatThousandsJS(value);
+    };
+
+    // JS thread functions for updating state
+    const updateTooltipValue = (value: string) => {
+        setTooltipValue(value);
+    };
+
+    const updateTooltipValueWithHaptic = (value: string, dataIndex: number) => {
+        setTooltipValue(value);
+        // Only trigger haptic if we moved to a different data point
+        if (previousDataIndex !== null && previousDataIndex !== dataIndex && Platform.OS !== 'web') {
+            const feedbackStyle = Math.abs(dataIndex - previousDataIndex) > 1
+                ? Haptics.ImpactFeedbackStyle.Medium
+                : Haptics.ImpactFeedbackStyle.Light;
+            Haptics.impactAsync(feedbackStyle);
+        }
+        setPreviousDataIndex(dataIndex);
+    };
+
+    const activateManualTooltip = (value: string) => {
+        setIsManuallyActive(true);
+        setManualTooltipValue(value);
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            setIsManuallyActive(false);
+            setManualTooltipValue('');
+        }, 3000);
+    };
+
+    // Function to update tooltip from UI thread with enhanced gesture tracking
+    const updateTooltip = (xValue: number, yValue: number) => {
+        'worklet';
+        // Get the closest data point index
+        const index = Math.round(xValue);
+        const clampedIndex = Math.max(0, Math.min(index, data.length - 1));
+        const dataPoint = data[clampedIndex];
+
+        if (dataPoint) {
+            // Track gesture velocity for smooth transitions
+            const currentTime = Date.now();
+            if (lastGestureTime.value > 0) {
+                const timeDelta = currentTime - lastGestureTime.value;
+                if (timeDelta > 0) {
+                    gestureVelocity.value = Math.abs(index - (previousDataIndex || 0)) / timeDelta;
+                }
+            }
+            lastGestureTime.value = currentTime;
+
+            const formattedValue = formatValue(dataPoint.value); // Use actual data value
+            runOnJS(updateTooltipValueWithHaptic)(formattedValue, clampedIndex);
+
+            // Call the provided callback if available
+            if (onDataPointPress) {
+                runOnJS(onDataPointPress)(dataPoint, clampedIndex);
+            }
+        }
+    };
+
+    // Use derived value to track changes and update tooltip
+    useDerivedValue(() => {
+        if (isActive && data.length > 0) {
+            const xValue = state.x.value.value;
+            const yValue = state.y.y.value.value;
+            updateTooltip(xValue, yValue);
+        }
+        return null;
+    });
+
+    // Enhanced gesture state management for instant response
+    useEffect(() => {
+        if (!isActive) {
+            setTooltipValue('');
+            setPreviousDataIndex(null);
+
+            // Platform-specific gesture state transitions
+            gestureActive.value = false;
+            gestureVelocity.value = withSpring(0, { damping: 15, stiffness: 120 });
+
+            // Instant hide for iOS, smooth for Android
+            const hideConfig = Platform.OS === 'ios'
+                ? { damping: 30, stiffness: 500 }
+                : { damping: 12, stiffness: 100 };
+            smoothTransition.value = withSpring(0, hideConfig);
+        } else {
+            gestureActive.value = true;
+
+            // Instant show for iOS, smooth for Android
+            const showConfig = Platform.OS === 'ios'
+                ? { damping: 30, stiffness: 500 }
+                : { damping: 15, stiffness: 150 };
+            smoothTransition.value = withSpring(1, showConfig);
+        }
+    }, [isActive]);
+
+    // Enhanced tooltip styles with platform-specific animations for instant iOS response
+    const tooltipAnimatedStyle = useAnimatedStyle(() => {
+        const tooltipWidth = defaultTooltipConfig.minWidth;
+
+        // Platform-specific animation timing - iOS instant, Android smooth
+        const animationDuration = Platform.OS === 'ios' ? 0 : 150;
+        const springConfig = Platform.OS === 'ios'
+            ? { damping: 30, stiffness: 500 } // Very fast spring for iOS
+            : { damping: 15, stiffness: 150 }; // Smooth spring for Android
+
+        // Velocity-based scale for natural feel
+        const velocityScale = interpolate(
+            gestureVelocity.value,
+            [0, 0.5, 1.5],
+            [1, 1.05, 1.1],
+            Extrapolate.CLAMP
+        );
+
+        // Smooth transition opacity with platform-specific timing
+        const transitionOpacity = interpolate(
+            smoothTransition.value,
+            [0, 0.3, 1],
+            [0, 0.7, 1],
+            Extrapolate.CLAMP
+        );
+
+        return {
+            opacity: withTiming(
+                (isActive || isManuallyActive) ? transitionOpacity : 0,
+                { duration: animationDuration }
+            ),
+            transform: [
+                {
+                    translateX: state.x.position.value - tooltipWidth / 2,
+                },
+                {
+                    translateY: state.y.y.position.value - 40, // Proper offset for tooltip positioning
+                },
+                {
+                    scale: withSpring(
+                        (isActive || isManuallyActive) ? velocityScale : 0.8,
+                        springConfig
+                    ),
+                },
+            ],
+        };
+    });
 
     const handleToggleDataPoints = () => {
         setShowDataPoints(!showDataPoints);
@@ -87,20 +305,29 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
         }
     };
 
+    // Measure chart container on layout
+    const onChartLayout = (event: any) => {
+        const { width, height } = event.nativeEvent.layout;
+        setChartDimensions({ width, height });
+    };
+
     const styles = StyleSheet.create({
         container: {
-            margin: 16,
-            padding: 20,
+            margin: 10, // Reduced from 16px
+            padding: 12, // Reduced from 20px
             borderRadius: 16,
             backgroundColor: Colors[theme].card,
             alignItems: 'center',
+            // Ensure container takes full available width with minimal margins
+            width: screenWidth - 20, // Reduced from 32px
+            alignSelf: 'center',
         },
         title: {
-            marginBottom: 4,
+            marginBottom: 2, // Reduced from 4px
             textAlign: 'center',
         },
         description: {
-            marginBottom: 16,
+            marginBottom: 10, // Reduced from 16px
             textAlign: 'center',
             opacity: 0.7,
             fontSize: 12,
@@ -116,7 +343,71 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
             fontSize: 12,
             fontWeight: '500',
         },
+        chartContainer: {
+            width: responsiveDims.containerWidth,
+            height: chartHeight,
+            position: 'relative',
+            // Ensure proper overflow handling
+            overflow: 'visible',
+            backgroundColor: 'transparent',
+        },
+        // iOS-specific tooltip - larger size
+        iosTooltip: {
+            position: 'absolute',
+            backgroundColor: Colors[theme].tint || '#177AD5',
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: 50,
+            zIndex: 1000,
+        },
+        iosTooltipText: {
+            color: '#ffffff',
+            fontSize: 16,
+            fontWeight: '400',
+            textAlign: 'center',
+        },
+        // Android tooltip - original size
+        tooltip: {
+            position: 'absolute',
+            backgroundColor: Colors[theme].tint || '#177AD5',
+            paddingHorizontal: 9,
+            paddingVertical: 3,
+            borderRadius: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: 40,
+            zIndex: 1000,
+        },
+        tooltipText: {
+            color: '#ffffff',
+            fontSize: 14,
+            fontWeight: '400',
+            textAlign: 'center',
+        },
     });
+
+    // Early returns after all hooks
+    if (!font) {
+        return (
+            <ThemedView style={styles.container}>
+                <ThemedView style={[styles.chartContainer, { height: chartHeight }]}>
+                    <ThemedText>Loading chart...</ThemedText>
+                </ThemedView>
+            </ThemedView>
+        );
+    }
+
+    if (!data || data.length === 0) return null;
+
+    // Transform data for Victory Native XL - following official docs pattern
+    const chartData = data.map((item, index) => ({
+        x: index,
+        y: item.value,
+        label: item.label
+    }));
 
     return (
         <ThemedView style={styles.container}>
@@ -143,43 +434,139 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
                 </TouchableOpacity>
             )}
 
-            <LineChart
-                data={data}
-                width={finalConfig.width}
-                height={finalConfig.height}
-                spacing={finalConfig.spacing}
-                initialSpacing={finalConfig.initialSpacing}
-                curved={finalConfig.curved}
-                areaChart={finalConfig.areaChart}
-                color1={finalConfig.color1}
-                thickness={finalConfig.thickness}
-                hideDataPoints={finalConfig.hideDataPoints}
-                dataPointsColor={finalConfig.dataPointsColor}
-                dataPointsRadius={finalConfig.dataPointsRadius}
-                textColor1={finalConfig.textColor1}
-                textShiftY={finalConfig.textShiftY}
-                textShiftX={finalConfig.textShiftX}
-                textFontSize={finalConfig.textFontSize}
-                // Animation properties
-                isAnimated={finalConfig.isAnimated}
-                animateOnDataChange={finalConfig.animateOnDataChange}
-                animationDuration={finalConfig.animationDuration}
-                onDataChangeAnimationDuration={finalConfig.onDataChangeAnimationDuration}
-                // Area chart properties
-                startFillColor={finalConfig.startFillColor}
-                endFillColor={finalConfig.endFillColor}
-                startOpacity={finalConfig.startOpacity}
-                endOpacity={finalConfig.endOpacity}
-                // Axes properties
-                yAxisColor={finalConfig.yAxisColor}
-                xAxisColor={finalConfig.xAxisColor}
-                yAxisTextStyle={finalConfig.yAxisTextStyle}
-                xAxisLabelTextStyle={finalConfig.xAxisLabelTextStyle}
-                showVerticalLines={finalConfig.showVerticalLines}
-                verticalLinesColor={finalConfig.verticalLinesColor}
-                // Interaction
-                onPress={finalConfig.onPress || handleDataPointPress}
-            />
+            <View
+                ref={chartContainerRef}
+                style={styles.chartContainer}
+                onLayout={onChartLayout}
+            >
+                <CartesianChart
+                    data={chartData}
+                    xKey="x"
+                    yKeys={["y"]}
+                    chartPressState={state}
+                    padding={defaultConfig.padding}
+                    domainPadding={defaultConfig.domainPadding}
+                    axisOptions={{
+                        font,
+                        formatXLabel: (value) => {
+                            const index = Math.round(value);
+                            const clampedIndex = Math.max(0, Math.min(index, data.length - 1));
+                            return data[clampedIndex]?.label || '';
+                        },
+                        tickCount: data.length,
+                        labelColor: theme === 'dark' ? '#ccc' : '#666',
+                        lineColor: 'transparent',
+                        lineWidth: 0,
+                    }}
+                    yAxis={[{
+                        font,
+                        lineColor: 'transparent',
+                        lineWidth: 0,
+                        labelColor: theme === 'dark' ? '#ccc' : '#666',
+                        formatYLabel: (value) => formatValueForAxis(value),
+                    }]}
+                    frame={{
+                        lineColor: 'transparent',
+                        lineWidth: 0,
+                    }}
+                >
+                    {({ points, chartBounds }) => (
+                        <>
+                            {/* Enhanced Gradient Area fill */}
+                            {defaultConfig.areaChart && (
+                                <Area
+                                    points={points.y}
+                                    y0={chartBounds.bottom}
+                                    curveType={defaultConfig.curved ? "monotoneX" : "linear"}
+                                    animate={{ type: "timing", duration: defaultConfig.animationDuration }}
+                                    connectMissingData={true}
+                                >
+                                    <LinearGradient
+                                        start={vec(0, chartBounds.top)}
+                                        end={vec(0, chartBounds.bottom)}
+                                        colors={[
+                                            defaultConfig.startFillColor + Math.round(defaultConfig.startOpacity * 255).toString(16),
+                                            defaultConfig.endFillColor
+                                        ]}
+                                    />
+                                </Area>
+                            )}
+
+                            {/* Smooth Line */}
+                            <Line
+                                points={points.y}
+                                color={defaultConfig.color1}
+                                strokeWidth={defaultConfig.thickness}
+                                curveType={defaultConfig.curved ? "monotoneX" : "linear"}
+                                animate={{ type: "timing", duration: defaultConfig.animationDuration }}
+                                connectMissingData={true}
+                                strokeCap="round"
+                                strokeJoin="round"
+                            />
+
+                            {/* Enhanced Active point indicator */}
+                            {((isActive || isManuallyActive) && showDataPoints) && (
+                                <>
+                                    {/* Large outer glow */}
+                                    <Circle
+                                        cx={state.x.position}
+                                        cy={state.y.y.position}
+                                        r={12}
+                                        color={defaultConfig.color1 + '26'} // 15% opacity
+                                    />
+                                    {/* Medium ring */}
+                                    <Circle
+                                        cx={state.x.position}
+                                        cy={state.y.y.position}
+                                        r={8}
+                                        color={defaultConfig.color1 + '4D'} // 30% opacity
+                                    />
+                                    {/* Main dot */}
+                                    <Circle
+                                        cx={state.x.position}
+                                        cy={state.y.y.position}
+                                        r={5}
+                                        color={defaultConfig.color1}
+                                    />
+                                    {/* White center */}
+                                    <Circle
+                                        cx={state.x.position}
+                                        cy={state.y.y.position}
+                                        r={2}
+                                        color={Colors[theme].background}
+                                    />
+                                </>
+                            )}
+                        </>
+                    )}
+                </CartesianChart>
+
+                {/* Enhanced Tooltip with platform-specific styling */}
+                {showTooltip && ((isActive && tooltipValue) || (isManuallyActive && manualTooltipValue)) && (
+                    <Animated.View style={[
+                        Platform.OS === 'ios' ? styles.iosTooltip : styles.tooltip,
+                        tooltipAnimatedStyle,
+                        {
+                            backgroundColor: defaultTooltipConfig.backgroundColor,
+                            borderRadius: defaultTooltipConfig.borderRadius,
+                            paddingHorizontal: defaultTooltipConfig.paddingHorizontal,
+                            paddingVertical: defaultTooltipConfig.paddingVertical,
+                            minWidth: defaultTooltipConfig.minWidth,
+                        }
+                    ]}>
+                        <Text style={[
+                            Platform.OS === 'ios' ? styles.iosTooltipText : styles.tooltipText,
+                            {
+                                color: defaultTooltipConfig.textColor,
+                                fontSize: defaultTooltipConfig.fontSize,
+                                fontWeight: defaultTooltipConfig.fontWeight as any,
+                            }
+                        ]}>
+                            {isActive ? tooltipValue : manualTooltipValue}
+                        </Text>
+                    </Animated.View>
+                )}
+            </View>
         </ThemedView>
     );
 };
