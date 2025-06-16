@@ -1,38 +1,17 @@
-// Chart Data Types
+// Chart Data Types for Victory Native XL
 export interface BarDataItem {
-    value: number;
-    label?: string;
-    frontColor?: string;
-    gradientColor?: string;
-    sideColor?: string;
-    topColor?: string;
-    spacing?: number;
-    labelTextStyle?: object;
-    labelComponent?: () => React.ReactNode;
-    topLabelComponent?: () => React.ReactNode;
-    barWidth?: number;
-    borderRadius?: number;
-    borderTopLeftRadius?: number;
-    borderTopRightRadius?: number;
-    borderBottomLeftRadius?: number;
-    borderBottomRightRadius?: number;
+    label: string;      // x-axis value (string or number)
+    value: number;      // y-axis value (must be number)
+    // Additional metadata for interactions
+    originalIndex?: number;
+    color?: string;     // For custom bar colors
 }
 
 export interface LineDataItem {
-    value: number;
-    label?: string;
-    labelTextStyle?: object;
-    dataPointText?: string;
-    dataPointLabelComponent?: () => React.ReactNode;
-    dataPointHeight?: number;
-    dataPointWidth?: number;
-    dataPointColor?: string;
-    dataPointRadius?: number;
-    hideDataPoint?: boolean;
-    textShiftX?: number;
-    textShiftY?: number;
-    textColor?: string;
-    textFontSize?: number;
+    label: string;      // x-axis value
+    value: number;      // y-axis value
+    // Additional metadata
+    originalIndex?: number;
 }
 
 export interface PieDataItem {
@@ -50,57 +29,46 @@ export interface PieDataItem {
     onPress?: (item: PieDataItem, index: number) => void;
 }
 
-// Chart Configuration Types
-export interface LineConfig {
-    color?: string;
-    thickness?: number;
-    curved?: boolean;
-    hideDataPoints?: boolean;
-    dataPointsColor?: string;
-    dataPointsRadius?: number;
-    shiftY?: number;
-    initialSpacing?: number;
-    animateOnDataChange?: boolean;
-    animationDuration?: number;
-}
-
-export interface BarChartConfig {
-    width?: number;
+// Victory Native XL Chart Configuration Types
+export interface VictoryBarChartConfig {
+    // Chart dimensions and layout
     height?: number;
-    barWidth?: number;
-    spacing?: number;
-    initialSpacing?: number;
-    showGradient?: boolean;
+    padding?: number | { left?: number; right?: number; top?: number; bottom?: number };
+    domainPadding?: number | { left?: number; right?: number; top?: number; bottom?: number };
+
+    // Bar styling
+    barColor?: string;
+    gradientColors?: [string, string];
+    roundedCorners?: {
+        topLeft?: number;
+        topRight?: number;
+        bottomLeft?: number;
+        bottomRight?: number;
+    };
+
+    // Axis configuration for Victory Native XL
+    xAxisConfig?: {
+        font?: any; // SkFont from react-native-skia
+        labelColor?: string;
+        lineColor?: string;
+        lineWidth?: number;
+        formatXLabel?: (value: any) => string;
+    };
+    yAxisConfig?: {
+        font?: any; // SkFont from react-native-skia
+        labelColor?: string;
+        lineColor?: string;
+        lineWidth?: number;
+        tickCount?: number;
+        formatYLabel?: (value: any) => string;
+    };
+
+    // Animation
     isAnimated?: boolean;
     animationDuration?: number;
-    barBorderRadius?: number;
-    isThreeD?: boolean;
-    side?: 'left' | 'right';
-    sideWidth?: number;
-    frontColor?: string;
-    sideColor?: string;
-    topColor?: string;
-    gradientColor?: string;
-    // Axis props
-    yAxisThickness?: number;
-    xAxisThickness?: number;
-    xAxisType?: 'solid' | 'dashed' | 'dotted';
-    xAxisColor?: string;
-    yAxisColor?: string;
-    hideYAxisText?: boolean;
-    yAxisTextStyle?: object;
-    xAxisLabelTextStyle?: object;
-    stepValue?: number;
-    maxValue?: number;
-    noOfSections?: number;
-    yAxisLabelTexts?: string[];
-    labelWidth?: number;
-    // Line overlay
-    showLine?: boolean;
-    lineConfig?: LineConfig;
-    // Interaction
-    onPress?: (item: BarDataItem, index: number) => void;
-    activeOpacity?: number;
+
+    // Domain bounds
+    domain?: { x?: [number, number]; y?: [number, number] };
 }
 
 export interface LineChartConfig {
@@ -159,10 +127,10 @@ export interface PieChartConfig {
     shadowColor?: string;
 }
 
-// Component Props Types
+// Component Props Types for Victory Native XL
 export interface InteractiveBarChartProps {
     data: BarDataItem[];
-    config?: BarChartConfig;
+    config?: VictoryBarChartConfig;
     title?: string;
     description?: string;
     theme?: 'light' | 'dark';
@@ -193,16 +161,17 @@ export interface InteractivePieChartProps {
     showLegend?: boolean;
     centerLabel?: {
         selectedText?: string;
-        defaultText?: string;
         selectedSubtext?: string;
         defaultSubtext?: string;
     };
 }
 
-// Theme Types
+// Legacy types for backward compatibility
+export interface BarChartConfig extends VictoryBarChartConfig { }
+
+// Common types
 export type ChartTheme = 'light' | 'dark';
 
-// Utility Types
 export interface ChartDimensions {
     width: number;
     height: number;

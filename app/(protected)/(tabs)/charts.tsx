@@ -1,5 +1,7 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { Stack } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { Dimensions, ScrollView, useColorScheme } from 'react-native';
+import { Dimensions, ScrollView, StatusBar, TouchableOpacity, useColorScheme } from 'react-native';
 
 import {
     GestureLineChart,
@@ -16,29 +18,29 @@ import {
 } from '@/components/charts';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Modal } from '@/components/ui/Modal';
 
 // Get screen dimensions for responsive charts
 const { width: screenWidth } = Dimensions.get('window');
 const chartContainerPadding = 40; // Total horizontal padding (20px each side)
 const availableWidth = screenWidth - chartContainerPadding - 32; // Subtract container margins (16px each side)
-const safeChartWidth = Math.min(availableWidth, 320); // Conservative max width
+const safeChartWidth = Math.min(availableWidth, 400); // Increased max width for 12 months
 
-// Data generation utilities (outside components)
+// Data generation utilities for Victory Native XL format
 const generateBarChartData = (theme: ChartTheme): BarDataItem[] => {
-    const primaryColor = theme === 'dark' ? '#4FC3F7' : '#2196F3';
-    const secondaryColor = theme === 'dark' ? '#81C784' : '#4CAF50';
-
     return [
-        { value: 2500, frontColor: primaryColor, gradientColor: '#E3F2FD', spacing: 6, label: 'Jan' },
-        { value: 2400, frontColor: secondaryColor, gradientColor: '#E8F5E8' },
-        { value: 3500, frontColor: primaryColor, gradientColor: '#E3F2FD', spacing: 6, label: 'Feb' },
-        { value: 3000, frontColor: secondaryColor, gradientColor: '#E8F5E8' },
-        { value: 4500, frontColor: primaryColor, gradientColor: '#E3F2FD', spacing: 6, label: 'Mar' },
-        { value: 4000, frontColor: secondaryColor, gradientColor: '#E8F5E8' },
-        { value: 5200, frontColor: primaryColor, gradientColor: '#E3F2FD', spacing: 6, label: 'Apr' },
-        { value: 4900, frontColor: secondaryColor, gradientColor: '#E8F5E8' },
-        { value: 3800, frontColor: primaryColor, gradientColor: '#E3F2FD', spacing: 6, label: 'May' },
-        { value: 3600, frontColor: secondaryColor, gradientColor: '#E8F5E8' },
+        { label: 'Jan', value: 2800 },
+        { label: 'Feb', value: 3200 },
+        { label: 'Mar', value: 4200 },
+        { label: 'Apr', value: 5400 },
+        { label: 'May', value: 3900 },
+        { label: 'Jun', value: 3600 },
+        { label: 'Jul', value: 4100 },
+        { label: 'Aug', value: 3800 },
+        { label: 'Sep', value: 4500 },
+        { label: 'Oct', value: 4800 },
+        { label: 'Nov', value: 5200 },
+        { label: 'Dec', value: 5600 },
     ];
 };
 
@@ -74,27 +76,22 @@ const generatePieChartData = (theme: ChartTheme): PieDataItem[] => {
     ];
 };
 
-// Chart configuration factories
+// Chart configuration factories for Victory Native XL
 const createBarChartConfig = (theme: ChartTheme): BarChartConfig => ({
-    width: safeChartWidth,
     height: 240,
     isAnimated: true,
     animationDuration: 1000,
-    showGradient: true,
-    showLine: true,
-    lineConfig: {
-        color: '#FF9800',
-        thickness: 3,
-        curved: true,
-        hideDataPoints: false,
-        dataPointsColor: '#FF9800',
-        dataPointsRadius: 5,
-        shiftY: 20,
-        initialSpacing: -30,
+    barColor: theme === 'dark' ? '#60A5FA' : '#3B82F6',
+    gradientColors: [
+        theme === 'dark' ? '#60A5FA' : '#3B82F6',
+        theme === 'dark' ? '#60A5FA80' : '#3B82F680'
+    ],
+    roundedCorners: {
+        topLeft: 6,
+        topRight: 6,
     },
-    // Custom 3D effect configuration
-    isThreeD: false,
-    barBorderRadius: 6,
+    domainPadding: { left: 10, right: 10, top: 30 },
+    padding: { left: 12, right: 12, top: 20, bottom: 20 },
 });
 
 const createLineChartConfig = (theme: ChartTheme): LineChartConfig => ({
@@ -129,15 +126,20 @@ const createPieChartConfig = (theme: ChartTheme): PieChartConfig => {
 export default function ChartsScreen() {
     const colorScheme = useColorScheme();
     const theme: ChartTheme = colorScheme ?? 'light';
+    const isDark = colorScheme === 'dark';
 
     // Chart interaction state
     const [selectedBarIndex, setSelectedBarIndex] = useState<number | null>(null);
     const [selectedPieIndex, setSelectedPieIndex] = useState<number | null>(0);
 
-    // Generate data with theme awareness
-    const barData = useMemo(() => generateBarChartData(theme), [theme]);
-    const lineData = useMemo(() => generateLineChartData(), []);
-    const pieData = useMemo(() => generatePieChartData(theme), [theme]);
+    // Refresh and modal state
+    const [refreshKey, setRefreshKey] = useState(0);
+    const [modalVisible, setModalVisible] = useState(false);
+
+    // Generate data with theme awareness and refresh key for forcing regeneration
+    const barData = useMemo(() => generateBarChartData(theme), [theme, refreshKey]);
+    const lineData = useMemo(() => generateLineChartData(), [refreshKey]);
+    const pieData = useMemo(() => generatePieChartData(theme), [theme, refreshKey]);
 
     // Create configurations
     const barConfig = useMemo(() => createBarChartConfig(theme), [theme]);
@@ -159,72 +161,140 @@ export default function ChartsScreen() {
         console.log('Pie slice pressed:', item.text, item.value);
     };
 
+    // Header handlers
+    const handleRefresh = () => {
+        // Reset chart selection states
+        setSelectedBarIndex(null);
+        setSelectedPieIndex(0);
+
+        // Force chart data regeneration and restart animations
+        setRefreshKey(prev => prev + 1);
+
+        console.log('Charts refreshed');
+    };
+
+    const handleInfo = () => {
+        setModalVisible(true);
+    };
+
     return (
-        <ScrollView showsVerticalScrollIndicator={false}>
-            <ThemedView style={styles.header}>
-                <ThemedText type="title" style={styles.title}>
-                    Interactive Charts 2025
-                </ThemedText>
-                <ThemedText style={styles.subtitle}>
-                    Modular • Customizable • Gesture-enabled
-                </ThemedText>
-            </ThemedView>
-
-            {/* Interactive Bar Chart */}
-            <InteractiveBarChart
-                data={barData}
-                config={barConfig}
-                title="Sales Performance Dashboard"
-                description="Touch bars to see values • Animated gradients • Line overlay"
-                theme={theme}
-                onBarPress={handleBarPress}
-                selectedIndex={selectedBarIndex}
-                showSelectionInfo={true}
-            />
-
-            {/* Gesture Line Chart */}
-            <GestureLineChart
-                data={lineData}
-                config={lineConfig}
-                title="Performance Trends"
-                description="Area chart • Smooth curves • Interactive data points"
-                theme={theme}
-                onDataPointPress={handleLineDataPointPress}
-                showDataPointsToggle={true}
-                initialShowDataPoints={true}
-            />
-
-            {/* Interactive Pie Chart */}
-            <InteractivePieChart
-                data={pieData}
-                config={pieConfig}
-                title="Market Distribution"
-                description="Donut chart • Touch selection • Animated focus"
-                theme={theme}
-                onSlicePress={handlePieSlicePress}
-                selectedIndex={selectedPieIndex}
-                showLegend={true}
-                centerLabel={{
-                    selectedText: pieData[selectedPieIndex || 0]?.text || 'Select',
-                    defaultText: 'Tap slice',
-                    selectedSubtext: 'Market Share',
-                    defaultSubtext: 'to select',
+        <>
+            <Stack.Screen
+                options={{
+                    headerShown: true,
+                    title: 'Interactive Charts',
+                    headerStyle: {
+                        backgroundColor: isDark ? '#111827' : '#F9FAFB',
+                    },
+                    headerTintColor: isDark ? '#F9FAFB' : '#111827',
+                    headerTitleStyle: {
+                        fontWeight: '600',
+                        fontSize: 18,
+                    },
+                    headerShadowVisible: false,
+                    headerLeft: () => (
+                        <TouchableOpacity
+                            onPress={handleRefresh}
+                            style={styles.headerButton}
+                        >
+                            <Ionicons
+                                name="refresh"
+                                size={22}
+                                color={isDark ? '#60A5FA' : '#3B82F6'}
+                            />
+                        </TouchableOpacity>
+                    ),
+                    headerRight: () => (
+                        <TouchableOpacity
+                            onPress={handleInfo}
+                            style={styles.headerButton}
+                        >
+                            <Ionicons
+                                name="information-circle-outline"
+                                size={22}
+                                color={isDark ? '#60A5FA' : '#3B82F6'}
+                            />
+                        </TouchableOpacity>
+                    ),
                 }}
             />
-
-            {/* Simple Line Chart */}
-            <SimpleLineChart
-                data={lineData}
-                title="Simple Line Chart"
-                description="No area fill • Straight lines • Clean design"
-                theme={theme}
-                onDataPointPress={(item: LineDataItem, index: number) => {
-                    console.log('Simple line data point pressed:', item.label, item.value);
-                }}
+            <StatusBar
+                barStyle={isDark ? 'light-content' : 'dark-content'}
+                backgroundColor={isDark ? '#111827' : '#F9FAFB'}
             />
+            <ScrollView showsVerticalScrollIndicator={false}>
+                <ThemedView style={styles.header}>
+                    <ThemedText type="title" style={styles.title}>
+                        Interactive Charts 2025
+                    </ThemedText>
+                    <ThemedText style={styles.subtitle}>
+                        Victory Native XL • Performance • Gestures
+                    </ThemedText>
+                </ThemedView>
 
+                {/* Interactive Bar Chart */}
+                <InteractiveBarChart
+                    data={barData}
+                    config={barConfig}
+                    title="Sales Performance Dashboard"
+                    description="Touch bars to see values • Animated gradients • Victory Native XL"
+                    theme={theme}
+                    onBarPress={handleBarPress}
+                    selectedIndex={selectedBarIndex}
+                    showSelectionInfo={true}
+                />
 
-        </ScrollView>
+                {/* Gesture Line Chart */}
+                <GestureLineChart
+                    data={lineData}
+                    config={lineConfig}
+                    title="Performance Trends"
+                    description="Area chart • Smooth curves • Interactive data points"
+                    theme={theme}
+                    onDataPointPress={handleLineDataPointPress}
+                    showDataPointsToggle={true}
+                    initialShowDataPoints={true}
+                />
+
+                {/* Interactive Pie Chart */}
+                <InteractivePieChart
+                    data={pieData}
+                    config={pieConfig}
+                    title="Market Distribution"
+                    description="Donut chart • Touch selection • Animated focus"
+                    theme={theme}
+                    onSlicePress={handlePieSlicePress}
+                    selectedIndex={selectedPieIndex}
+                    showLegend={true}
+                    centerLabel={{
+                        selectedText: pieData[selectedPieIndex || 0]?.text || 'Select',
+                        selectedSubtext: 'Market Share',
+                        defaultSubtext: 'Tap slice to select',
+                    }}
+                />
+
+                {/* Simple Line Chart */}
+                <SimpleLineChart
+                    data={lineData}
+                    title="Simple Line Chart"
+                    description="No area fill • Straight lines • Clean design"
+                    theme={theme}
+                    onDataPointPress={(item: LineDataItem, index: number) => {
+                        console.log('Simple line data point pressed:', item.label, item.value);
+                    }}
+                />
+            </ScrollView>
+
+            <Modal
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)}
+                title="Interactive Charts Showcase"
+                message="This page demonstrates interactive chart components with gesture support, animations, and theme awareness. Use the refresh button in the header to regenerate chart data and restart animations."
+                type="info"
+                primaryButtonText="Got it"
+                secondaryButtonText="Close"
+            />
+        </>
     );
 }
 
@@ -242,6 +312,7 @@ const styles = {
         opacity: 0.7,
         fontSize: 14,
     },
-
-
+    headerButton: {
+        padding: 8,
+    },
 }; 

@@ -1,12 +1,16 @@
+import { LinearGradient, useFont, vec } from '@shopify/react-native-skia';
 import * as Haptics from 'expo-haptics';
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { Dimensions, Platform, StyleSheet } from 'react-native';
-import { BarChart } from 'react-native-gifted-charts';
+import { Bar, CartesianChart, useChartPressState } from 'victory-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
-import type { BarDataItem, InteractiveBarChartProps } from './types';
+import type { InteractiveBarChartProps } from './types';
+
+// We'll use require for the font to avoid TypeScript issues with .ttf imports
+const SpaceMono = require('../../assets/fonts/SpaceMono-Regular.ttf');
 
 const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     data,
@@ -18,59 +22,92 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     selectedIndex,
     showSelectionInfo = true,
 }) => {
+    // Load font using Skia's useFont hook
+    const font = useFont(SpaceMono, 12);
+
     // Get responsive dimensions
     const { width: screenWidth } = Dimensions.get('window');
-    const containerWidth = screenWidth - 72; // Account for margins and padding (16 + 20 + 20 + 16)
-    const defaultWidth = Math.min(containerWidth, 300);
+    const containerWidth = screenWidth - 72; // Account for margins and padding
 
-    // Default configuration with responsive sizing
+    // Set up chart press state for interactions
+    const { state, isActive } = useChartPressState({
+        x: 0,
+        y: { value: 0 }
+    });
+
+    // Handle press events with haptic feedback
+    useEffect(() => {
+        if (isActive && Platform.OS !== 'web') {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+
+        // Call the provided callback if available
+        if (isActive && onBarPress && state.x.value !== undefined) {
+            const index = Math.round(state.x.value.value);
+            if (index >= 0 && index < data.length) {
+                onBarPress(data[index], index);
+            }
+        }
+    }, [isActive, state.x.value, data, onBarPress]);
+
+    // Default configuration with Victory Native XL patterns
     const defaultConfig = {
-        width: defaultWidth,
         height: 220,
-        barWidth: Math.max(12, Math.min(16, containerWidth / 25)), // Dynamic bar width
-        initialSpacing: 10,
-        spacing: Math.max(8, containerWidth / 40), // Dynamic spacing
-        barBorderRadius: 4,
-        showGradient: true,
+        padding: { left: 16, right: 16, top: 20, bottom: 20 },
+        domainPadding: { left: 20, right: 20, top: 30, bottom: 0 },
+        barColor: Colors[theme].tint || '#177AD5',
+        gradientColors: [
+            Colors[theme].tint || '#177AD5',
+            (Colors[theme].tint || '#177AD5') + '50'
+        ] as [string, string],
+        roundedCorners: {
+            topLeft: 4,
+            topRight: 4,
+        },
+        xAxisConfig: {
+            font,
+            labelColor: theme === 'dark' ? '#ccc' : '#666',
+            lineColor: theme === 'dark' ? '#444' : '#e0e0e0',
+            lineWidth: 1,
+            formatXLabel: (value: any) => {
+                if (typeof value === 'number') {
+                    const index = Math.round(value);
+                    return data[index]?.label || String(value);
+                }
+                return String(value);
+            },
+        },
+        yAxisConfig: {
+            font,
+            labelColor: theme === 'dark' ? '#ccc' : '#666',
+            lineColor: theme === 'dark' ? '#444' : '#e0e0e0',
+            lineWidth: 1,
+            tickCount: 6,
+            formatYLabel: (value: any) => {
+                if (typeof value === 'number') {
+                    if (value >= 1000) {
+                        return `${(value / 1000).toFixed(0)}k`;
+                    }
+                    return String(Math.round(value));
+                }
+                return String(value);
+            },
+        },
         isAnimated: true,
         animationDuration: 800,
-        yAxisThickness: 0,
-        xAxisType: 'dashed' as const,
-        xAxisColor: theme === 'dark' ? '#666' : '#ccc',
-        yAxisTextStyle: { color: theme === 'dark' ? '#ccc' : '#666', fontSize: 12 },
-        xAxisLabelTextStyle: { color: theme === 'dark' ? '#ccc' : '#666', textAlign: 'center' as const },
-        stepValue: 1000,
-        maxValue: 6000,
-        noOfSections: 6,
-        yAxisLabelTexts: ['0', '1k', '2k', '3k', '4k', '5k', '6k'],
-        labelWidth: 40,
-        activeOpacity: 0.7,
-        // Default line overlay configuration
-        showLine: true,
-        lineConfig: {
-            color: '#FF9800',
-            thickness: 3,
-            curved: true,
-            hideDataPoints: false,
-            dataPointsColor: '#FF9800',
-            dataPointsRadius: 4,
-            shiftY: 20,
-            initialSpacing: -30,
-        },
+        domain: undefined as { x?: [number, number]; y?: [number, number] } | undefined,
     };
 
     // Merge default config with provided config
     const mergedConfig = { ...defaultConfig, ...config };
 
-    const handleBarPress = (item: BarDataItem, index: number) => {
-        // Trigger haptic feedback on mobile platforms
-        if (Platform.OS !== 'web') {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
-
-        // Call the provided callback if available
-        onBarPress?.(item, index);
-    };
+    // Prepare data for Victory Native XL (ensure proper format)
+    const formattedData = data.map((item, index) => ({
+        x: index, // Use index as x-value for proper positioning
+        value: item.value,
+        label: item.label,
+        originalIndex: index,
+    }));
 
     const selectedItem = selectedIndex !== null && selectedIndex !== undefined ? data[selectedIndex] : null;
 
@@ -91,6 +128,10 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             textAlign: 'center',
             opacity: 0.7,
             fontSize: 12,
+        },
+        chartContainer: {
+            width: containerWidth,
+            height: mergedConfig.height,
         },
         selectionInfo: {
             marginTop: 12,
@@ -118,45 +159,33 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
                 </ThemedText>
             )}
 
-            <BarChart
-                data={data}
-                width={mergedConfig.width}
-                height={mergedConfig.height}
-                barWidth={mergedConfig.barWidth}
-                initialSpacing={mergedConfig.initialSpacing}
-                spacing={mergedConfig.spacing}
-                barBorderRadius={mergedConfig.barBorderRadius}
-                showGradient={mergedConfig.showGradient}
-                isAnimated={mergedConfig.isAnimated}
-                animationDuration={mergedConfig.animationDuration}
-                isThreeD={mergedConfig.isThreeD}
-                side={mergedConfig.side}
-                sideWidth={mergedConfig.sideWidth}
-                frontColor={mergedConfig.frontColor}
-                sideColor={mergedConfig.sideColor}
-                topColor={mergedConfig.topColor}
-                gradientColor={mergedConfig.gradientColor}
-                // Axis configuration
-                yAxisThickness={mergedConfig.yAxisThickness}
-                xAxisThickness={mergedConfig.xAxisThickness}
-                xAxisType={mergedConfig.xAxisType}
-                xAxisColor={mergedConfig.xAxisColor}
-                yAxisColor={mergedConfig.yAxisColor}
-                hideYAxisText={mergedConfig.hideYAxisText}
-                yAxisTextStyle={mergedConfig.yAxisTextStyle}
-                xAxisLabelTextStyle={mergedConfig.xAxisLabelTextStyle}
-                stepValue={mergedConfig.stepValue}
-                maxValue={mergedConfig.maxValue}
-                noOfSections={mergedConfig.noOfSections}
-                yAxisLabelTexts={mergedConfig.yAxisLabelTexts}
-                labelWidth={mergedConfig.labelWidth}
-                // Line overlay
-                showLine={mergedConfig.showLine}
-                lineConfig={mergedConfig.lineConfig}
-                // Interaction
-                onPress={handleBarPress}
-                activeOpacity={mergedConfig.activeOpacity}
-            />
+            <ThemedView style={styles.chartContainer}>
+                <CartesianChart
+                    data={formattedData}
+                    xKey="x"
+                    yKeys={["value"]}
+                    padding={mergedConfig.padding}
+                    domainPadding={mergedConfig.domainPadding}
+                    domain={mergedConfig.domain}
+                    xAxis={mergedConfig.xAxisConfig}
+                    yAxis={[mergedConfig.yAxisConfig]}
+                    chartPressState={state}
+                >
+                    {({ points, chartBounds }) => (
+                        <Bar
+                            points={points.value}
+                            chartBounds={chartBounds}
+                            roundedCorners={mergedConfig.roundedCorners}
+                        >
+                            <LinearGradient
+                                start={vec(0, 0)}
+                                end={vec(0, mergedConfig.height)}
+                                colors={mergedConfig.gradientColors}
+                            />
+                        </Bar>
+                    )}
+                </CartesianChart>
+            </ThemedView>
 
             {showSelectionInfo && selectedItem && (
                 <ThemedView style={styles.selectionInfo}>
