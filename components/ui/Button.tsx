@@ -12,7 +12,7 @@ import {
 
 export interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
     title: string;
-    variant?: 'primary' | 'secondary' | 'outline';
+    variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
     size?: 'small' | 'medium' | 'large';
     loading?: boolean;
     style?: ViewStyle;
@@ -99,6 +99,20 @@ export function Button({
                         isDisabled && styles.outlineTextDisabled,
                     ],
                 };
+            case 'ghost':
+                return {
+                    container: [
+                        styles.container,
+                        styles.ghostContainer,
+                        isDisabled && styles.ghostContainerDisabled,
+                    ],
+                    text: [
+                        styles.text,
+                        styles.ghostText,
+                        isDark && styles.ghostTextDark,
+                        isDisabled && styles.ghostTextDisabled,
+                    ],
+                };
             default: // primary
                 return {
                     container: [
@@ -161,7 +175,13 @@ export function Button({
             >
                 {loading ? (
                     <ActivityIndicator
-                        color={variant === 'primary' ? '#FFFFFF' : isDark ? '#F9FAFB' : '#3B82F6'}
+                        color={
+                            variant === 'primary'
+                                ? '#FFFFFF'
+                                : variant === 'ghost'
+                                    ? isDark ? '#60A5FA' : '#3B82F6'
+                                    : isDark ? '#F9FAFB' : '#3B82F6'
+                        }
                         size="small"
                     />
                 ) : (
@@ -283,6 +303,24 @@ const styles = StyleSheet.create({
         color: '#60A5FA',
     },
     outlineTextDisabled: {
+        color: '#94A3B8',
+    },
+    // Ghost variant
+    ghostContainer: {
+        backgroundColor: 'transparent',
+        shadowOpacity: 0,
+        elevation: 0,
+    },
+    ghostContainerDisabled: {
+        backgroundColor: 'transparent',
+    },
+    ghostText: {
+        color: '#3B82F6',
+    },
+    ghostTextDark: {
+        color: '#60A5FA',
+    },
+    ghostTextDisabled: {
         color: '#94A3B8',
     },
 }); 

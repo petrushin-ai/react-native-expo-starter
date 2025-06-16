@@ -20,6 +20,7 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   'person.fill': 'person',
   'gearshape.fill': 'settings',
+  'square.grid.3x3.fill': 'grid-view',
 } as IconMapping;
 
 /**
