@@ -19,6 +19,8 @@ Never write documentation or tests unless explicitly asked
 
 Do not ever try to run the project, it's user's duty
 
+Do not use default or fallback values, instead use guards to throw exception
+
 Use web search and docs to understand which is the best native implementation option and develop own implementation if there's nothing found in docs or web
 
 ### Docs
