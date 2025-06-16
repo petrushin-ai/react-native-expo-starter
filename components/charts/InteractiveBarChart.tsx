@@ -40,18 +40,19 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
 
     // Better responsive calculation with grid-based approach
     const responsiveCalculations = () => {
-        const baseMargins = 32; // Total horizontal margins (16px each side)
-        const cardPadding = 40; // Card internal padding (20px each side)
+        const baseMargins = 20; // Reduced from 32px - Total horizontal margins (10px each side)
+        const cardPadding = 24; // Reduced from 40px - Card internal padding (12px each side)
         const availableWidth = screenWidth - baseMargins - cardPadding;
 
-        // Calculate optimal spacing for 12 months
-        const minBarWidth = 16;
-        const optimalBarWidth = Math.max(minBarWidth, Math.floor((availableWidth - 120) / data.length)); // Reserve 120px for padding
+        // Calculate optimal spacing for 12 months with more aggressive space usage
+        const minBarWidth = 18; // Increased minimum bar width
+        const reservedPadding = 80; // Reduced from 120px for chart padding
+        const optimalBarWidth = Math.max(minBarWidth, Math.floor((availableWidth - reservedPadding) / data.length));
 
         return {
             containerWidth: availableWidth,
             barWidth: optimalBarWidth,
-            spacing: Math.max(4, Math.floor((availableWidth - (optimalBarWidth * data.length)) / (data.length + 1))),
+            spacing: Math.max(2, Math.floor((availableWidth - (optimalBarWidth * data.length)) / (data.length + 1))), // Reduced min spacing
         };
     };
 
@@ -137,21 +138,21 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
         }
     }, [isActive, state.x.value, data, onBarPress]);
 
-    // Default configuration with improved responsive padding
+    // Default configuration with optimized space usage
     const defaultConfig = {
         height: 220,
-        // Better responsive padding that ensures all labels show
+        // Minimal responsive padding for maximum chart space
         padding: {
-            left: Math.max(20, responsiveDims.spacing),
-            right: Math.max(20, responsiveDims.spacing),
-            top: 40,
-            bottom: 20
+            left: Math.max(12, responsiveDims.spacing), // Reduced from 20
+            right: Math.max(12, responsiveDims.spacing), // Reduced from 20
+            top: 30, // Reduced from 40
+            bottom: 16 // Reduced from 20
         },
-        // Improved domain padding for all 12 months
+        // Minimal domain padding for maximum bar space
         domainPadding: {
-            left: Math.max(15, responsiveDims.spacing / 2),
-            right: Math.max(15, responsiveDims.spacing / 2),
-            top: 40,
+            left: Math.max(8, responsiveDims.spacing / 2), // Reduced from 15
+            right: Math.max(8, responsiveDims.spacing / 2), // Reduced from 15
+            top: 30, // Reduced from 40
             bottom: 0
         },
         barColor: Colors[theme].tint || '#177AD5',
@@ -254,21 +255,21 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
 
     const styles = StyleSheet.create({
         container: {
-            margin: 16,
-            padding: 20,
+            margin: 10, // Reduced from 16px
+            padding: 12, // Reduced from 20px
             borderRadius: 16,
             backgroundColor: Colors[theme].card,
             alignItems: 'center',
-            // Ensure container takes full available width
-            width: screenWidth - 32,
+            // Ensure container takes full available width with minimal margins
+            width: screenWidth - 20, // Reduced from 32px
             alignSelf: 'center',
         },
         title: {
-            marginBottom: 4,
+            marginBottom: 2, // Reduced from 4px
             textAlign: 'center',
         },
         description: {
-            marginBottom: 16,
+            marginBottom: 10, // Reduced from 16px
             textAlign: 'center',
             opacity: 0.7,
             fontSize: 12,
@@ -281,8 +282,8 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             overflow: 'visible',
         },
         selectionInfo: {
-            marginTop: 12,
-            padding: 8,
+            marginTop: 8, // Reduced from 12px
+            padding: 6, // Reduced from 8px
             borderRadius: 8,
             backgroundColor: Colors[theme].surface,
         },
@@ -293,17 +294,17 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
         tooltip: {
             position: 'absolute',
             backgroundColor: Colors[theme].tint || '#177AD5',
-            paddingHorizontal: 12,
-            paddingVertical: 6,
-            borderRadius: 15,
+            paddingHorizontal: 10, // Reduced from 12px
+            paddingVertical: 5, // Reduced from 6px
+            borderRadius: 12, // Reduced from 15px
             alignItems: 'center',
             justifyContent: 'center',
-            minWidth: 50,
+            minWidth: 45, // Reduced from 50px
             zIndex: 1000,
         },
         tooltipText: {
             color: '#ffffff',
-            fontSize: 14,
+            fontSize: 13, // Reduced from 14px
             fontWeight: '500',
             textAlign: 'center',
         },

@@ -90,8 +90,10 @@ const createBarChartConfig = (theme: ChartTheme): BarChartConfig => ({
         topLeft: 6,
         topRight: 6,
     },
-    domainPadding: { left: 20, right: 20, top: 30 },
-    padding: { left: 16, right: 16, top: 20, bottom: 20 },
+    // Minimal domain padding for maximum bar space
+    domainPadding: { left: 12, right: 12, top: 25 },
+    // Minimal padding that still shows all content
+    padding: { left: 10, right: 10, top: 15, bottom: 15 },
 });
 
 const createLineChartConfig = (theme: ChartTheme): LineChartConfig => ({
