@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
-import { HapticTab } from '@/components/HapticTab';
+import { AnimatedTabButton } from '@/components/ui/AnimatedTabButton';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -17,20 +17,25 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         tabBarInactiveTintColor: Colors[colorScheme ?? 'light'].tabIconDefault,
+        tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
+        },
         headerShown: false,
-        tabBarButton: HapticTab,
+        tabBarButton: AnimatedTabButton,
         tabBarStyle: Platform.select({
           ios: {
             // Use solid background on iOS for better theme support
             backgroundColor: tabBarBackgroundColor,
             paddingTop: 8,
-            height: 88, // Increase height to accommodate the extra padding
+            height: 95, // Increased height for labels and better tap targets
           },
           default: {
             // Use solid background color for Android and web
             backgroundColor: tabBarBackgroundColor,
             paddingTop: 8,
-            height: 68, // Increase height to accommodate the extra padding
+            height: 75, // Increased height for labels and better tap targets
           },
         }),
       }}>
