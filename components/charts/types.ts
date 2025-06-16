@@ -52,6 +52,7 @@ export interface VictoryBarChartConfig {
         labelColor?: string;
         lineColor?: string;
         lineWidth?: number;
+        tickCount?: number;
         formatXLabel?: (value: any) => string;
     };
     yAxisConfig?: {
