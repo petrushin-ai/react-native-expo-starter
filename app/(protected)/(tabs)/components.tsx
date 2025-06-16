@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/Button';
+import { DarkModePreview } from '@/components/ui/DarkModePreview';
 import ExpandableView from '@/components/ui/ExpandableView';
 import { Input } from '@/components/ui/Input';
 import { LottieAnimation, LottieView } from '@/components/ui/LottieAnimation';
@@ -26,7 +27,6 @@ export default function ComponentsScreen() {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [switchValue, setSwitchValue] = useState(false);
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-    const [darkModeEnabled, setDarkModeEnabled] = useState(isDark);
     const [lottieAutoPlay, setLottieAutoPlay] = useState(true);
     const [lottieLoop, setLottieLoop] = useState(true);
 
@@ -306,25 +306,18 @@ export default function ComponentsScreen() {
 
                             <View style={styles.switchRow}>
                                 <Text style={[styles.switchLabel, isDark && styles.switchLabelDark]}>
-                                    Enable Notifications
+                                    Notifications
                                 </Text>
                                 <Switch
                                     value={notificationsEnabled}
                                     onValueChange={setNotificationsEnabled}
                                 />
                             </View>
-
-                            <View style={styles.switchRow}>
-                                <Text style={[styles.switchLabel, isDark && styles.switchLabelDark]}>
-                                    Dark Mode Preview
-                                </Text>
-                                <Switch
-                                    value={darkModeEnabled}
-                                    onValueChange={setDarkModeEnabled}
-                                />
-                            </View>
                         </View>
                     </View>
+
+                    {/* Dark Mode Preview Component */}
+                    <DarkModePreview />
 
                     {/* Lottie Animation Component */}
                     <View style={styles.section}>

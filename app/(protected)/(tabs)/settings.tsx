@@ -1,4 +1,5 @@
 import { Switch } from '@/components/ui/Switch';
+import { ThemeSelector } from '@/components/ui/ThemeSelector';
 import {
     PermissionConfig,
     permissionDescriptions,
@@ -150,6 +151,9 @@ export default function SettingsScreen() {
         <ScrollView style={[styles.container, isDark && styles.containerDark]}>
             <View style={styles.content}>
                 <Text style={[styles.title, isDark && styles.textDark]}>Settings</Text>
+
+                {/* Theme Section */}
+                <ThemeSelector />
 
                 {/* Push Notifications Section */}
                 {notificationsSupported && (
