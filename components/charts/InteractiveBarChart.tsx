@@ -387,6 +387,7 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             position: 'relative',
             // Ensure proper overflow handling
             overflow: 'visible',
+            backgroundColor: 'transparent',
         },
         selectionInfo: {
             marginTop: 8, // Reduced from 12px
@@ -450,7 +451,7 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
                 </ThemedText>
             )}
 
-            <ThemedView style={styles.chartContainer}>
+            <ThemedView style={[styles.chartContainer, { backgroundColor: 'transparent' }]}>
                 <CartesianChart
                     data={formattedData}
                     xKey="x"
