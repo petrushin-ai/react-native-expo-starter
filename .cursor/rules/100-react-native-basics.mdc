@@ -5,6 +5,8 @@ alwaysApply: true
 ---
 ### General rules
 
+This is a bootstrap application so every function need to be implemented perfectly in accordance of official documentation and APIs
+
 - Always try to fit in conventional architecture, if it's possible do not create additional files
 - If file length exceeding 500 lines consider refactoring it to some helpers \ hooks or anyhow reasonable
 - Create usefull universall functional-style helpers, and if you need new always check against existing ones
