@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.itdept-betterplace.react-native-expo"
+      "bundleIdentifier": "com.itdept-betterplace.react-native-expo",
+      "infoPlist": {
+        "NSUserNotificationUsageDescription": "This app uses notifications to keep you updated with important information."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +21,12 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.itdeptbetterplace.reactnativeexpo"
+      "package": "com.itdeptbetterplace.reactnativeexpo",
+      "permissions": [
+        "NOTIFICATIONS",
+        "VIBRATE"
+      ],
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -34,6 +42,21 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-native-asset",
+        {
+          "assets": []
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#ffffff",
+          "defaultChannel": "default",
+          "sounds": []
         }
       ]
     ],

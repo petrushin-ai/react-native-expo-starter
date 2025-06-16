@@ -11,6 +11,7 @@ alwaysApply: true
 - Carefully consider fixing all typescript and linter errors as it guarantees app starts
 - Follow architectural patterns where it's possible and needed, but consider size of project every time
 - Use Sequential thinking MCP to analyze task and implement action plan sequentially
+- Ensure your solution complies with actual libraries api
 
 ### Do's and DONT's
 
