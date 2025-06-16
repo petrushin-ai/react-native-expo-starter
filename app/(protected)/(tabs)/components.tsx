@@ -31,6 +31,12 @@ export default function ComponentsScreen() {
     const [lottieAutoPlay, setLottieAutoPlay] = useState(true);
     const [lottieLoop, setLottieLoop] = useState(true);
 
+    // Data fetching states
+    const [fetchLoading, setFetchLoading] = useState(false);
+    const [fetchDelay, setFetchDelay] = useState('2');
+    const [fetchedData, setFetchedData] = useState<any>(null);
+    const [fetchExpandableVisible, setFetchExpandableVisible] = useState(false);
+
     // Lottie animation refs for manual control
     const lottieRef1 = useRef<LottieView>(null);
     const lottieRef2 = useRef(null);
@@ -65,6 +71,43 @@ export default function ComponentsScreen() {
         setTimeout(() => setLoading(false), 2000);
     };
 
+    const fetchData = async () => {
+        if (fetchLoading) return;
+
+        setFetchLoading(true);
+        setFetchedData(null);
+        setFetchExpandableVisible(false);
+
+        try {
+            // Apply custom delay
+            const delayMs = Math.max(0, parseInt(fetchDelay) || 0) * 1000;
+            if (delayMs > 0) {
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+            }
+
+            // Fetch data from JSONPlaceholder API
+            const response = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            setFetchedData(data);
+            setFetchExpandableVisible(true);
+        } catch (error) {
+            console.error('Fetch error:', error);
+            setFetchedData({
+                error: true,
+                message: error instanceof Error ? error.message : 'An unknown error occurred',
+                timestamp: new Date().toISOString(),
+            });
+            setFetchExpandableVisible(true);
+        } finally {
+            setFetchLoading(false);
+        }
+    };
+
     const handleRefresh = () => {
         // Reset all demo states
         setModalVisible(false);
@@ -75,6 +118,13 @@ export default function ComponentsScreen() {
         setNotificationsEnabled(true);
         setLottieAutoPlay(true);
         setLottieLoop(true);
+
+        // Reset fetch states
+        setFetchLoading(false);
+        setFetchDelay('2');
+        setFetchedData(null);
+        setFetchExpandableVisible(false);
+
         demoForm.resetForm();
     };
 
@@ -175,6 +225,58 @@ export default function ComponentsScreen() {
                                     onPress={handleLoadingDemo}
                                 />
                                 <Button title="Disabled" disabled />
+                            </View>
+
+                            {/* Enhanced Loading States */}
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Enhanced Loading States
+                            </Text>
+                            <View style={styles.buttonRow}>
+                                <Button
+                                    title={loading ? "Loading..." : "Lottie Load"}
+                                    loading={loading}
+                                    onPress={handleLoadingDemo}
+                                    variant="primary"
+                                />
+                                <Button
+                                    title="Secondary Load"
+                                    loading={loading}
+                                    onPress={handleLoadingDemo}
+                                    variant="secondary"
+                                />
+                            </View>
+                            <View style={styles.buttonRow}>
+                                <Button
+                                    title="Outline Load"
+                                    loading={loading}
+                                    onPress={handleLoadingDemo}
+                                    variant="outline"
+                                />
+                                <Button
+                                    title="Ghost Load"
+                                    loading={loading}
+                                    onPress={handleLoadingDemo}
+                                    variant="ghost"
+                                />
+                            </View>
+
+                            {/* Always Loading Examples */}
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Always Loading (Demo)
+                            </Text>
+                            <View style={styles.buttonRow}>
+                                <Button
+                                    title="Always Loading"
+                                    loading={true}
+                                    onPress={() => { }} // No-op since it's always loading
+                                    variant="primary"
+                                />
+                                <Button
+                                    title="Processing..."
+                                    loading={true}
+                                    onPress={() => { }}
+                                    variant="secondary"
+                                />
                             </View>
                         </View>
                     </View>
@@ -555,6 +657,70 @@ export default function ComponentsScreen() {
                             </View>
                         </View>
                     </View>
+
+                    {/* Data Fetching Component */}
+                    <View style={styles.section}>
+                        <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+                            Data Fetching
+                        </Text>
+                        <Text style={[styles.description, isDark && styles.descriptionDark]}>
+                            Fetch data from a public API with custom delay and loading states. Features a Lottie spinner button that shows while loading.
+                        </Text>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Fetch Configuration
+                            </Text>
+
+                            {/* Delay Input */}
+                            <Input
+                                label="Delay (seconds)"
+                                placeholder="Enter delay in seconds"
+                                value={fetchDelay}
+                                onChangeText={setFetchDelay}
+                                keyboardType="numeric"
+                            />
+
+                            {/* Fetch Button with Lottie Spinner */}
+                            <View style={styles.fetchButtonContainer}>
+                                <Button
+                                    title={fetchLoading ? "Fetching..." : "Fetch Data"}
+                                    onPress={fetchData}
+                                    loading={fetchLoading}
+                                    variant="primary"
+                                />
+                            </View>
+
+                            {/* Results Expandable View */}
+                            <ExpandableView expanded={fetchExpandableVisible}>
+                                <View style={[styles.fetchResultsContainer, isDark && styles.fetchResultsContainerDark]}>
+                                    <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                        API Response
+                                    </Text>
+                                    {fetchedData && (
+                                        <View style={styles.jsonContainer}>
+                                            <Text style={[styles.jsonText, isDark && styles.jsonTextDark]}>
+                                                {JSON.stringify(fetchedData, null, 2)}
+                                            </Text>
+                                        </View>
+                                    )}
+                                    {fetchedData?.error && (
+                                        <View style={[styles.errorContainer, isDark && styles.errorContainerDark]}>
+                                            <Ionicons
+                                                name="alert-circle"
+                                                size={20}
+                                                color={isDark ? '#F87171' : '#EF4444'}
+                                                style={styles.errorIcon}
+                                            />
+                                            <Text style={[styles.errorText, isDark && styles.errorTextDark]}>
+                                                Error: {fetchedData.message}
+                                            </Text>
+                                        </View>
+                                    )}
+                                </View>
+                            </ExpandableView>
+                        </View>
+                    </View>
                 </View>
             </ScrollView>
 
@@ -725,5 +891,53 @@ const styles = StyleSheet.create({
     },
     headerButton: {
         padding: 8,
+    },
+    fetchButtonContainer: {
+        marginBottom: 16,
+    },
+    fetchResultsContainer: {
+        backgroundColor: '#F3F4F6',
+        padding: 16,
+        borderRadius: 8,
+        marginTop: 12,
+    },
+    fetchResultsContainerDark: {
+        backgroundColor: '#1F2937',
+    },
+    jsonContainer: {
+        marginTop: 12,
+    },
+    jsonText: {
+        fontSize: 14,
+        color: '#374151',
+    },
+    jsonTextDark: {
+        color: '#D1D5DB',
+    },
+    errorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 12,
+    },
+    errorContainerDark: {
+        backgroundColor: '#1F2937',
+    },
+    errorIcon: {
+        marginRight: 8,
+    },
+    errorText: {
+        fontSize: 14,
+        color: '#374151',
+    },
+    errorTextDark: {
+        color: '#D1D5DB',
+    },
+    variantSubtitle: {
+        fontSize: 14,
+        color: '#6B7280',
+        marginBottom: 12,
+    },
+    variantSubtitleDark: {
+        color: '#9CA3AF',
     },
 }); 
