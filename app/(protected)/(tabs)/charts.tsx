@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { Dimensions, ScrollView, StatusBar, TouchableOpacity, useColorScheme } from 'react-native';
+import { Dimensions, ScrollView, StatusBar, StyleSheet, TouchableOpacity } from 'react-native';
 
 import {
     GestureLineChart,
@@ -19,6 +19,7 @@ import {
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Modal } from '@/components/ui/Modal';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 // Get screen dimensions for responsive charts
 const { width: screenWidth } = Dimensions.get('window');
@@ -127,7 +128,6 @@ const createPieChartConfig = (theme: ChartTheme): PieChartConfig => {
 
 export default function ChartsScreen() {
     const colorScheme = useColorScheme();
-    const theme: ChartTheme = colorScheme ?? 'light';
     const isDark = colorScheme === 'dark';
 
     // Chart interaction state
@@ -139,14 +139,14 @@ export default function ChartsScreen() {
     const [modalVisible, setModalVisible] = useState(false);
 
     // Generate data with theme awareness and refresh key for forcing regeneration
-    const barData = useMemo(() => generateBarChartData(theme), [theme, refreshKey]);
+    const barData = useMemo(() => generateBarChartData(colorScheme), [colorScheme, refreshKey]);
     const lineData = useMemo(() => generateLineChartData(), [refreshKey]);
-    const pieData = useMemo(() => generatePieChartData(theme), [theme, refreshKey]);
+    const pieData = useMemo(() => generatePieChartData(colorScheme), [colorScheme, refreshKey]);
 
     // Create configurations
-    const barConfig = useMemo(() => createBarChartConfig(theme), [theme]);
-    const lineConfig = useMemo(() => createLineChartConfig(theme), [theme]);
-    const pieConfig = useMemo(() => createPieChartConfig(theme), [theme]);
+    const barConfig = useMemo(() => createBarChartConfig(colorScheme), [colorScheme]);
+    const lineConfig = useMemo(() => createLineChartConfig(colorScheme), [colorScheme]);
+    const pieConfig = useMemo(() => createPieChartConfig(colorScheme), [colorScheme]);
 
     // Enhanced event handlers with real-time selection updates
     const handleBarPress = (item: BarDataItem, index: number) => {
@@ -224,7 +224,7 @@ export default function ChartsScreen() {
                 barStyle={isDark ? 'light-content' : 'dark-content'}
                 backgroundColor={isDark ? '#111827' : '#F9FAFB'}
             />
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView showsVerticalScrollIndicator={false} style={[styles.container, isDark && styles.containerDark]}>
                 <ThemedView style={styles.header}>
                     <ThemedText type="title" style={styles.title}>
                         Interactive Charts 2025
@@ -240,7 +240,7 @@ export default function ChartsScreen() {
                     config={barConfig}
                     title="Sales Performance Dashboard"
                     description="Drag to see real-time selection • Enhanced tooltips • Currency formatting"
-                    theme={theme}
+                    theme={colorScheme}
                     onBarPress={handleBarPress}
                     selectedIndex={selectedBarIndex}
                     showSelectionInfo={true}
@@ -248,7 +248,7 @@ export default function ChartsScreen() {
                     tooltipConfig={{
                         currencySymbol: '$',
                         currencyPosition: 'before',
-                        backgroundColor: theme === 'dark' ? '#1F2937' : '#3B82F6',
+                        backgroundColor: isDark ? '#1F2937' : '#3B82F6',
                         textColor: '#ffffff',
                         borderRadius: 12,
                         fontSize: 16,
@@ -267,7 +267,7 @@ export default function ChartsScreen() {
                     config={lineConfig}
                     title="Performance Trends"
                     description="Area chart • Smooth curves • Interactive data points"
-                    theme={theme}
+                    theme={colorScheme}
                     onDataPointPress={handleLineDataPointPress}
                     showDataPointsToggle={true}
                     initialShowDataPoints={true}
@@ -279,7 +279,7 @@ export default function ChartsScreen() {
                     config={pieConfig}
                     title="Market Distribution"
                     description="Donut chart • Touch selection • Animated focus"
-                    theme={theme}
+                    theme={colorScheme}
                     onSlicePress={handlePieSlicePress}
                     selectedIndex={selectedPieIndex}
                     showLegend={true}
@@ -295,7 +295,7 @@ export default function ChartsScreen() {
                     data={lineData}
                     title="Simple Line Chart"
                     description="No area fill • Straight lines • Clean design"
-                    theme={theme}
+                    theme={colorScheme}
                     onDataPointPress={(item: LineDataItem, index: number) => {
                         console.log('Simple line data point pressed:', item.label, item.value);
                     }}
@@ -315,7 +315,14 @@ export default function ChartsScreen() {
     );
 }
 
-const styles = {
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#F9FAFB',
+    },
+    containerDark: {
+        backgroundColor: '#111827',
+    },
     header: {
         padding: 20,
         alignItems: 'center' as const,
@@ -332,4 +339,4 @@ const styles = {
     headerButton: {
         padding: 8,
     },
-}; 
+}); 
