@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/Switch';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useFormValidation, validationRules } from '@/hooks/useFormValidation';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Stack } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
     ScrollView,
@@ -64,20 +65,70 @@ export default function ComponentsScreen() {
         setTimeout(() => setLoading(false), 2000);
     };
 
+    const handleRefresh = () => {
+        // Reset all demo states
+        setModalVisible(false);
+        setExpandableVisible(false);
+        setLoading(false);
+        setPasswordVisible(false);
+        setSwitchValue(false);
+        setNotificationsEnabled(true);
+        setLottieAutoPlay(true);
+        setLottieLoop(true);
+        demoForm.resetForm();
+    };
+
+    const handleInfo = () => {
+        setModalVisible(true);
+    };
+
     return (
         <>
+            <Stack.Screen
+                options={{
+                    headerShown: true,
+                    title: 'UI Components',
+                    headerStyle: {
+                        backgroundColor: isDark ? '#111827' : '#F9FAFB',
+                    },
+                    headerTintColor: isDark ? '#F9FAFB' : '#111827',
+                    headerTitleStyle: {
+                        fontWeight: '600',
+                        fontSize: 18,
+                    },
+                    headerShadowVisible: false,
+                    headerLeft: () => (
+                        <TouchableOpacity
+                            onPress={handleRefresh}
+                            style={styles.headerButton}
+                        >
+                            <Ionicons
+                                name="refresh"
+                                size={22}
+                                color={isDark ? '#60A5FA' : '#3B82F6'}
+                            />
+                        </TouchableOpacity>
+                    ),
+                    headerRight: () => (
+                        <TouchableOpacity
+                            onPress={handleInfo}
+                            style={styles.headerButton}
+                        >
+                            <Ionicons
+                                name="information-circle-outline"
+                                size={22}
+                                color={isDark ? '#60A5FA' : '#3B82F6'}
+                            />
+                        </TouchableOpacity>
+                    ),
+                }}
+            />
             <StatusBar
                 barStyle={isDark ? 'light-content' : 'dark-content'}
                 backgroundColor={isDark ? '#111827' : '#F9FAFB'}
             />
             <ScrollView style={[styles.container, isDark && styles.containerDark]}>
                 <View style={styles.content}>
-                    <Text style={[styles.title, isDark && styles.titleDark]}>
-                        UI Components
-                    </Text>
-                    <Text style={[styles.subtitle, isDark && styles.subtitleDark]}>
-                        Showcase of all available UI components in the design system
-                    </Text>
 
                     {/* Button Components */}
                     <View style={styles.section}>
@@ -510,11 +561,11 @@ export default function ComponentsScreen() {
             <Modal
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
-                title="Demo Modal"
-                message="This is a demonstration of the modal component. It can display content, handle user actions, and supports both light and dark themes."
+                title="UI Components Showcase"
+                message="This page demonstrates all available UI components in the design system. Use the refresh button in the header to reset all demo states, or interact with each component to see their different states and functionality."
                 type="info"
                 primaryButtonText="Got it"
-                secondaryButtonText="Cancel"
+                secondaryButtonText="Close"
             />
         </>
     );
@@ -671,5 +722,8 @@ const styles = StyleSheet.create({
     lottieButtons: {
         flexDirection: 'row',
         gap: 8,
+    },
+    headerButton: {
+        padding: 8,
     },
 }); 
