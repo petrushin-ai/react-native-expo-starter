@@ -5,6 +5,7 @@ import { Modal } from '@/components/ui/Modal';
 import { useSession } from '@/contexts/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useFormValidation, validationRules } from '@/hooks/useFormValidation';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Redirect, router } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
@@ -258,29 +259,45 @@ export default function SignIn() {
                                         error={currentForm.getFieldError('password')}
                                         touched={currentForm.formState.password?.touched || false}
                                         variant="default"
+                                        style={styles.passwordInput}
                                     />
                                     <TouchableOpacity
                                         style={styles.passwordToggle}
                                         onPress={() => setShowPassword(!showPassword)}
                                     >
-                                        <Text style={[styles.passwordToggleText, isDark && styles.passwordToggleTextDark]}>
-                                            {showPassword ? '🙈' : '👁️'}
-                                        </Text>
+                                        <Ionicons
+                                            name={showPassword ? 'eye-off' : 'eye'}
+                                            size={20}
+                                            color={isDark ? '#9CA3AF' : '#6B7280'}
+                                        />
                                     </TouchableOpacity>
                                 </View>
 
                                 {/* Animated Confirm Password Field */}
                                 <ExpandableView expanded={activeTab === 'signup'}>
-                                    <Input
-                                        {...signupForm.getFieldProps('confirmPassword')}
-                                        label="Confirm Password"
-                                        placeholder="Confirm your password"
-                                        secureTextEntry={!showPassword}
-                                        editable={!isLoading}
-                                        error={getConfirmPasswordError()}
-                                        touched={signupForm.formState.confirmPassword?.touched || false}
-                                        variant="default"
-                                    />
+                                    <View style={styles.passwordContainer}>
+                                        <Input
+                                            {...signupForm.getFieldProps('confirmPassword')}
+                                            label="Confirm Password"
+                                            placeholder="Confirm your password"
+                                            secureTextEntry={!showPassword}
+                                            editable={!isLoading}
+                                            error={getConfirmPasswordError()}
+                                            touched={signupForm.formState.confirmPassword?.touched || false}
+                                            variant="default"
+                                            style={styles.passwordInput}
+                                        />
+                                        <TouchableOpacity
+                                            style={styles.passwordToggle}
+                                            onPress={() => setShowPassword(!showPassword)}
+                                        >
+                                            <Ionicons
+                                                name={showPassword ? 'eye-off' : 'eye'}
+                                                size={20}
+                                                color={isDark ? '#9CA3AF' : '#6B7280'}
+                                            />
+                                        </TouchableOpacity>
+                                    </View>
                                 </ExpandableView>
 
                                 {/* Animated Login Options */}
@@ -469,17 +486,17 @@ const styles = StyleSheet.create({
     passwordContainer: {
         position: 'relative',
     },
+    passwordInput: {
+        paddingRight: 50, // Make room for the icon
+    },
     passwordToggle: {
         position: 'absolute',
-        right: 16,
-        top: 38,
-        padding: 8,
-    },
-    passwordToggleText: {
-        fontSize: 16,
-    },
-    passwordToggleTextDark: {
-        opacity: 0.8,
+        right: 12,
+        top: 37, // Adjusted to account for label height
+        width: 24,
+        height: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     loginOptions: {
         flexDirection: 'row',
