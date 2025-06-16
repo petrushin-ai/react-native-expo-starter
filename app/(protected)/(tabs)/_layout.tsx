@@ -23,10 +23,14 @@ export default function TabLayout() {
           ios: {
             // Use solid background on iOS for better theme support
             backgroundColor: tabBarBackgroundColor,
+            paddingTop: 8,
+            height: 88, // Increase height to accommodate the extra padding
           },
           default: {
             // Use solid background color for Android and web
             backgroundColor: tabBarBackgroundColor,
+            paddingTop: 8,
+            height: 68, // Increase height to accommodate the extra padding
           },
         }),
       }}>
