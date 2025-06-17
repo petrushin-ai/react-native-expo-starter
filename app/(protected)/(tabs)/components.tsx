@@ -6,6 +6,7 @@ import ExpandableView from '@/components/ui/ExpandableView';
 import { Input } from '@/components/ui/Input';
 import { LottieAnimation, LottieView } from '@/components/ui/LottieAnimation';
 import { Modal } from '@/components/ui/Modal';
+import { PhoneInput, isValidPhoneNumber, type ICountry } from '@/components/ui/PhoneInput';
 import { Switch } from '@/components/ui/Switch';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useFormValidation, validationRules } from '@/hooks/useFormValidation';
@@ -49,6 +50,16 @@ export default function ComponentsScreen() {
     const [multiDropdownValue, setMultiDropdownValue] = useState<string[]>([]);
     const [countryValue, setCountryValue] = useState<string>('');
     const [categoryValue, setCategoryValue] = useState<string>('');
+
+    // Phone Input states
+    const [phoneValue, setPhoneValue] = useState<string>('');
+    const [selectedPhoneCountry, setSelectedPhoneCountry] = useState<ICountry | null>(null);
+    const [phoneValue2, setPhoneValue2] = useState<string>('');
+    const [selectedPhoneCountry2, setSelectedPhoneCountry2] = useState<ICountry | null>(null);
+    const [phoneValue3, setPhoneValue3] = useState<string>('');
+    const [selectedPhoneCountry3, setSelectedPhoneCountry3] = useState<ICountry | null>(null);
+    const [phoneValue4, setPhoneValue4] = useState<string>('');
+    const [selectedPhoneCountry4, setSelectedPhoneCountry4] = useState<ICountry | null>(null);
 
     // Dropdown data
     const basicOptions: DropdownItem[] = [
@@ -293,6 +304,16 @@ export default function ComponentsScreen() {
         setMultiDropdownValue([]);
         setCountryValue('');
         setCategoryValue('');
+
+        // Reset Phone Input states
+        setPhoneValue('');
+        setSelectedPhoneCountry(null);
+        setPhoneValue2('');
+        setSelectedPhoneCountry2(null);
+        setPhoneValue3('');
+        setSelectedPhoneCountry3(null);
+        setPhoneValue4('');
+        setSelectedPhoneCountry4(null);
 
         demoForm.resetForm();
     };
@@ -1088,6 +1109,160 @@ export default function ComponentsScreen() {
                                 </View>
                             </ExpandableView>
                         </View>
+                    </View>
+
+                    {/* Phone Input Component */}
+                    <View style={styles.section}>
+                        <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+                            Phone Input
+                        </Text>
+                        <Text style={[styles.description, isDark && styles.descriptionDark]}>
+                            International phone number input with country selection, formatting, and validation. Features flag icons, automatic country detection, and theme-aware styling.
+                        </Text>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Basic Usage
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Standard phone input with country selection and validation
+                            </Text>
+
+                            <PhoneInput
+                                label="Phone Number"
+                                placeholder="Enter your phone number"
+                                value={phoneValue}
+                                onChangePhoneNumber={setPhoneValue}
+                                selectedCountry={selectedPhoneCountry}
+                                onChangeSelectedCountry={setSelectedPhoneCountry}
+                                defaultCountry="US"
+                            />
+
+                            {(phoneValue || selectedPhoneCountry) && (
+                                <View style={[styles.expandableContent, isDark && styles.expandableContentDark]}>
+                                    <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                        Country: {selectedPhoneCountry?.name?.en || 'Not selected'}
+                                    </Text>
+                                    <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                        Phone: {selectedPhoneCountry?.callingCode || ''} {phoneValue}
+                                    </Text>
+                                    <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                        Valid: {selectedPhoneCountry && phoneValue ?
+                                            isValidPhoneNumber(phoneValue, selectedPhoneCountry) ? 'Yes' : 'No'
+                                            : 'Unknown'}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Error State
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Phone input with validation error
+                            </Text>
+
+                            <PhoneInput
+                                label="Phone Number (Required)"
+                                placeholder="Enter a valid phone number"
+                                value={phoneValue2}
+                                onChangePhoneNumber={setPhoneValue2}
+                                selectedCountry={selectedPhoneCountry2}
+                                onChangeSelectedCountry={setSelectedPhoneCountry2}
+                                error="Please enter a valid phone number"
+                                touched={true}
+                                defaultCountry="GB"
+                            />
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Pre-filled Value
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Phone input with default value in E.164 format
+                            </Text>
+
+                            <PhoneInput
+                                label="Contact Number"
+                                placeholder="Phone number"
+                                value={phoneValue3}
+                                onChangePhoneNumber={setPhoneValue3}
+                                selectedCountry={selectedPhoneCountry3}
+                                onChangeSelectedCountry={setSelectedPhoneCountry3}
+                                defaultValue="+1234567890"
+                                defaultCountry="CA"
+                            />
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Limited Countries
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Show only specific countries with popular countries at top
+                            </Text>
+
+                            <PhoneInput
+                                label="Business Phone"
+                                placeholder="Select country and enter number"
+                                value={phoneValue4}
+                                onChangePhoneNumber={setPhoneValue4}
+                                selectedCountry={selectedPhoneCountry4}
+                                onChangeSelectedCountry={setSelectedPhoneCountry4}
+                                showOnly={['US', 'CA', 'GB', 'AU', 'DE', 'FR', 'JP', 'BR']}
+                                popularCountries={['US', 'CA', 'GB']}
+                                defaultCountry="US"
+                                language="en"
+                            />
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Disabled State
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Phone input in disabled state
+                            </Text>
+
+                            <PhoneInput
+                                label="Disabled Phone Input"
+                                placeholder="This input is disabled"
+                                value="+1 (555) 123-4567"
+                                disabled={true}
+                                defaultCountry="US"
+                            />
+                        </View>
+
+                        {/* Show all phone input values */}
+                        {(phoneValue || phoneValue2 || phoneValue3 || phoneValue4) && (
+                            <View style={[styles.expandableContent, isDark && styles.expandableContentDark]}>
+                                <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                    All Phone Numbers
+                                </Text>
+                                {phoneValue && (
+                                    <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                        Basic: {selectedPhoneCountry?.callingCode || ''} {phoneValue}
+                                    </Text>
+                                )}
+                                {phoneValue2 && (
+                                    <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                        Error Demo: {selectedPhoneCountry2?.callingCode || ''} {phoneValue2}
+                                    </Text>
+                                )}
+                                {phoneValue3 && (
+                                    <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                        Pre-filled: {selectedPhoneCountry3?.callingCode || ''} {phoneValue3}
+                                    </Text>
+                                )}
+                                {phoneValue4 && (
+                                    <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                        Limited: {selectedPhoneCountry4?.callingCode || ''} {phoneValue4}
+                                    </Text>
+                                )}
+                            </View>
+                        )}
                     </View>
                 </View>
             </ScrollView>
