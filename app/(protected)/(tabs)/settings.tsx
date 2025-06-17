@@ -1,3 +1,4 @@
+import { BurgerMenuButton } from '@/components/ui/BurgerMenuButton';
 import { Switch } from '@/components/ui/Switch';
 import { ThemeSelector } from '@/components/ui/ThemeSelector';
 import {
@@ -11,6 +12,8 @@ import { useNotificationContext } from '@/contexts/NotificationContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useStartupPermissions } from '@/hooks/useStartupPermissions';
+import { useDrawerStatus } from '@react-navigation/drawer';
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
@@ -27,6 +30,9 @@ import {
 export default function SettingsScreen() {
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
+    const navigation = useNavigation();
+    const drawerStatus = useDrawerStatus();
+    const isDrawerOpen = drawerStatus === 'open';
     const {
         expoPushToken,
         devicePushToken,
@@ -67,6 +73,14 @@ export default function SettingsScreen() {
         // Check again when app becomes active (handled by contexts, but good to be explicit)
         // No more frequent polling here since contexts handle it efficiently
     }, [checkPermissions, checkNotificationPermissions]);
+
+    const handleBurgerPress = () => {
+        if (isDrawerOpen) {
+            (navigation as any).closeDrawer();
+        } else {
+            (navigation as any).openDrawer();
+        }
+    };
 
     const handleRequestNotificationPermission = async () => {
         setIsRequestingPermission(true);
@@ -148,168 +162,175 @@ export default function SettingsScreen() {
         .filter(key => permissionsConfig[key]);
 
     return (
-        <ScrollView style={[styles.container, isDark && styles.containerDark]}>
-            <View style={styles.content}>
-                <Text style={[styles.title, isDark && styles.textDark]}>Settings</Text>
+        <>
+            <ScrollView style={[styles.container, isDark && styles.containerDark]}>
+                <View style={styles.content}>
+                    <Text style={[styles.title, isDark && styles.textDark]}>Settings</Text>
 
-                {/* Theme Section */}
-                <ThemeSelector />
+                    {/* Theme Section */}
+                    <ThemeSelector />
 
-                {/* Push Notifications Section */}
-                {notificationsSupported && (
-                    <View style={styles.section}>
-                        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
-                            Push Notifications
-                        </Text>
-
-                        {notificationPermissionStatus !== 'granted' ? (
-                            <>
-                                <Text style={[styles.permissionDescription, isDark && styles.textDark, styles.notificationPrompt]}>
-                                    Enable push notifications to receive important updates and reminders.
-                                </Text>
-
-                                <TouchableOpacity
-                                    style={[styles.enableButton, isRequestingPermission && styles.enableButtonDisabled]}
-                                    onPress={handleRequestNotificationPermission}
-                                    disabled={isRequestingPermission || isLoadingToken}
-                                >
-                                    {isRequestingPermission || isLoadingToken ? (
-                                        <ActivityIndicator size="small" color="#fff" />
-                                    ) : (
-                                        <Text style={styles.enableButtonText}>Enable Notifications</Text>
-                                    )}
-                                </TouchableOpacity>
-                            </>
-                        ) : (
-                            <>
-                                <View style={styles.notificationStatus}>
-                                    <Text style={[styles.statusText, isDark && styles.textDark]}>
-                                        ✓ Notifications Enabled
-                                    </Text>
-                                    <TouchableOpacity onPress={() => {
-                                        if (Platform.OS === 'ios') {
-                                            Linking.openURL('app-settings:');
-                                        } else {
-                                            Linking.openSettings();
-                                        }
-                                    }}>
-                                        <Text style={[styles.manageText, isDark && styles.manageDark]}>
-                                            Manage in Settings
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-
-                                <TouchableOpacity
-                                    style={[styles.testButton, isSendingTest && styles.testButtonDisabled]}
-                                    onPress={handleSendTestNotification}
-                                    disabled={isSendingTest}
-                                >
-                                    {isSendingTest ? (
-                                        <ActivityIndicator size="small" color="#2563EB" />
-                                    ) : (
-                                        <Text style={[styles.testButtonText, isDark && styles.testButtonTextDark]}>
-                                            Send Test Notification
-                                        </Text>
-                                    )}
-                                </TouchableOpacity>
-
-                                {permissionsDebugMode && expoPushToken && (
-                                    <View style={[styles.debugSection, isDark && styles.debugSectionDark]}>
-                                        <Text style={[styles.debugTitle, isDark && styles.textDark]}>
-                                            Expo Push Token:
-                                        </Text>
-                                        <Text style={[styles.debugText, isDark && styles.textDark]}>
-                                            {expoPushToken}
-                                        </Text>
-                                    </View>
-                                )}
-
-                                {isLoadingToken ? (
-                                    <View style={styles.loadingContainer}>
-                                        <ActivityIndicator size="small" color="#2563EB" />
-                                        <Text style={[styles.loadingText, isDark && styles.textDark]}>
-                                            Generating push token...
-                                        </Text>
-                                    </View>
-                                ) : null}
-                            </>
-                        )}
-
-                        {tokenError && (
-                            <Text style={[styles.errorText, isDark && styles.errorTextDark]}>
-                                Error: {tokenError}
+                    {/* Push Notifications Section */}
+                    {notificationsSupported && (
+                        <View style={styles.section}>
+                            <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
+                                Push Notifications
                             </Text>
-                        )}
 
-                        {permissionsDebugMode && devicePushToken && (
-                            <View style={[styles.debugSection, isDark && styles.debugSectionDark]}>
-                                <Text style={[styles.debugTitle, isDark && styles.textDark]}>
-                                    Device Token:
-                                </Text>
-                                <Text style={[styles.debugText, isDark && styles.textDark]}>
-                                    {devicePushToken}
-                                </Text>
-                            </View>
-                        )}
-                    </View>
-                )}
+                            {notificationPermissionStatus !== 'granted' ? (
+                                <>
+                                    <Text style={[styles.permissionDescription, isDark && styles.textDark, styles.notificationPrompt]}>
+                                        Enable push notifications to receive important updates and reminders.
+                                    </Text>
 
-                {/* Other Permissions Section */}
-                {enabledPermissions.length > 0 && (
-                    <View style={styles.section}>
-                        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
-                            App Permissions
-                        </Text>
-
-                        {permissionsLoading ? (
-                            <ActivityIndicator size="small" color="#2563EB" />
-                        ) : (
-                            <>
-                                {enabledPermissions.map((permission) => (
-                                    <View key={permission} style={styles.permissionRow}>
-                                        <View style={styles.permissionInfo}>
-                                            <Text style={[styles.permissionName, isDark && styles.textDark]}>
-                                                {permissionDisplayNames[permission]}
+                                    <TouchableOpacity
+                                        style={[styles.enableButton, isRequestingPermission && styles.enableButtonDisabled]}
+                                        onPress={handleRequestNotificationPermission}
+                                        disabled={isRequestingPermission || isLoadingToken}
+                                    >
+                                        {isRequestingPermission || isLoadingToken ? (
+                                            <ActivityIndicator size="small" color="#fff" />
+                                        ) : (
+                                            <Text style={styles.enableButtonText}>Enable Notifications</Text>
+                                        )}
+                                    </TouchableOpacity>
+                                </>
+                            ) : (
+                                <>
+                                    <View style={styles.notificationStatus}>
+                                        <Text style={[styles.statusText, isDark && styles.textDark]}>
+                                            ✓ Notifications Enabled
+                                        </Text>
+                                        <TouchableOpacity onPress={() => {
+                                            if (Platform.OS === 'ios') {
+                                                Linking.openURL('app-settings:');
+                                            } else {
+                                                Linking.openSettings();
+                                            }
+                                        }}>
+                                            <Text style={[styles.manageText, isDark && styles.manageDark]}>
+                                                Manage in Settings
                                             </Text>
-                                            <Text style={[styles.permissionDescription, isDark && styles.textDark]}>
-                                                {permissionDescriptions[permission]}
+                                        </TouchableOpacity>
+                                    </View>
+
+                                    <TouchableOpacity
+                                        style={[styles.testButton, isSendingTest && styles.testButtonDisabled]}
+                                        onPress={handleSendTestNotification}
+                                        disabled={isSendingTest}
+                                    >
+                                        {isSendingTest ? (
+                                            <ActivityIndicator size="small" color="#2563EB" />
+                                        ) : (
+                                            <Text style={[styles.testButtonText, isDark && styles.testButtonTextDark]}>
+                                                Send Test Notification
                                             </Text>
-                                            {permissionsDebugMode && (
-                                                <Text style={[styles.debugInfo, isDark && styles.textDark]}>
-                                                    Status: {permissions[permission]}
-                                                </Text>
-                                            )}
+                                        )}
+                                    </TouchableOpacity>
+
+                                    {permissionsDebugMode && expoPushToken && (
+                                        <View style={[styles.debugSection, isDark && styles.debugSectionDark]}>
+                                            <Text style={[styles.debugTitle, isDark && styles.textDark]}>
+                                                Expo Push Token:
+                                            </Text>
+                                            <Text style={[styles.debugText, isDark && styles.textDark]}>
+                                                {expoPushToken}
+                                            </Text>
                                         </View>
-                                        <Switch
-                                            value={permissions[permission] === 'granted'}
-                                            onValueChange={() => handlePermissionToggle(permission)}
-                                        />
-                                    </View>
-                                ))}
+                                    )}
 
-                                {permissionsDebugMode && (
-                                    <View style={styles.debugActions}>
-                                        <TouchableOpacity
-                                            style={styles.resetButton}
-                                            onPress={resetPermissions}
-                                        >
-                                            <Text style={styles.resetButtonText}>Reset All Permissions</Text>
-                                        </TouchableOpacity>
+                                    {isLoadingToken ? (
+                                        <View style={styles.loadingContainer}>
+                                            <ActivityIndicator size="small" color="#2563EB" />
+                                            <Text style={[styles.loadingText, isDark && styles.textDark]}>
+                                                Generating push token...
+                                            </Text>
+                                        </View>
+                                    ) : null}
+                                </>
+                            )}
 
-                                        <TouchableOpacity
-                                            style={styles.recheckButton}
-                                            onPress={handleRecheckPermissions}
-                                        >
-                                            <Text style={styles.recheckButtonText}>Recheck Permissions</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                )}
-                            </>
-                        )}
-                    </View>
-                )}
-            </View>
-        </ScrollView>
+                            {tokenError && (
+                                <Text style={[styles.errorText, isDark && styles.errorTextDark]}>
+                                    Error: {tokenError}
+                                </Text>
+                            )}
+
+                            {permissionsDebugMode && devicePushToken && (
+                                <View style={[styles.debugSection, isDark && styles.debugSectionDark]}>
+                                    <Text style={[styles.debugTitle, isDark && styles.textDark]}>
+                                        Device Token:
+                                    </Text>
+                                    <Text style={[styles.debugText, isDark && styles.textDark]}>
+                                        {devicePushToken}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+                    )}
+
+                    {/* Other Permissions Section */}
+                    {enabledPermissions.length > 0 && (
+                        <View style={styles.section}>
+                            <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
+                                App Permissions
+                            </Text>
+
+                            {permissionsLoading ? (
+                                <ActivityIndicator size="small" color="#2563EB" />
+                            ) : (
+                                <>
+                                    {enabledPermissions.map((permission) => (
+                                        <View key={permission} style={styles.permissionRow}>
+                                            <View style={styles.permissionInfo}>
+                                                <Text style={[styles.permissionName, isDark && styles.textDark]}>
+                                                    {permissionDisplayNames[permission]}
+                                                </Text>
+                                                <Text style={[styles.permissionDescription, isDark && styles.textDark]}>
+                                                    {permissionDescriptions[permission]}
+                                                </Text>
+                                                {permissionsDebugMode && (
+                                                    <Text style={[styles.debugInfo, isDark && styles.textDark]}>
+                                                        Status: {permissions[permission]}
+                                                    </Text>
+                                                )}
+                                            </View>
+                                            <Switch
+                                                value={permissions[permission] === 'granted'}
+                                                onValueChange={() => handlePermissionToggle(permission)}
+                                            />
+                                        </View>
+                                    ))}
+
+                                    {permissionsDebugMode && (
+                                        <View style={styles.debugActions}>
+                                            <TouchableOpacity
+                                                style={styles.resetButton}
+                                                onPress={resetPermissions}
+                                            >
+                                                <Text style={styles.resetButtonText}>Reset All Permissions</Text>
+                                            </TouchableOpacity>
+
+                                            <TouchableOpacity
+                                                style={styles.recheckButton}
+                                                onPress={handleRecheckPermissions}
+                                            >
+                                                <Text style={styles.recheckButtonText}>Recheck Permissions</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    )}
+                                </>
+                            )}
+                        </View>
+                    )}
+                </View>
+            </ScrollView>
+
+            <BurgerMenuButton
+                onPress={handleBurgerPress}
+                isDrawerOpen={isDrawerOpen}
+            />
+        </>
     );
 }
 

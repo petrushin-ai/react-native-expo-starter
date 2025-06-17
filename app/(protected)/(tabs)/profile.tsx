@@ -1,6 +1,9 @@
+import { BurgerMenuButton } from '@/components/ui/BurgerMenuButton';
 import { Modal } from '@/components/ui/Modal';
 import { useSession } from '@/contexts/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useDrawerStatus } from '@react-navigation/drawer';
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
     ScrollView,
@@ -15,6 +18,9 @@ export default function ProfileScreen() {
     const [showSignOutModal, setShowSignOutModal] = useState(false);
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
+    const navigation = useNavigation();
+    const drawerStatus = useDrawerStatus();
+    const isDrawerOpen = drawerStatus === 'open';
 
     const handleSignOut = () => {
         setShowSignOutModal(true);
@@ -27,6 +33,14 @@ export default function ProfileScreen() {
             signOut();
             // Navigation will be handled automatically by the protected route
         }, 100);
+    };
+
+    const handleBurgerPress = () => {
+        if (isDrawerOpen) {
+            (navigation as any).closeDrawer();
+        } else {
+            (navigation as any).openDrawer();
+        }
     };
 
     return (
@@ -75,6 +89,11 @@ export default function ProfileScreen() {
                     )}
                 </View>
             </ScrollView>
+
+            <BurgerMenuButton
+                onPress={handleBurgerPress}
+                isDrawerOpen={isDrawerOpen}
+            />
 
             <Modal
                 visible={showSignOutModal}

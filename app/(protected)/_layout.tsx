@@ -1,12 +1,16 @@
+import { CustomDrawerContent } from '@/components/ui/CustomDrawerContent';
 import { PermissionModal } from '@/components/ui/PermissionModal';
 import { useSession } from '@/contexts/AuthContext';
 import { useStartupPermissions } from '@/hooks/useStartupPermissions';
-import { Redirect, Stack } from 'expo-router';
+import { Redirect } from 'expo-router';
+import { Drawer } from 'expo-router/drawer';
 import React from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function ProtectedLayout() {
     const { session, isLoading, isAuthEnabled } = useSession();
+    const { width } = useWindowDimensions();
     const {
         permissionModal,
         closePermissionModal,
@@ -29,26 +33,35 @@ export default function ProtectedLayout() {
         return <Redirect href="/sign-in" />;
     }
 
-    // Render the protected routes
+    // Render the protected routes with drawer navigation
     return (
         <>
-            <Stack>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                {/* Example: Using native assets for custom back button
-                <Stack.Screen 
-                    name="details" 
-                    options={{
-                        // On iOS, this will use the native asset from the asset catalog
-                        // On Android, you'll need to provide a fallback
-                        headerBackImageSource: { 
-                            uri: "chevron-left", 
-                            width: 24, 
-                            height: 24 
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <Drawer
+                    drawerContent={(props) => <CustomDrawerContent {...props} />}
+                    screenOptions={{
+                        headerShown: false,
+                        drawerPosition: 'right',
+                        drawerType: 'front',
+                        drawerStyle: {
+                            width: width * 0.8, // 80% of screen width
+                            backgroundColor: 'transparent',
                         },
-                    }} 
-                />
-                */}
-            </Stack>
+                        overlayColor: 'rgba(0, 0, 0, 0.4)',
+                        swipeEnabled: true,
+                        swipeEdgeWidth: 50,
+                        swipeMinDistance: 20,
+                    }}
+                >
+                    <Drawer.Screen
+                        name="(tabs)"
+                        options={{
+                            drawerLabel: 'Main',
+                            title: 'Home',
+                        }}
+                    />
+                </Drawer>
+            </GestureHandlerRootView>
 
             <PermissionModal
                 visible={permissionModal.visible}
