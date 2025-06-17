@@ -6,15 +6,11 @@ import { Dimensions, ScrollView, StatusBar, StyleSheet, TouchableOpacity } from 
 import {
     GestureLineChart,
     InteractiveBarChart,
-    InteractivePieChart,
-    SimpleLineChart,
     type BarChartConfig,
     type BarDataItem,
     type ChartTheme,
     type LineChartConfig,
-    type LineDataItem,
-    type PieChartConfig,
-    type PieDataItem
+    type LineDataItem
 } from '@/components/charts';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -58,24 +54,7 @@ const generateLineChartData = (): LineDataItem[] => [
     { value: 95, label: 'Oct' },
 ];
 
-const generatePieChartData = (theme: ChartTheme): PieDataItem[] => {
-    const colors = theme === 'dark'
-        ? ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9']
-        : ['#F44336', '#009688', '#2196F3', '#4CAF50', '#FFC107', '#9C27B0', '#00BCD4', '#FFEB3B', '#673AB7', '#03A9F4'];
 
-    return [
-        { value: 18, color: colors[0], text: '18%' },
-        { value: 15, color: colors[1], text: '15%' },
-        { value: 12, color: colors[2], text: '12%' },
-        { value: 10, color: colors[3], text: '10%' },
-        { value: 9, color: colors[4], text: '9%' },
-        { value: 8, color: colors[5], text: '8%' },
-        { value: 7, color: colors[6], text: '7%' },
-        { value: 6, color: colors[7], text: '6%' },
-        { value: 8, color: colors[8], text: '8%' },
-        { value: 7, color: colors[9], text: '7%' },
-    ];
-};
 
 // Chart configuration factories for Victory Native XL
 const createBarChartConfig = (theme: ChartTheme): BarChartConfig => ({
@@ -113,18 +92,7 @@ const createLineChartConfig = (theme: ChartTheme): LineChartConfig => ({
     spacing: Math.max(18, (safeChartWidth - 60) / 10), // Dynamic spacing based on safe width
 });
 
-const createPieChartConfig = (theme: ChartTheme): PieChartConfig => {
-    const maxRadius = Math.min(safeChartWidth * 0.28, 85); // Scale radius based on safe width
-    return {
-        radius: maxRadius,
-        innerRadius: maxRadius * 0.68, // Maintain proportion
-        isAnimated: true,
-        animationDuration: 1000,
-        sectionAutoFocus: true,
-        shadow: true,
-        shadowColor: theme === 'dark' ? '#000' : '#999',
-    };
-};
+
 
 export default function ChartsScreen() {
     const colorScheme = useColorScheme();
@@ -132,7 +100,6 @@ export default function ChartsScreen() {
 
     // Chart interaction state
     const [selectedBarIndex, setSelectedBarIndex] = useState<number | null>(null);
-    const [selectedPieIndex, setSelectedPieIndex] = useState<number | null>(0);
 
     // Refresh and modal state
     const [refreshKey, setRefreshKey] = useState(0);
@@ -141,12 +108,10 @@ export default function ChartsScreen() {
     // Generate data with theme awareness and refresh key for forcing regeneration
     const barData = useMemo(() => generateBarChartData(colorScheme), [colorScheme, refreshKey]);
     const lineData = useMemo(() => generateLineChartData(), [refreshKey]);
-    const pieData = useMemo(() => generatePieChartData(colorScheme), [colorScheme, refreshKey]);
 
     // Create configurations
     const barConfig = useMemo(() => createBarChartConfig(colorScheme), [colorScheme]);
     const lineConfig = useMemo(() => createLineChartConfig(colorScheme), [colorScheme]);
-    const pieConfig = useMemo(() => createPieChartConfig(colorScheme), [colorScheme]);
 
     // Enhanced event handlers with real-time selection updates
     const handleBarPress = (item: BarDataItem, index: number) => {
@@ -158,16 +123,12 @@ export default function ChartsScreen() {
         console.log('Line data point pressed:', item.label, item.value);
     };
 
-    const handlePieSlicePress = (item: PieDataItem, index: number) => {
-        setSelectedPieIndex(index);
-        console.log('Pie slice pressed:', item.text, item.value);
-    };
+
 
     // Header handlers
     const handleRefresh = () => {
         // Reset chart selection states
         setSelectedBarIndex(null);
-        setSelectedPieIndex(0);
 
         // Force chart data regeneration and restart animations
         setRefreshKey(prev => prev + 1);
@@ -339,40 +300,14 @@ export default function ChartsScreen() {
                     showDataPointTooltip={false}
                 />
 
-                {/* Interactive Pie Chart */}
-                <InteractivePieChart
-                    data={pieData}
-                    config={pieConfig}
-                    title="Market Distribution"
-                    description="Donut chart • Touch selection • Animated focus"
-                    theme={colorScheme}
-                    onSlicePress={handlePieSlicePress}
-                    selectedIndex={selectedPieIndex}
-                    showLegend={true}
-                    centerLabel={{
-                        selectedText: pieData[selectedPieIndex || 0]?.text || 'Select',
-                        selectedSubtext: 'Market Share',
-                        defaultSubtext: 'Tap slice to select',
-                    }}
-                />
 
-                {/* Simple Line Chart */}
-                <SimpleLineChart
-                    data={lineData}
-                    title="Simple Line Chart"
-                    description="No area fill • Straight lines • Clean design"
-                    theme={colorScheme}
-                    onDataPointPress={(item: LineDataItem, index: number) => {
-                        console.log('Simple line data point pressed:', item.label, item.value);
-                    }}
-                />
             </ScrollView>
 
             <Modal
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
                 title="Interactive Charts Showcase"
-                message="This page demonstrates interactive chart components with gesture support, animations, and theme awareness. Features include multiple interpolation types (natural, cardinal, step, linear), configurable data point sizes (3px to 8px), static data point tooltips that hide during dragging, enhanced dynamic tooltips, real-time selection feedback, responsive design, and individual data point toggles for each chart. Use the refresh button to regenerate data and each chart's toggle button to control static data points visibility."
+                message="This page demonstrates interactive chart components with gesture support, animations, and theme awareness. Features include multiple interpolation types (natural, cardinal, step, linear), configurable data point sizes (3px to 8px), static data point tooltips that hide during dragging, enhanced dynamic tooltips, real-time selection feedback, responsive design, and individual data point toggles for line charts. Use the refresh button to regenerate data and each chart's toggle button to control static data points visibility."
                 type="info"
                 primaryButtonText="Got it"
                 secondaryButtonText="Close"

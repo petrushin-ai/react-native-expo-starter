@@ -30,20 +30,7 @@ export interface LineDataItem {
     originalIndex?: number;
 }
 
-export interface PieDataItem {
-    value: number;
-    color?: string;
-    gradientCenterColor?: string;
-    text?: string;
-    textColor?: string;
-    textSize?: number;
-    fontStyle?: 'normal' | 'italic';
-    fontWeight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
-    focused?: boolean;
-    pieInnerComponent?: () => React.ReactNode;
-    labelPosition?: 'onBorder' | 'outward' | 'inward' | 'mid';
-    onPress?: (item: PieDataItem, index: number) => void;
-}
+
 
 // Victory Native XL Chart Configuration Types
 export interface VictoryBarChartConfig {
@@ -128,24 +115,7 @@ export interface LineChartConfig {
     onPress?: (item: LineDataItem, index: number) => void;
 }
 
-export interface PieChartConfig {
-    donut?: boolean;
-    radius?: number;
-    innerRadius?: number;
-    innerCircleColor?: string;
-    showGradient?: boolean;
-    sectionAutoFocus?: boolean;
-    isAnimated?: boolean;
-    animationDuration?: number;
-    centerLabelComponent?: () => React.ReactNode;
-    // Interaction
-    onPress?: (item: PieDataItem, index: number) => void;
-    // Styling
-    strokeColor?: string;
-    strokeWidth?: number;
-    shadow?: boolean;
-    shadowColor?: string;
-}
+
 
 // Component Props Types for Victory Native XL
 export interface InteractiveBarChartProps {
@@ -210,21 +180,7 @@ export interface GestureLineChartProps {
     showFrame?: boolean;
 }
 
-export interface InteractivePieChartProps {
-    data: PieDataItem[];
-    config?: PieChartConfig;
-    title?: string;
-    description?: string;
-    theme?: 'light' | 'dark';
-    onSlicePress?: (item: PieDataItem, index: number) => void;
-    selectedIndex?: number | null;
-    showLegend?: boolean;
-    centerLabel?: {
-        selectedText?: string;
-        selectedSubtext?: string;
-        defaultSubtext?: string;
-    };
-}
+
 
 // Legacy types for backward compatibility
 export interface BarChartConfig extends VictoryBarChartConfig { }
