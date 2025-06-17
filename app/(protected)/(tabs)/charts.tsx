@@ -7,6 +7,7 @@ import {
     GestureLineChart,
     InteractiveBarChart,
     InteractiveRingChart,
+    ThinRingChart,
     type BarChartConfig,
     type BarDataItem,
     type ChartTheme,
@@ -61,6 +62,14 @@ const generateRingChartData = (): RingDataItem[] => [
     { label: 'Desktop', value: 35, color: '#10B981' },
     { label: 'Tablet', value: 15, color: '#F59E0B' },
     { label: 'Other', value: 5, color: '#EF4444' },
+];
+
+// Data for thin ring chart with different values to test absolute vs percentage
+const generateThinRingData = () => [
+    { label: 'Mobile', value: 150, color: '#3B82F6' },
+    { label: 'Desktop', value: 120, color: '#10B981' },
+    { label: 'Tablet', value: 80, color: '#F59E0B' },
+    { label: 'Other', value: 30, color: '#EF4444' },
 ];
 
 // Chart configuration factories for Victory Native XL
@@ -154,6 +163,7 @@ export default function ChartsScreen() {
     const barData = useMemo(() => generateBarChartData(colorScheme), [colorScheme, refreshKey]);
     const lineData = useMemo(() => generateLineChartData(), [refreshKey]);
     const ringData = useMemo(() => generateRingChartData(), [refreshKey]);
+    const thinRingData = useMemo(() => generateThinRingData(), [refreshKey]);
 
     // Create configurations
     const barConfig = useMemo(() => createBarChartConfig(colorScheme), [colorScheme]);
@@ -401,6 +411,22 @@ export default function ChartsScreen() {
                             }}
                         />
                     </ChartCard>
+
+                    {/* Thin Ring Chart */}
+                    <ChartCard
+                        title="Thin Ring Chart (10px thick)"
+                        description="Ultra-thin ring • Rounded borders • Different absolute values to test legend display"
+                        isDark={isDark}
+                    >
+                        <ThinRingChart
+                            data={thinRingData}
+                            title="Server Usage"
+                            description="Absolute values: 150, 120, 80, 30"
+                            theme={colorScheme}
+                            size={300}
+                            ringThickness={12}
+                        />
+                    </ChartCard>
                 </View>
             </ScrollView>
 
@@ -439,13 +465,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#333',
         marginBottom: 8,
-        textAlign: 'center',
     },
     subtitle: {
         fontSize: 16,
         color: '#666',
         lineHeight: 24,
-        textAlign: 'center',
     },
     textDark: {
         color: '#fff',

@@ -1,7 +1,7 @@
 import { useFont } from '@shopify/react-native-skia';
 import * as Haptics from 'expo-haptics';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -52,28 +52,27 @@ const InteractiveRingChart: React.FC<InteractiveRingChartProps> = ({
     appearAnimationStaggerDelay = 100,
     onAppearAnimationComplete,
 }) => {
-    // Responsive dimensions calculation
-    const { width: screenWidth } = Dimensions.get('window');
+    // Note: Using parent container dimensions instead of screen width for better responsiveness
 
-    // Early validation - ensure we have valid data and screen dimensions
-    if (!data || !Array.isArray(data) || data.length === 0 || !screenWidth || screenWidth <= 0) {
+    // Early validation - ensure we have valid data
+    if (!data || !Array.isArray(data) || data.length === 0) {
         return (
             <ThemedView style={{
-                margin: 10,
-                padding: 12,
+                margin: 0,
+                padding: 0,
                 borderRadius: 16,
                 backgroundColor: Colors[theme]?.card || '#ffffff',
                 alignItems: 'center',
-                minWidth: 200,
+                width: '100%',
                 alignSelf: 'center',
             }}>
                 {title && (
-                    <ThemedText type="subtitle" style={{ marginBottom: 2, textAlign: 'center' }}>
+                    <ThemedText type="subtitle" style={{ marginBottom: 2, textAlign: 'center', paddingHorizontal: 16 }}>
                         {title}
                     </ThemedText>
                 )}
                 {description && (
-                    <ThemedText style={{ marginBottom: 10, textAlign: 'center', opacity: 0.7, fontSize: 12 }}>
+                    <ThemedText style={{ marginBottom: 10, textAlign: 'center', opacity: 0.7, fontSize: 12, paddingHorizontal: 16 }}>
                         {description}
                     </ThemedText>
                 )}
@@ -135,7 +134,7 @@ const InteractiveRingChart: React.FC<InteractiveRingChartProps> = ({
     const defaultConfig = {
         width: 300,
         height: 300,
-        size: Math.min(280, screenWidth * 0.7),
+        size: 280, // Use fixed size that will be constrained by parent container
         innerRadius: '50%',
         outerRadius: undefined,
         padAngle: 2,
@@ -259,17 +258,12 @@ const InteractiveRingChart: React.FC<InteractiveRingChartProps> = ({
     // Get the effective highlighted index
     const effectiveHighlightedIndex = highlightedIndex ?? internalHighlightedIndex;
 
-    // Better responsive calculation with grid-based approach
+    // Simplified responsive calculation based on parent container
     const responsiveCalculations = () => {
-        const baseMargins = 20; // Total horizontal margins (10px each side)
-        const cardPadding = 24; // Card internal padding (12px each side)
-        const availableWidth = Math.max(200, screenWidth - baseMargins - cardPadding); // Ensure minimum width
-
-        // Ensure chart fits within available space with some buffer
-        const chartSize = Math.min(availableWidth, screenWidth * 0.7, 300);
+        // Use a reasonable default chart size that will be constrained by parent
+        const chartSize = Math.min(300, 280); // Max 300px, default 280px
 
         return {
-            containerWidth: availableWidth,
             chartSize,
         };
     };
@@ -292,88 +286,112 @@ const InteractiveRingChart: React.FC<InteractiveRingChartProps> = ({
                 styles.legendContainer,
                 {
                     width: '100%',
-                    paddingVertical: 12,
-                    paddingHorizontal: 16,
-                    marginTop: 16,
+                    paddingVertical: 16,
+                    paddingBottom: 0,
+                    paddingHorizontal: 0,
+                    marginTop: 20,
                     flexDirection: 'column',
                 }
             ]}>
                 {legendData.map((item, index) => {
-                    const isHighlighted = effectiveHighlightedIndex === index;
                     const isTotal = item.originalIndex === -1;
-                    const isTotalSelected = selectedCenterItem === null && isTotal; // Total is selected when no specific item is selected
+                    // For data items, check if their originalIndex matches the highlighted data index
+                    const isDataItemSelected = !isTotal && effectiveHighlightedIndex === item.originalIndex;
+
+                    // Total is never "selected" - it's just a reset button
+                    const isSelected = isDataItemSelected;
+
+                    // All items get secondary button styling (Total is never selected/highlighted)
+                    const buttonStyle = [
+                        styles.legendItemSecondary,
+                        theme === 'dark' && styles.legendItemSecondaryDark,
+                        isSelected && styles.legendItemSelected,
+                        isSelected && theme === 'dark' && styles.legendItemSelectedDark
+                    ];
 
                     return (
                         <TouchableOpacity
                             key={`legend-${index}`}
                             style={[
-                                styles.legendItem,
+                                styles.legendItemBase,
+                                buttonStyle,
                                 {
-                                    marginBottom: defaultLegendConfig.rowSpacing,
-                                    width: '100%',
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    paddingVertical: 8,
-                                    paddingHorizontal: 12,
-                                    backgroundColor: (isHighlighted || isTotalSelected) ? 'rgba(59, 130, 246, 0.05)' : 'transparent',
-                                    borderRadius: 6,
+                                    marginBottom: 12,
                                 }
                             ]}
                             onPress={() => handleLegendItemPress(item, index)}
                             activeOpacity={0.7}
                         >
-                            <View
-                                style={[
-                                    styles.legendIndicator,
-                                    {
-                                        width: defaultLegendConfig.indicatorSize,
-                                        height: defaultLegendConfig.indicatorSize,
-                                        backgroundColor: item.color,
-                                        borderRadius: defaultLegendConfig.indicatorShape === 'circle'
-                                            ? defaultLegendConfig.indicatorSize! / 2 : 2,
-                                        opacity: isHighlighted || isTotalSelected ? 1 : 0.6,
-                                        transform: [{ scale: isHighlighted || isTotalSelected ? 1.2 : 1 }],
-                                        marginRight: 12,
-                                        borderWidth: isHighlighted ? 2 : 0,
-                                        borderColor: isHighlighted ? '#3B82F6' : 'transparent',
-                                    }
-                                ]}
-                            />
-                            <View style={[styles.legendText, { flex: 1 }]}>
-                                <ThemedText
+                            <View style={styles.legendItemContent}>
+                                <View
                                     style={[
+                                        styles.legendIndicator,
                                         {
-                                            fontSize: isTotal ? defaultLegendConfig.fontSize! + 1 : defaultLegendConfig.fontSize,
-                                            fontWeight: isTotal ? 'bold' : defaultLegendConfig.fontWeight as any,
-                                            color: isHighlighted
-                                                ? defaultLegendConfig.highlightTextColor
-                                                : defaultLegendConfig.textColor,
+                                            width: isTotal ? 16 : 14,
+                                            height: isTotal ? 16 : 14,
+                                            backgroundColor: item.color,
+                                            borderRadius: isTotal ? 8 : 7,
+                                            marginRight: 16,
+                                            borderWidth: isSelected && !isTotal ? 2 : 0,
+                                            borderColor: isSelected ? '#2563EB' : 'transparent',
                                         }
                                     ]}
-                                >
-                                    {item.label}
-                                </ThemedText>
-                                {(defaultLegendConfig.showValues || defaultLegendConfig.showPercentages) && (
+                                />
+                                <View style={styles.legendTextContainer}>
                                     <ThemedText
                                         style={[
-                                            {
-                                                fontSize: (defaultLegendConfig.fontSize! - 2),
-                                                color: isHighlighted
-                                                    ? defaultLegendConfig.highlightTextColor
-                                                    : defaultLegendConfig.textColor,
-                                                opacity: 0.7,
-                                            }
+                                            styles.legendTitle,
+                                            theme === 'dark' && styles.legendTitleSecondaryDark,
+                                            isSelected && styles.legendTitleSelected,
                                         ]}
+                                        numberOfLines={1}
+                                        ellipsizeMode="tail"
                                     >
-                                        {isTotal ? `${item.value} total` :
-                                            defaultLegendConfig.showValues && defaultLegendConfig.showPercentages
-                                                ? `${item.value} (${item.percentage?.toFixed(1)}%)`
-                                                : defaultLegendConfig.showValues
-                                                    ? `${item.value}`
-                                                    : `${item.percentage?.toFixed(1)}%`
-                                        }
+                                        {item.label}
                                     </ThemedText>
-                                )}
+                                </View>
+
+                                {/* Values on the right side */}
+                                {(defaultLegendConfig.showValues || defaultLegendConfig.showPercentages) && (() => {
+                                    const isPercentageMode = !defaultLegendConfig.showValues && defaultLegendConfig.showPercentages;
+                                    const showAbsoluteValues = defaultLegendConfig.showValues;
+                                    const showPercentages = defaultLegendConfig.showPercentages;
+
+                                    // For Total in percentage mode, don't show any value
+                                    if (isTotal && isPercentageMode) {
+                                        return null;
+                                    }
+
+                                    return (
+                                        <View style={styles.legendValueContainer}>
+                                            <ThemedText
+                                                style={[
+                                                    styles.legendValue,
+                                                    theme === 'dark' && styles.legendValueSecondaryDark,
+                                                    isSelected && styles.legendValueSelected,
+                                                ]}
+                                            >
+                                                {isTotal ?
+                                                    showPercentages ? `${item.percentage?.toFixed(1)}%` : `${item.value}` :
+                                                    showPercentages
+                                                        ? `${item.percentage?.toFixed(1)}%`
+                                                        : `${item.value}`
+                                                }
+                                            </ThemedText>
+                                            {!isTotal && showAbsoluteValues && showPercentages && item.value !== item.percentage && (
+                                                <ThemedText
+                                                    style={[
+                                                        styles.legendPercentage,
+                                                        theme === 'dark' && styles.legendPercentageSecondaryDark,
+                                                        isSelected && styles.legendPercentageSelected,
+                                                    ]}
+                                                >
+                                                    {`${item.value}`}
+                                                </ThemedText>
+                                            )}
+                                        </View>
+                                    );
+                                })()}
                             </View>
                         </TouchableOpacity>
                     );
@@ -504,24 +522,27 @@ const InteractiveRingChart: React.FC<InteractiveRingChartProps> = ({
 
     const styles = StyleSheet.create({
         container: {
-            margin: 10, // Reduced from 16px
-            padding: 12, // Reduced from 20px
+            margin: 0, // Remove margins for maximum width
+            padding: 0, // Remove padding for maximum width
             borderRadius: 16,
+            marginTop: 20,
             backgroundColor: Colors[theme]?.card || '#ffffff',
             alignItems: 'center',
-            // Ensure container takes full available width with minimal margins
-            width: Math.max(200, screenWidth - 20), // Reduced from 32px with minimum width
+            // Use 100% width to fill parent container
+            width: '100%',
             alignSelf: 'center',
         },
         title: {
             marginBottom: 2, // Reduced from 4px
             textAlign: 'center',
+            paddingHorizontal: 16, // Add padding only to text elements
         },
         description: {
             marginBottom: 10, // Reduced from 16px
             textAlign: 'center',
             opacity: 0.7,
             fontSize: 12,
+            paddingHorizontal: 16, // Add padding only to text elements
         },
         chartContainer: {
             alignItems: 'center',
@@ -549,7 +570,105 @@ const InteractiveRingChart: React.FC<InteractiveRingChartProps> = ({
         },
         legendContainer: {
             paddingVertical: 12,
+            paddingHorizontal: 16, // Add horizontal padding for legend
+        },
+        legendItemBase: {
+            borderRadius: 12,
+            overflow: 'hidden',
+        },
+        legendItemPrimary: {
+            backgroundColor: '#2563EB',
+            paddingVertical: 18,
             paddingHorizontal: 16,
+        },
+        legendItemSecondary: {
+            backgroundColor: 'transparent',
+            borderWidth: 1,
+            borderColor: '#E5E7EB',
+            paddingVertical: 16,
+            paddingHorizontal: 16,
+            minHeight: 84, // Increased by 14px (from 70 to 84)
+        },
+        legendItemSecondaryDark: {
+            borderColor: '#374151',
+        },
+        legendItemSelected: {
+            backgroundColor: '#EFF6FF',
+            borderColor: '#2563EB',
+        },
+        legendItemSelectedDark: {
+            backgroundColor: '#1E3A8A',
+            borderColor: '#3B82F6',
+        },
+        legendItemContent: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flex: 1,
+        },
+        legendTextContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+        },
+        legendValueContainer: {
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            minWidth: 100, // Ensure consistent width for values
+        },
+        legendTitle: {
+            fontSize: 20, // Reduced by 2px (from 18 to 16)
+            fontWeight: '400',
+            color: '#2563EB',
+            flexShrink: 1, // Allow text to shrink if needed
+        },
+        legendTitlePrimary: {
+            color: '#fff',
+        },
+        legendTitleSecondaryDark: {
+            color: '#6B7280',
+        },
+        legendTitleSelected: {
+            color: '#2563EB',
+        },
+        legendValue: {
+            fontSize: 30, // Reduced from 42
+            fontWeight: '700',
+            color: '#333',
+            lineHeight: 36,
+            textAlign: 'right',
+        },
+        legendValueSecondaryDark: {
+            color: '#E5E7EB',
+        },
+        legendValueSelected: {
+            color: '#1D4ED8',
+        },
+        legendPercentage: {
+            fontSize: 16, // Reduced from 24
+            fontWeight: '500',
+            color: '#666',
+            textAlign: 'right',
+            marginTop: 2,
+        },
+        legendPercentageSecondaryDark: {
+            color: '#9CA3AF',
+        },
+        legendPercentageSelected: {
+            color: '#1D4ED8',
+        },
+        legendDescription: {
+            fontSize: 14,
+            color: '#666',
+        },
+        legendDescriptionPrimary: {
+            color: 'rgba(255, 255, 255, 0.8)',
+        },
+        legendDescriptionSecondaryDark: {
+            color: '#9CA3AF',
+        },
+        legendDescriptionSelected: {
+            color: '#1D4ED8',
         },
         legendItem: {
             marginBottom: 8,

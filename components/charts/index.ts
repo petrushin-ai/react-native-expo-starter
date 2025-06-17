@@ -2,6 +2,7 @@
 export { default as GestureLineChart } from './GestureLineChart';
 export { default as InteractiveBarChart } from './InteractiveBarChart';
 export { default as InteractiveRingChart } from './InteractiveRingChart';
+export { default as ThinRingChart } from './ThinRingChart';
 
 // Export all types
 export type {
