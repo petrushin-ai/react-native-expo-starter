@@ -10,6 +10,7 @@ import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-rean
 import CustomSplashScreen from '@/components/ui/SplashScreen';
 import { SessionProvider } from '@/contexts/AuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
+import { SplashProvider, useSplash } from '@/contexts/SplashContext';
 import { ThemeProvider as CustomThemeProvider, useTheme } from '@/contexts/ThemeContext';
 
 // Configure Reanimated logger to suppress warnings about shared value access during render
@@ -38,13 +39,14 @@ function ThemedApp() {
   );
 }
 
-export default function RootLayout() {
+function AppContent() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
   const [appIsReady, setAppIsReady] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+  const { setSplashFinished } = useSplash();
 
   useEffect(() => {
     async function prepare() {
@@ -68,7 +70,9 @@ export default function RootLayout() {
 
   const onSplashFinish = useCallback(() => {
     setShowSplash(false);
-  }, []);
+    // Notify all components that the splash screen has finished
+    setSplashFinished(true);
+  }, [setSplashFinished]);
 
   if (!loaded) {
     // Return null while fonts are loading
@@ -91,5 +95,13 @@ export default function RootLayout() {
         />
       )}
     </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <SplashProvider>
+      <AppContent />
+    </SplashProvider>
   );
 }

@@ -1,12 +1,13 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useDrawerStatus } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Animated, Easing, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import { BurgerMenuButton } from '@/components/ui/BurgerMenuButton';
 import { LottieAnimation } from '@/components/ui/LottieAnimation';
+import { useSplash } from '@/contexts/SplashContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function HomeScreen() {
@@ -15,22 +16,64 @@ export default function HomeScreen() {
   const isDrawerOpen = drawerStatus === 'open';
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const { isSplashFinished } = useSplash();
 
   // State for pull-to-refresh and wave animation
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [waveAnimationTrigger, setWaveAnimationTrigger] = useState(0);
+  const [hasTriggeredInitialAnimation, setHasTriggeredInitialAnimation] = useState(false);
+
+  // Animation for Explore Charts button
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  // Trigger wave animation immediately when splash screen finishes
+  useEffect(() => {
+    if (isSplashFinished && !hasTriggeredInitialAnimation) {
+      // Trigger animation immediately after splash screen finishes
+      setWaveAnimationTrigger(prev => prev + 1);
+      setHasTriggeredInitialAnimation(true);
+    }
+  }, [isSplashFinished, hasTriggeredInitialAnimation]);
 
   // Trigger wave animation when screen comes into focus (navigation)
   useFocusEffect(
     useCallback(() => {
-      // Small delay to ensure screen is fully loaded
+      // Only trigger on navigation focus, not initial load
+      if (hasTriggeredInitialAnimation) {
+        // Small delay to ensure screen is fully loaded
+        const timer = setTimeout(() => {
+          setWaveAnimationTrigger(prev => prev + 1);
+        }, 200);
+
+        return () => clearTimeout(timer);
+      }
+    }, [hasTriggeredInitialAnimation])
+  );
+
+  // Trigger button animation when waveAnimationTrigger changes
+  useEffect(() => {
+    if (waveAnimationTrigger > 0) {
+      // Small delay after wave animation starts
       const timer = setTimeout(() => {
-        setWaveAnimationTrigger(prev => prev + 1);
-      }, 200);
+        Animated.sequence([
+          Animated.timing(scaleAnim, {
+            toValue: 1.05,
+            duration: 350,
+            easing: Easing.bezier(0.25, 0.46, 0.45, 0.94),
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim, {
+            toValue: 1,
+            duration: 350,
+            easing: Easing.bezier(0.25, 0.46, 0.45, 0.94),
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }, 400);
 
       return () => clearTimeout(timer);
-    }, [])
-  );
+    }
+  }, [waveAnimationTrigger, scaleAnim]);
 
   const handleBurgerPress = () => {
     if (isDrawerOpen) {
@@ -103,20 +146,22 @@ export default function HomeScreen() {
               Quick Actions
             </Text>
 
-            <TouchableOpacity
-              style={[styles.actionButton, styles.primaryAction]}
-              onPress={handleNavigateToCharts}
-            >
-              <View style={styles.actionButtonContent}>
-                <Ionicons name="bar-chart" size={24} color="#fff" />
-                <View style={styles.actionButtonText}>
-                  <Text style={styles.actionButtonTitle}>Explore Charts</Text>
-                  <Text style={styles.actionButtonDescription}>
-                    View beautiful data visualizations and chart components
-                  </Text>
+            <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+              <TouchableOpacity
+                style={[styles.actionButton, styles.primaryAction, isDark && styles.primaryActionDark]}
+                onPress={handleNavigateToCharts}
+              >
+                <View style={styles.actionButtonContent}>
+                  <Ionicons name="bar-chart" size={24} color={isDark ? '#6B7280' : '#2563EB'} />
+                  <View style={styles.actionButtonText}>
+                    <Text style={[styles.actionButtonTitle, isDark && styles.actionButtonTitleDark]}>Explore Charts</Text>
+                    <Text style={[styles.actionButtonDescription, isDark && styles.textDark]}>
+                      View beautiful data visualizations and chart components
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </Animated.View>
 
             <TouchableOpacity
               style={[styles.actionButton, styles.secondaryAction, isDark && styles.secondaryActionDark]}
@@ -321,19 +366,42 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   primaryAction: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#9ca3af',
     paddingVertical: 18,
     paddingHorizontal: 16,
+    minHeight: 100,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   secondaryAction: {
-    backgroundColor: 'transparent',
+    backgroundColor: '#f8f9fa',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    paddingVertical: 16,
+    borderColor: '#9ca3af',
+    paddingVertical: 18,
     paddingHorizontal: 16,
+    minHeight: 100,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   secondaryActionDark: {
-    borderColor: '#374151',
+    backgroundColor: '#2d2d2d',
+    borderColor: '#6b7280',
   },
   actionButtonContent: {
     flexDirection: 'row',
@@ -346,13 +414,13 @@ const styles = StyleSheet.create({
   actionButtonTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
+    color: '#374151',
     marginBottom: 4,
   },
   actionButtonTitleSecondary: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2563EB',
+    color: '#374151',
     marginBottom: 4,
   },
   actionButtonTitleSecondaryDark: {
@@ -360,7 +428,7 @@ const styles = StyleSheet.create({
   },
   actionButtonDescription: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: '#666',
   },
   actionButtonDescriptionSecondary: {
     fontSize: 14,
@@ -455,5 +523,12 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     lineHeight: 24,
+  },
+  primaryActionDark: {
+    backgroundColor: '#2d2d2d',
+    borderColor: '#6b7280',
+  },
+  actionButtonTitleDark: {
+    color: '#6B7280',
   },
 });
