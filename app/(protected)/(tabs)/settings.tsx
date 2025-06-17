@@ -352,6 +352,7 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontWeight: 'bold',
         marginBottom: 30,
+        paddingTop: 7,
         color: '#333',
     },
     textDark: {
