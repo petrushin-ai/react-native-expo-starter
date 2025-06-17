@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Stack } from 'expo-router';
+import { Stack, useNavigation, useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { Dimensions, ScrollView, StatusBar, StyleSheet, TouchableOpacity } from 'react-native';
 
@@ -97,6 +97,11 @@ const createLineChartConfig = (theme: ChartTheme): LineChartConfig => ({
 export default function ChartsScreen() {
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
+    const router = useRouter();
+    const navigation = useNavigation();
+
+    // Component refresh key - changing this will force a complete remount
+    const [componentKey, setComponentKey] = useState(0);
 
     // Chart interaction state
     const [selectedBarIndex, setSelectedBarIndex] = useState<number | null>(null);
@@ -127,13 +132,9 @@ export default function ChartsScreen() {
 
     // Header handlers
     const handleRefresh = () => {
-        // Reset chart selection states
-        setSelectedBarIndex(null);
-
-        // Force chart data regeneration and restart animations
-        setRefreshKey(prev => prev + 1);
-
-        console.log('Charts refreshed');
+        // Force a complete component refresh by changing the key
+        // This will unmount and remount the entire component
+        setComponentKey(prev => prev + 1);
     };
 
     const handleInfo = () => {
@@ -141,7 +142,7 @@ export default function ChartsScreen() {
     };
 
     return (
-        <>
+        <React.Fragment key={componentKey}>
             <Stack.Screen
                 options={{
                     headerShown: true,
@@ -312,7 +313,7 @@ export default function ChartsScreen() {
                 primaryButtonText="Got it"
                 secondaryButtonText="Close"
             />
-        </>
+        </React.Fragment>
     );
 }
 

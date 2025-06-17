@@ -154,6 +154,13 @@ export interface InteractiveBarChartProps {
     showXAxis?: boolean;
     showYAxis?: boolean;
     showFrame?: boolean;
+    // Appearing animation configuration
+    enableAppearAnimation?: boolean;
+    appearAnimationType?: 'timing' | 'spring';
+    appearAnimationDuration?: number;
+    appearAnimationStagger?: boolean;
+    appearAnimationStaggerDelay?: number;
+    onAppearAnimationComplete?: () => void;
 }
 
 export interface GestureLineChartProps {

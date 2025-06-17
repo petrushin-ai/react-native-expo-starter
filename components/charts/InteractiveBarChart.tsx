@@ -42,28 +42,71 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     showXAxis = true,
     showYAxis = true,
     showFrame = false,
+    // Appearing animation configuration
+    enableAppearAnimation = true,
+    appearAnimationType = 'spring',
+    appearAnimationDuration = 1500,
+    appearAnimationStagger = true,
+    appearAnimationStaggerDelay = 120,
+    onAppearAnimationComplete,
 }) => {
-    // Load font using Skia's useFont hook
-    const font = useFont(SpaceMono, 12);
-
     // Responsive dimensions calculation
     const { width: screenWidth } = Dimensions.get('window');
+
+    // Early validation - ensure we have valid data and screen dimensions
+    if (!data || !Array.isArray(data) || data.length === 0 || !screenWidth || screenWidth <= 0) {
+        return (
+            <ThemedView style={{
+                margin: 10,
+                padding: 12,
+                borderRadius: 16,
+                backgroundColor: Colors[theme]?.card || '#ffffff',
+                alignItems: 'center',
+                minWidth: 200,
+                alignSelf: 'center',
+            }}>
+                {title && (
+                    <ThemedText type="subtitle" style={{ marginBottom: 2, textAlign: 'center' }}>
+                        {title}
+                    </ThemedText>
+                )}
+                {description && (
+                    <ThemedText style={{ marginBottom: 10, textAlign: 'center', opacity: 0.7, fontSize: 12 }}>
+                        {description}
+                    </ThemedText>
+                )}
+                <ThemedView style={{
+                    width: 200,
+                    height: 220,
+                    backgroundColor: 'transparent',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }}>
+                    <ThemedText style={{ opacity: 0.5 }}>No data available</ThemedText>
+                </ThemedView>
+            </ThemedView>
+        );
+    }
+
+    // Load font using Skia's useFont hook
+    const font = useFont(SpaceMono, 12);
 
     // Better responsive calculation with grid-based approach
     const responsiveCalculations = () => {
         const baseMargins = 20; // Reduced from 32px - Total horizontal margins (10px each side)
         const cardPadding = 24; // Reduced from 40px - Card internal padding (12px each side)
-        const availableWidth = screenWidth - baseMargins - cardPadding;
+        const availableWidth = Math.max(200, screenWidth - baseMargins - cardPadding); // Ensure minimum width
 
-        // Calculate optimal spacing for 12 months with more aggressive space usage
+        // Calculate optimal spacing for data length with more aggressive space usage
+        const dataLength = Math.max(1, data?.length || 1); // Ensure at least 1 to avoid division by zero
         const minBarWidth = 18; // Increased minimum bar width
         const reservedPadding = 80; // Reduced from 120px for chart padding
-        const optimalBarWidth = Math.max(minBarWidth, Math.floor((availableWidth - reservedPadding) / data.length));
+        const optimalBarWidth = Math.max(minBarWidth, Math.floor((availableWidth - reservedPadding) / dataLength));
 
         return {
             containerWidth: availableWidth,
             barWidth: optimalBarWidth,
-            spacing: Math.max(2, Math.floor((availableWidth - (optimalBarWidth * data.length)) / (data.length + 1))), // Reduced min spacing
+            spacing: Math.max(2, Math.floor((availableWidth - (optimalBarWidth * dataLength)) / (dataLength + 1))), // Reduced min spacing
         };
     };
 
@@ -86,6 +129,119 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     const gestureVelocity = useSharedValue(0);
     const lastGestureTime = useSharedValue(0);
     const lastSelectionUpdateTime = useSharedValue(0);
+
+    // Appearing animation
+    const appearProgress = useSharedValue(enableAppearAnimation ? 0 : 1);
+    const hasTriggeredCallback = useSharedValue(false);
+    const [currentAnimatedData, setCurrentAnimatedData] = useState(data || []);
+
+    // Trigger appearing animation on mount
+    useEffect(() => {
+        if (enableAppearAnimation && data && data.length > 0) {
+            hasTriggeredCallback.value = false;
+            const animationConfig = appearAnimationType === 'spring'
+                ? withSpring(1, {
+                    damping: 12, // Reduced damping for smoother spring
+                    stiffness: 80, // Reduced stiffness for more fluid motion
+                    mass: 1.2 // Increased mass for better easing at the end
+                })
+                : withTiming(1, {
+                    duration: appearAnimationDuration,
+                    easing: require('react-native-reanimated').Easing.bezier(0.25, 0.1, 0.25, 1) // Custom easing for smooth end
+                });
+
+            appearProgress.value = animationConfig;
+        }
+    }, [enableAppearAnimation, appearAnimationType, appearAnimationDuration]);
+
+    // Restart animation when data changes
+    useEffect(() => {
+        if (!data || data.length === 0) {
+            setCurrentAnimatedData([]);
+            return;
+        }
+
+        if (enableAppearAnimation) {
+            appearProgress.value = 0;
+            hasTriggeredCallback.value = false;
+
+            const animationConfig = appearAnimationType === 'spring'
+                ? withSpring(1, {
+                    damping: 12, // Reduced damping for smoother spring
+                    stiffness: 80, // Reduced stiffness for more fluid motion
+                    mass: 1.2 // Increased mass for better easing at the end
+                })
+                : withTiming(1, {
+                    duration: appearAnimationDuration,
+                    easing: require('react-native-reanimated').Easing.bezier(0.25, 0.1, 0.25, 1) // Custom easing for smooth end
+                });
+
+            appearProgress.value = animationConfig;
+        } else {
+            // If animation is disabled, update data immediately
+            setCurrentAnimatedData(data);
+        }
+    }, [data, enableAppearAnimation, appearAnimationType, appearAnimationDuration]);
+
+    // Update animated data when progress changes
+    useDerivedValue(() => {
+        if (!data || data.length === 0) {
+            runOnJS(setCurrentAnimatedData)([]);
+            return;
+        }
+
+        if (!enableAppearAnimation) {
+            runOnJS(setCurrentAnimatedData)(data);
+            return;
+        }
+
+        const newData = data.map((item, index) => {
+            if (!item || typeof item.value !== 'number') {
+                return { ...item, value: 0 };
+            }
+
+            let progress = appearProgress.value;
+
+            // Apply stagger effect if enabled
+            if (appearAnimationStagger && data.length > 1) {
+                // Use a different approach that doesn't cause division by zero
+                const staggerDelay = index * appearAnimationStaggerDelay;
+                const totalAnimationTime = appearAnimationDuration + (data.length - 1) * appearAnimationStaggerDelay;
+                const normalizedStaggerDelay = staggerDelay / totalAnimationTime;
+
+                // Calculate effective progress with safe denominator
+                const adjustedProgress = Math.max(0, appearProgress.value - normalizedStaggerDelay);
+                const maxProgressRange = 1 - normalizedStaggerDelay;
+
+                // Ensure we don't divide by zero and handle edge cases
+                if (maxProgressRange > 0.001) {
+                    progress = Math.min(1, Math.max(0, adjustedProgress / maxProgressRange));
+                } else {
+                    // For the last items where the range is very small, use direct progress
+                    progress = Math.max(0, Math.min(1, appearProgress.value));
+                }
+            }
+
+            return {
+                ...item,
+                value: item.value * progress
+            };
+        });
+
+        runOnJS(setCurrentAnimatedData)(newData);
+    });
+
+    // Track animation completion and trigger callback
+    useDerivedValue(() => {
+        if (enableAppearAnimation &&
+            appearProgress.value >= 1 &&
+            !hasTriggeredCallback.value &&
+            onAppearAnimationComplete) {
+            hasTriggeredCallback.value = true;
+            runOnJS(onAppearAnimationComplete)();
+        }
+        return null;
+    });
 
     // Default tooltip configuration
     const defaultTooltipConfig = {
@@ -256,22 +412,22 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
         height: 220,
         // Use provided padding or enhanced defaults
         padding: padding || {
-            left: Math.max(12, responsiveDims.spacing),
-            right: Math.max(12, responsiveDims.spacing),
+            left: Math.max(12, responsiveDims?.spacing || 12),
+            right: Math.max(12, responsiveDims?.spacing || 12),
             top: showTooltip ? 50 : 30, // Increased top padding when tooltips are enabled
             bottom: 16
         },
         // Use provided domainPadding or enhanced defaults
         domainPadding: domainPadding || {
-            left: Math.max(8, responsiveDims.spacing / 2),
-            right: Math.max(8, responsiveDims.spacing / 2),
+            left: Math.max(8, (responsiveDims?.spacing || 12) / 2),
+            right: Math.max(8, (responsiveDims?.spacing || 12) / 2),
             top: showTooltip ? 60 : 30, // Increased top domain padding for tooltips
             bottom: 0
         },
-        barColor: Colors[theme].tint || '#177AD5',
+        barColor: Colors[theme]?.tint || '#177AD5',
         gradientColors: [
-            Colors[theme].tint || '#177AD5',
-            (Colors[theme].tint || '#177AD5') + opacityToHex(gradientOpacity)
+            Colors[theme]?.tint || '#177AD5',
+            (Colors[theme]?.tint || '#177AD5') + opacityToHex(gradientOpacity)
         ] as [string, string],
         roundedCorners: {
             topLeft: 4,
@@ -283,12 +439,12 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             lineColor: showGrid ? (theme === 'dark' ? '#333' : '#f0f0f0') : 'transparent',
             lineWidth: showGrid ? 1 : 0,
             // Ensure we show all labels
-            tickCount: data.length,
+            tickCount: Math.max(1, data?.length || 1),
             formatXLabel: (value: any) => {
                 if (typeof value === 'number') {
                     const index = Math.round(value);
-                    if (index >= 0 && index < data.length) {
-                        return data[index]?.label || String(value);
+                    if (index >= 0 && index < (data?.length || 0)) {
+                        return data?.[index]?.label || String(value);
                     }
                 }
                 return String(value);
@@ -329,6 +485,16 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     // Merge default config with provided config
     const mergedConfig = { ...defaultConfig, ...config };
 
+    // Validate and ensure all critical values are defined
+    const safeConfig = {
+        ...mergedConfig,
+        height: Math.max(1, mergedConfig.height || 220),
+        padding: mergedConfig.padding || { left: 12, right: 12, top: 30, bottom: 16 },
+        domainPadding: mergedConfig.domainPadding || { left: 8, right: 8, top: 30, bottom: 0 },
+        gradientColors: mergedConfig.gradientColors || ['#177AD5', '#177AD5'],
+        roundedCorners: mergedConfig.roundedCorners || { topLeft: 4, topRight: 4 }
+    };
+
     // Apply gradient opacity to gradient colors if specified
     if (mergedConfig.gradientColors && (gradientOpacity !== 0.3 || config.gradientOpacity !== undefined)) {
         const finalOpacity = config.gradientOpacity !== undefined ? config.gradientOpacity : gradientOpacity;
@@ -351,10 +517,10 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     }
 
     // Prepare data for Victory Native XL (ensure proper format)
-    const formattedData = data.map((item, index) => ({
+    const formattedData = currentAnimatedData.map((item, index) => ({
         x: index, // Use index as x-value for proper positioning
-        value: item.value,
-        label: item.label,
+        value: typeof item?.value === 'number' ? item.value : 0,
+        label: item?.label || `Item ${index + 1}`,
         originalIndex: index,
     }));
 
@@ -413,10 +579,10 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             margin: 10, // Reduced from 16px
             padding: 12, // Reduced from 20px
             borderRadius: 16,
-            backgroundColor: Colors[theme].card,
+            backgroundColor: Colors[theme]?.card || '#ffffff',
             alignItems: 'center',
             // Ensure container takes full available width with minimal margins
-            width: screenWidth - 20, // Reduced from 32px
+            width: Math.max(200, screenWidth - 20), // Reduced from 32px with minimum width
             alignSelf: 'center',
         },
         title: {
@@ -430,8 +596,8 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             fontSize: 12,
         },
         chartContainer: {
-            width: responsiveDims.containerWidth,
-            height: mergedConfig.height,
+            width: Math.max(200, responsiveDims?.containerWidth || 200),
+            height: safeConfig?.height || 220,
             position: 'relative',
             // Ensure proper overflow handling
             overflow: 'visible',
@@ -441,7 +607,7 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             marginTop: 8, // Reduced from 12px
             padding: 6, // Reduced from 8px
             borderRadius: 8,
-            backgroundColor: Colors[theme].surface,
+            backgroundColor: Colors[theme]?.surface || '#f5f5f5',
         },
         selectionText: {
             fontSize: 12,
@@ -450,7 +616,7 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
         // iOS-specific tooltip - larger size
         iosTooltip: {
             position: 'absolute',
-            backgroundColor: Colors[theme].tint || '#177AD5',
+            backgroundColor: Colors[theme]?.tint || '#177AD5',
             paddingHorizontal: 12, // Larger padding for iOS
             paddingVertical: 6, // Larger padding for iOS
             borderRadius: 15, // border-radius: 15px from web
@@ -468,7 +634,7 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
         // Android tooltip - original size
         tooltip: {
             position: 'absolute',
-            backgroundColor: Colors[theme].tint || '#177AD5',
+            backgroundColor: Colors[theme]?.tint || '#177AD5',
             paddingHorizontal: 9, // Original Android size
             paddingVertical: 3, // Original Android size
             borderRadius: 15, // border-radius: 15px from web
@@ -500,32 +666,62 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             )}
 
             <ThemedView style={[styles.chartContainer, { backgroundColor: 'transparent' }]}>
-                <CartesianChart
-                    data={formattedData}
-                    xKey="x"
-                    yKeys={["value"]}
-                    padding={mergedConfig.padding}
-                    domainPadding={mergedConfig.domainPadding}
-                    domain={mergedConfig.domain}
-                    xAxis={mergedConfig.xAxisConfig}
-                    yAxis={[mergedConfig.yAxisConfig]}
-                    chartPressState={state}
-                    frame={mergedConfig.frameConfig}
-                >
-                    {({ points, chartBounds }) => (
-                        <Bar
-                            points={points.value}
-                            chartBounds={chartBounds}
-                            roundedCorners={mergedConfig.roundedCorners}
-                        >
-                            <LinearGradient
-                                start={vec(0, 0)}
-                                end={vec(0, mergedConfig.height)}
-                                colors={mergedConfig.gradientColors}
-                            />
-                        </Bar>
-                    )}
-                </CartesianChart>
+                <Animated.View style={{ width: '100%', height: '100%' }}>
+                    <CartesianChart
+                        data={formattedData}
+                        xKey="x"
+                        yKeys={["value"]}
+                        padding={{
+                            left: Math.max(0, typeof safeConfig.padding === 'object' ? (safeConfig.padding?.left || 12) : (safeConfig.padding || 12)),
+                            right: Math.max(0, typeof safeConfig.padding === 'object' ? (safeConfig.padding?.right || 12) : (safeConfig.padding || 12)),
+                            top: Math.max(0, typeof safeConfig.padding === 'object' ? (safeConfig.padding?.top || 30) : (safeConfig.padding || 30)),
+                            bottom: Math.max(0, typeof safeConfig.padding === 'object' ? (safeConfig.padding?.bottom || 16) : (safeConfig.padding || 16))
+                        }}
+                        domainPadding={{
+                            left: Math.max(0, typeof safeConfig.domainPadding === 'object' ? (safeConfig.domainPadding?.left || 8) : (safeConfig.domainPadding || 8)),
+                            right: Math.max(0, typeof safeConfig.domainPadding === 'object' ? (safeConfig.domainPadding?.right || 8) : (safeConfig.domainPadding || 8)),
+                            top: Math.max(0, typeof safeConfig.domainPadding === 'object' ? (safeConfig.domainPadding?.top || 30) : (safeConfig.domainPadding || 30)),
+                            bottom: Math.max(0, typeof safeConfig.domainPadding === 'object' ? (safeConfig.domainPadding?.bottom || 0) : (safeConfig.domainPadding || 0))
+                        }}
+                        domain={{
+                            x: [0, Math.max(1, data.length - 1)],
+                            y: [0, Math.max(1, Math.max(...data.map(d => d.value || 0)) * 1.1)]
+                        }}
+                        xAxis={showXAxis ? safeConfig.xAxisConfig : undefined}
+                        yAxis={showYAxis ? [safeConfig.yAxisConfig] : undefined}
+                        chartPressState={state}
+                        frame={showFrame ? safeConfig.frameConfig : undefined}
+                    >
+                        {({ points, chartBounds }) => {
+                            // Validate chartBounds to prevent undefined values
+                            const safeChartBounds = {
+                                left: Math.max(0, chartBounds?.left || 0),
+                                right: Math.max(0, chartBounds?.right || 200),
+                                top: Math.max(0, chartBounds?.top || 0),
+                                bottom: Math.max(0, chartBounds?.bottom || 220)
+                            };
+
+                            // Ensure points.value exists and is valid
+                            if (!points?.value || !Array.isArray(points.value)) {
+                                return null;
+                            }
+
+                            return (
+                                <Bar
+                                    points={points.value}
+                                    chartBounds={safeChartBounds}
+                                    roundedCorners={safeConfig.roundedCorners}
+                                >
+                                    <LinearGradient
+                                        start={vec(0, 0)}
+                                        end={vec(0, Math.max(1, safeConfig.height || 220))}
+                                        colors={safeConfig.gradientColors}
+                                    />
+                                </Bar>
+                            );
+                        }}
+                    </CartesianChart>
+                </Animated.View>
 
                 {/* Enhanced Tooltip with platform-specific styling */}
                 {showTooltip && ((isActive && tooltipValue) || (isManuallyActive && manualTooltipValue)) && (
