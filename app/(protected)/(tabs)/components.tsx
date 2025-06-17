@@ -1,3 +1,4 @@
+import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { DarkModePreview } from '@/components/ui/DarkModePreview';
 import { DatePicker } from '@/components/ui/DatePicker';
@@ -1403,6 +1404,333 @@ export default function ComponentsScreen() {
                             />
                         </View>
                     </View>
+
+                    {/* Avatar Components */}
+                    <View style={styles.section}>
+                        <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+                            Avatar
+                        </Text>
+                        <Text style={[styles.description, isDark && styles.descriptionDark]}>
+                            User avatar components with different shapes, fallback options, initials, Gravatar support, and badges. Built with @kolking/react-native-avatar.
+                        </Text>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Control the shape of the avatars
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                The default circular shape can be changed by specifying a custom border radius. The style prop enables you to override the default styles.
+                            </Text>
+                            <View style={styles.avatarRow}>
+                                <View style={styles.avatarItem}>
+                                    <Avatar size={48} borderRadius={24} />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Default
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar size={48} borderRadius={8} />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Rounded
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar size={48} borderRadius={0} />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Square
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Custom fallback image or emoji
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                For users without an image, you have the option to display the default avatar icon, provide a custom fallback image, or even show an emoji.
+                            </Text>
+                            <View style={styles.avatarRow}>
+                                <View style={styles.avatarItem}>
+                                    <Avatar size={48} />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Default
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar
+                                        size={48}
+                                        source={require('@/assets/images/icon.png')}
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Custom
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar size={48} name="😊" />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Emoji
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Fallback to user's initials
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Another option for users without an image is to display their initials. By enabling the colorize option, unique color can be generated based on the user's name.
+                            </Text>
+                            <View style={styles.avatarRow}>
+                                <View style={styles.avatarItem}>
+                                    <Avatar size={48} name="N" />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        N
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar size={48} name="John Smith" colorize />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        JS
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar size={48} name="Emma Wilson" colorize />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        EM
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Gravatar support
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Include the user's email address to display their Gravatar image. This can be combined with your own avatar image to provide a fallback option.
+                            </Text>
+                            <View style={styles.avatarRow}>
+                                <View style={styles.avatarItem}>
+                                    <Avatar
+                                        size={48}
+                                        email="john@example.com"
+                                        name="John Doe"
+                                        colorize
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        John
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar
+                                        size={48}
+                                        email="jane@example.com"
+                                        name="Jane Smith"
+                                        colorize
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Jane
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar
+                                        size={48}
+                                        email="mike@example.com"
+                                        name="Mike Johnson"
+                                        colorize
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Mike
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Numeric badges
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                You can add a badge to display the count of unread messages or the online/offline status of the user. The position of the badge can also be customized.
+                            </Text>
+                            <View style={styles.avatarRow}>
+                                <View style={styles.avatarItem}>
+                                    <Avatar
+                                        size={48}
+                                        name="John Smith"
+                                        colorize
+                                        badge={3}
+                                        badgeColor="#22C55E"
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        3
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar
+                                        size={48}
+                                        name="Jane Doe"
+                                        colorize
+                                        badge={99}
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        99+
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar
+                                        size={48}
+                                        name="Mike Wilson"
+                                        colorize
+                                        badge={150}
+                                        badgeColor="#F59E0B"
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        99+
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Custom badges
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Another option for utilizing avatar badges is to display a custom status icon, such as an emoji, for example.
+                            </Text>
+                            <View style={styles.avatarRow}>
+                                <View style={styles.avatarItem}>
+                                    <Avatar
+                                        size={48}
+                                        name="John Smith"
+                                        colorize
+                                        badge="👑"
+                                        badgeColor="transparent"
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Crown
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar
+                                        size={48}
+                                        name="Jane Doe"
+                                        colorize
+                                        badge="😊"
+                                        badgeColor="transparent"
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Happy
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar
+                                        size={48}
+                                        name="Mike Wilson"
+                                        colorize
+                                        badge="🙈"
+                                        badgeColor="transparent"
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Monkey
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Different Sizes
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Avatars in different sizes for various use cases
+                            </Text>
+                            <View style={styles.avatarRow}>
+                                <View style={styles.avatarItem}>
+                                    <Avatar size="small" name="John Smith" colorize />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Small
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar size="medium" name="Jane Doe" colorize />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Medium
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar size="large" name="Mike Wilson" colorize />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Large
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Badge Positions
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Badges can be positioned in different corners of the avatar
+                            </Text>
+                            <View style={styles.avatarRow}>
+                                <View style={styles.avatarItem}>
+                                    <Avatar
+                                        size={48}
+                                        name="John Smith"
+                                        colorize
+                                        badge={1}
+                                        badgePosition="top-left"
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Top Left
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar
+                                        size={48}
+                                        name="Jane Doe"
+                                        colorize
+                                        badge={2}
+                                        badgePosition="top-right"
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Top Right
+                                    </Text>
+                                </View>
+                            </View>
+                            <View style={styles.avatarRow}>
+                                <View style={styles.avatarItem}>
+                                    <Avatar
+                                        size={48}
+                                        name="Mike Wilson"
+                                        colorize
+                                        badge={3}
+                                        badgePosition="bottom-left"
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Bottom Left
+                                    </Text>
+                                </View>
+                                <View style={styles.avatarItem}>
+                                    <Avatar
+                                        size={48}
+                                        name="Sarah Johnson"
+                                        colorize
+                                        badge={4}
+                                        badgePosition="bottom-right"
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Bottom Right
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
                 </View>
             </ScrollView>
 
@@ -1647,5 +1975,14 @@ const styles = StyleSheet.create({
     pdfViewer: {
         flex: 1,
         height: 300,
+    },
+    avatarRow: {
+        flexDirection: 'row',
+        gap: 24,
+        flexWrap: 'wrap',
+    },
+    avatarItem: {
+        alignItems: 'center',
+        gap: 8,
     },
 }); 
