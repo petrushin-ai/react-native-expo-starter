@@ -3,7 +3,15 @@ import { useDrawerStatus } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Easing, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Easing, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Reanimated, {
+  runOnJS,
+  runOnUI,
+  scrollTo,
+  useAnimatedRef,
+  useAnimatedScrollHandler,
+  useSharedValue
+} from 'react-native-reanimated';
 
 import { HelloWave } from '@/components/HelloWave';
 import { BurgerMenuButton } from '@/components/ui/BurgerMenuButton';
@@ -27,14 +35,68 @@ export default function HomeScreen() {
   // Animation for Explore Charts button
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
+  // Reanimated scroll handling
+  const scrollViewRef = useAnimatedRef<Reanimated.ScrollView>();
+  const scrollY = useSharedValue(0);
+  const isScrollingToTop = useSharedValue(false);
+
+  // Function to trigger animations (moved to separate function for reuse)
+  const triggerAnimations = useCallback(() => {
+    // Trigger wave animation
+    setWaveAnimationTrigger(prev => prev + 1);
+  }, []);
+
+  // Scroll handler to track position
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+      // Add occasional logging to track scroll position
+      if (Math.floor(event.contentOffset.y) % 100 === 0) {
+        console.log('🔍 Scroll position:', event.contentOffset.y);
+      }
+    },
+    onMomentumEnd: (event) => {
+      console.log('🔍 onMomentumEnd triggered, position:', event.contentOffset.y, 'isScrollingToTop:', isScrollingToTop.value);
+      // Check if we just finished scrolling to top and should trigger animations
+      if (isScrollingToTop.value && event.contentOffset.y <= 5) {
+        console.log('🔍 Scroll to top completed, triggering animations');
+        isScrollingToTop.value = false;
+        // Use the pre-defined function with runOnJS
+        runOnJS(triggerAnimations)();
+      }
+    },
+  });
+
+  // Function to handle scroll to top with animation coordination
+  const handleScrollToTopAndAnimate = useCallback(() => {
+    console.log('🔍 handleScrollToTopAndAnimate called, scrollY.value:', scrollY.value);
+
+    // Check if we need to scroll to top
+    if (scrollY.value > 10) { // Small threshold to avoid unnecessary scrolling
+      console.log('🔍 Need to scroll to top, current position:', scrollY.value);
+      isScrollingToTop.value = true;
+
+      // Use runOnUI to call scrollTo from UI thread
+      runOnUI(() => {
+        'worklet';
+        console.log('🔍 Calling scrollTo from UI thread');
+        scrollTo(scrollViewRef, 0, 0, true);
+      })();
+    } else {
+      console.log('🔍 Already at top, triggering animations immediately');
+      // Already at top, trigger animations immediately
+      triggerAnimations();
+    }
+  }, [triggerAnimations, scrollY, scrollViewRef, isScrollingToTop]);
+
   // Trigger wave animation immediately when splash screen finishes
   useEffect(() => {
     if (isSplashFinished && !hasTriggeredInitialAnimation) {
       // Trigger animation immediately after splash screen finishes
-      setWaveAnimationTrigger(prev => prev + 1);
+      handleScrollToTopAndAnimate();
       setHasTriggeredInitialAnimation(true);
     }
-  }, [isSplashFinished, hasTriggeredInitialAnimation]);
+  }, [isSplashFinished, hasTriggeredInitialAnimation, handleScrollToTopAndAnimate]);
 
   // Trigger wave animation when screen comes into focus (navigation)
   useFocusEffect(
@@ -43,12 +105,12 @@ export default function HomeScreen() {
       if (hasTriggeredInitialAnimation) {
         // Small delay to ensure screen is fully loaded
         const timer = setTimeout(() => {
-          setWaveAnimationTrigger(prev => prev + 1);
+          handleScrollToTopAndAnimate();
         }, 200);
 
         return () => clearTimeout(timer);
       }
-    }, [hasTriggeredInitialAnimation])
+    }, [hasTriggeredInitialAnimation, handleScrollToTopAndAnimate])
   );
 
   // Trigger button animation when waveAnimationTrigger changes
@@ -117,17 +179,18 @@ export default function HomeScreen() {
 
     setIsRefreshing(false);
 
-    // Trigger wave animation after successful refresh
-    setTimeout(() => {
-      setWaveAnimationTrigger(prev => prev + 1);
-    }, 100);
-  }, []);
+    // Trigger wave animation after successful refresh using the same mechanism
+    handleScrollToTopAndAnimate();
+  }, [handleScrollToTopAndAnimate]);
 
   return (
     <>
-      <ScrollView
+      <Reanimated.ScrollView
+        ref={scrollViewRef}
         style={[styles.container, isDark && styles.containerDark]}
         contentContainerStyle={styles.scrollContent}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -347,7 +410,7 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
-      </ScrollView>
+      </Reanimated.ScrollView>
 
       <BurgerMenuButton
         onPress={handleBurgerPress}
