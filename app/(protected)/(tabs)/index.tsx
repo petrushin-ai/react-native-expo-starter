@@ -296,14 +296,16 @@ export default function HomeScreen() {
           </View>
 
           {/* Kawaii Kitty Section */}
-          <View style={[styles.kawaiSection, isDark && styles.kawaiSectionDark]}>
-            <LottieAnimation
-              source={require('@/assets/lottie/splash.lottie')}
-              autoPlay
-              loop
-              size="medium"
-              style={styles.kittyAnimation}
-            />
+          <View style={[styles.kawaiCard, isDark && styles.kawaiCardDark]}>
+            <View style={styles.skyBackground}>
+              <LottieAnimation
+                source={require('@/assets/lottie/splash.lottie')}
+                autoPlay
+                loop
+                size="medium"
+                style={styles.kittyAnimation}
+              />
+            </View>
             <Text style={[styles.kawaiText, isDark && styles.textDark]}>
               頑張って！ (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧
             </Text>
@@ -545,17 +547,47 @@ const styles = StyleSheet.create({
     color: '#666',
     lineHeight: 20,
   },
-  kawaiSection: {
+  kawaiCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 40,
+    marginBottom: 20,
     alignItems: 'center',
-    paddingVertical: 8,
-    marginTop: 0,
-    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  kawaiSectionDark: {
-    backgroundColor: 'transparent',
+  kawaiCardDark: {
+    backgroundColor: '#2d2d2d',
+    borderColor: '#374151',
+  },
+  skyBackground: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#87CEEB',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    shadowColor: '#4A90E2',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   kittyAnimation: {
-    marginBottom: 16,
+    // Animation will be centered within the sky background
   },
   kawaiText: {
     fontSize: 20,
@@ -579,14 +611,11 @@ const styles = StyleSheet.create({
   },
   creditsSection: {
     alignItems: 'center',
-    paddingVertical: 24,
-    marginTop: 70,
-    paddingTop: 50,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    paddingVertical: 10,
+    marginTop: 20,
   },
   creditsSectionDark: {
-    borderTopColor: '#374151',
+    // No border styling needed
   },
   creditsTitle: {
     fontSize: 16,
