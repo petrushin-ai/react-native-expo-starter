@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useDrawerStatus } from '@react-navigation/drawer';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -19,6 +19,18 @@ export default function HomeScreen() {
   // State for pull-to-refresh and wave animation
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [waveAnimationTrigger, setWaveAnimationTrigger] = useState(0);
+
+  // Trigger wave animation when screen comes into focus (navigation)
+  useFocusEffect(
+    useCallback(() => {
+      // Small delay to ensure screen is fully loaded
+      const timer = setTimeout(() => {
+        setWaveAnimationTrigger(prev => prev + 1);
+      }, 200);
+
+      return () => clearTimeout(timer);
+    }, [])
+  );
 
   const handleBurgerPress = () => {
     if (isDrawerOpen) {
@@ -44,13 +56,15 @@ export default function HomeScreen() {
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
 
-    // Trigger wave animation
-    setWaveAnimationTrigger(prev => prev + 1);
-
     // Simulate loading delay (like fetching fresh data)
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     setIsRefreshing(false);
+
+    // Trigger wave animation after successful refresh
+    setTimeout(() => {
+      setWaveAnimationTrigger(prev => prev + 1);
+    }, 100);
   }, []);
 
   return (
@@ -76,7 +90,7 @@ export default function HomeScreen() {
           <View style={styles.welcomeSection}>
             <View style={styles.titleContainer}>
               <Text style={[styles.title, isDark && styles.textDark]}>Welcome!</Text>
-              <HelloWave />
+              <HelloWave trigger={waveAnimationTrigger} />
             </View>
             <Text style={[styles.subtitle, isDark && styles.textDark]}>
               Your modern React Native app is ready to go. Explore the features and start building something amazing!

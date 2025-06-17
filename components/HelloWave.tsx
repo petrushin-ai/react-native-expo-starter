@@ -1,71 +1,85 @@
 import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
-  withRepeat,
   withSequence,
-  withSpring
+  withSpring,
+  withTiming
 } from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/ThemedText';
 
-export function HelloWave() {
-  const rotationAnimation = useSharedValue(0);
-  const translateXAnimation = useSharedValue(0);
-  const translateYAnimation = useSharedValue(0);
+interface HelloWaveProps {
+  /** Trigger to restart the wave animation. Change this value to trigger a new animation */
+  trigger?: number;
+}
 
-  useEffect(() => {
-    // Create coordinated animation values for natural waving motion
-    const springConfig = {
-      damping: 10,
-      stiffness: 120,
-      mass: 0.6,
+export function HelloWave({ trigger = 0 }: HelloWaveProps) {
+  const rotationAnimation = useSharedValue(0);
+  const scaleAnimation = useSharedValue(1);
+  const opacityAnimation = useSharedValue(1);
+
+  const startProfessionalWaveAnimation = () => {
+    // Professional micro-animation with subtle movements
+    const timingConfig = {
+      duration: 600,
+      easing: Easing.bezier(0.25, 0.46, 0.45, 0.94), // Professional easing curve
     };
 
-    const waveSequence = withSequence(
-      // Wave right - rotate right, move right, slight bounce up
-      withSpring(8, springConfig),
-      // Wave left - rotate left, move left, slight bounce up  
-      withSpring(-8, springConfig),
-      // Wave right again
-      withSpring(8, springConfig),
-      // Return to center
-      withSpring(0, { ...springConfig, damping: 12 })
+    const springConfig = {
+      damping: 15,
+      stiffness: 200,
+      mass: 0.8,
+    };
+
+    // Subtle rotation sequence - much less exaggerated
+    const rotationSequence = withSequence(
+      withTiming(0, { duration: 0 }), // Reset to 0
+      withSpring(12, springConfig), // Gentle right wave
+      withSpring(-8, springConfig), // Gentle left wave  
+      withSpring(6, springConfig),  // Smaller right wave
+      withSpring(0, { ...springConfig, damping: 20 }) // Smooth return to center
     );
 
-    const translateXSequence = withSequence(
-      // Move right during right wave
-      withSpring(2, springConfig),
-      // Move left during left wave
-      withSpring(-2, springConfig),
-      // Move right again
-      withSpring(2, springConfig),
-      // Return to center
-      withSpring(0, { ...springConfig, damping: 12 })
+    // Subtle scale animation for emphasis
+    const scaleSequence = withSequence(
+      withTiming(1, { duration: 0 }), // Reset
+      withTiming(1.1, { duration: 150, easing: Easing.out(Easing.quad) }),
+      withTiming(0.95, { duration: 100, easing: Easing.inOut(Easing.quad) }),
+      withTiming(1.05, { duration: 120, easing: Easing.out(Easing.quad) }),
+      withTiming(1, { duration: 230, easing: Easing.out(Easing.quad) })
     );
 
-    const translateYSequence = withSequence(
-      // Slight bounce up during wave peaks
-      withSpring(-1, springConfig),
-      withSpring(-1, springConfig),
-      withSpring(-1, springConfig),
-      // Return to center
-      withSpring(0, { ...springConfig, damping: 12 })
+    // Subtle opacity pulse for attention
+    const opacitySequence = withSequence(
+      withTiming(1, { duration: 0 }), // Reset
+      withTiming(0.7, { duration: 100, easing: Easing.out(Easing.quad) }),
+      withTiming(1, { duration: 150, easing: Easing.out(Easing.quad) }),
+      withTiming(0.85, { duration: 100, easing: Easing.out(Easing.quad) }),
+      withTiming(1, { duration: 250, easing: Easing.out(Easing.quad) })
     );
 
     // Start all animations simultaneously for coordinated motion
-    rotationAnimation.value = withRepeat(waveSequence, 2, false);
-    translateXAnimation.value = withRepeat(translateXSequence, 2, false);
-    translateYAnimation.value = withRepeat(translateYSequence, 2, false);
-  }, [rotationAnimation, translateXAnimation, translateYAnimation]);
+    rotationAnimation.value = rotationSequence;
+    scaleAnimation.value = scaleSequence;
+    opacityAnimation.value = opacitySequence;
+  };
+
+  useEffect(() => {
+    // Only animate when trigger changes (not on initial mount)
+    if (trigger > 0) {
+      startProfessionalWaveAnimation();
+    }
+  }, [trigger]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateX: translateXAnimation.value },
-      { translateY: translateYAnimation.value },
+      { scale: scaleAnimation.value },
       { rotate: `${rotationAnimation.value}deg` },
     ],
+    opacity: opacityAnimation.value,
   }));
 
   return (
@@ -79,7 +93,6 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 28,
     lineHeight: 32,
-    // Removed margins to avoid affecting pivot point
     textAlign: 'center',
   },
 });
