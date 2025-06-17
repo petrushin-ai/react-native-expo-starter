@@ -45,9 +45,9 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     // Appearing animation configuration
     enableAppearAnimation = true,
     appearAnimationType = 'spring',
-    appearAnimationDuration = 1500,
+    appearAnimationDuration = 800, // 30% quicker than 2000ms (2000 * 0.7 = 1400ms)
     appearAnimationStagger = true,
-    appearAnimationStaggerDelay = 120,
+    appearAnimationStaggerDelay = 150, // Increased for more pronounced stagger
     onAppearAnimationComplete,
 }) => {
     // Responsive dimensions calculation
@@ -141,13 +141,13 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             hasTriggeredCallback.value = false;
             const animationConfig = appearAnimationType === 'spring'
                 ? withSpring(1, {
-                    damping: 12, // Reduced damping for smoother spring
-                    stiffness: 80, // Reduced stiffness for more fluid motion
-                    mass: 1.2 // Increased mass for better easing at the end
+                    damping: 20, // Increased damping for stronger ease-out
+                    stiffness: 60, // Further reduced stiffness for slower, smoother motion
+                    mass: 1.5 // Increased mass for more pronounced ease-out
                 })
                 : withTiming(1, {
                     duration: appearAnimationDuration,
-                    easing: require('react-native-reanimated').Easing.bezier(0.25, 0.1, 0.25, 1) // Custom easing for smooth end
+                    easing: require('react-native-reanimated').Easing.bezier(0.16, 1, 0.3, 1) // Enhanced ease-out curve
                 });
 
             appearProgress.value = animationConfig;
@@ -167,13 +167,13 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
 
             const animationConfig = appearAnimationType === 'spring'
                 ? withSpring(1, {
-                    damping: 12, // Reduced damping for smoother spring
-                    stiffness: 80, // Reduced stiffness for more fluid motion
-                    mass: 1.2 // Increased mass for better easing at the end
+                    damping: 20, // Increased damping for stronger ease-out
+                    stiffness: 60, // Further reduced stiffness for slower, smoother motion
+                    mass: 1.5 // Increased mass for more pronounced ease-out
                 })
                 : withTiming(1, {
                     duration: appearAnimationDuration,
-                    easing: require('react-native-reanimated').Easing.bezier(0.25, 0.1, 0.25, 1) // Custom easing for smooth end
+                    easing: require('react-native-reanimated').Easing.bezier(0.16, 1, 0.3, 1) // Enhanced ease-out curve
                 });
 
             appearProgress.value = animationConfig;
