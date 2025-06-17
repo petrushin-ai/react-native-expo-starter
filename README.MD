@@ -134,7 +134,139 @@ The home screen is your app's first impression. This one nails it with a clean l
   </tr>
 </table>
 
-Interactive charts that make data exploration fun. Drag across the bar chart to see values, tap legend items to filter data, or switch between different chart types. All running at 60fps because Victory Native XL is just that good.
+**Four powerful chart types that make data visualization a joy.** Each chart is built with **Victory Native XL** and **React Native Skia** for buttery-smooth 60fps performance. Every interaction feels native because it basically is - running on the UI thread with haptic feedback that makes touching data actually satisfying.
+
+#### **GestureLineChart** - The Data Explorer's Dream
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Line Chart (Light)</strong></td>
+    <td align="center"><strong>Line Chart (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/gesture_line_chart_light.jpg" alt="Gesture Line Chart (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/gesture_line_chart_dark.jpg" alt="Gesture Line Chart (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+**The most interactive line chart you've ever touched.** Drag your finger across the chart and watch tooltips follow with real-time haptic feedback. Switch between 12 different interpolation types instantly - from sharp linear lines to smooth catmullRom curves.
+
+**Key Features:**
+- **12 Interpolation Types**: `linear`, `natural`, `bumpX`, `bumpY`, `cardinal`, `catmullRom`, `step`, `monotoneX`, `basis`, and more
+- **Area Chart Mode**: Beautiful gradient fills that add depth to your data
+- **Gesture-Driven Tooltips**: Smooth tracking with haptic feedback on data point changes
+- **Data Point Toggle**: Show/hide data points with a tap - perfect for reducing visual clutter
+- **Smart Auto-Formatting**: Automatically converts large numbers (1000 → 1k, 1500 → 1.5k)
+- **Responsive Design**: Adapts to any screen size while maintaining performance
+- **Appearing Animations**: Staggered animations that make charts come alive
+- **Theme Aware**: Seamlessly switches between light and dark mode
+
+**Perfect for:** Time series data, trend analysis, financial charts, analytics dashboards, any data that changes over time.
+
+---
+
+#### 📊 **InteractiveBarChart** - Touch-Responsive Excellence
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Bar Chart (Light)</strong></td>
+    <td align="center"><strong>Bar Chart (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/interactive_bar_chart_light.jpg" alt="Interactive Bar Chart (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/interactive_bar_chart_dark.jpg" alt="Interactive Bar Chart (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+**Every bar tells a story, and this chart makes sure you hear it.** Drag across bars to see real-time selection with tooltips that actually help. The gradient effects and rounded corners make data beautiful without sacrificing clarity.
+
+**Key Features:**
+- **Real-Time Selection**: Drag across bars with instant visual feedback and haptic responses
+- **Gradient Support**: Customizable gradients with opacity control for stunning visual effects
+- **Smart Tooltips**: Auto-positioning tooltips with currency formatting and custom value formatters
+- **Rounded Corners**: Configurable corner radius for modern, polished aesthetics
+- **Selection States**: Visual highlighting of selected bars with smooth transitions
+- **Auto-Hide Tooltips**: Configurable auto-hide with customizable delays
+- **Responsive Layout**: Dynamic spacing and sizing based on available width
+- **Appearing Animations**: Bars animate in with optional staggered timing
+- **Accessibility**: Full haptic feedback and screen reader support
+
+**Perfect for:** Sales data, comparisons, rankings, monthly reports, any categorical data that needs clear visual hierarchy.
+
+---
+
+#### 🍩 **InteractiveRingChart** - The Complete Donut Experience
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Ring Chart (Light)</strong></td>
+    <td align="center"><strong>Ring Chart (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/interactive_ring_chart_light.jpg" alt="Interactive Ring Chart (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/interactive_ring_chart_dark.jpg" alt="Interactive Ring Chart (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+**Not just a donut chart - it's a data exploration playground.** Tap slices to highlight them, interact with the legend for instant filtering, and watch the center value update in real-time. The legend shows both absolute values and percentages, making it perfect for presentations.
+
+**Key Features:**
+- **Interactive Legend**: Click legend items to highlight chart segments with smooth animations
+- **Center Value Display**: Configurable center content showing totals, selections, or custom content
+- **Dual Information Display**: Shows both absolute values and percentages simultaneously
+- **Highlighting System**: Multiple highlight states (selected, highlighted, normal) with visual feedback
+- **Custom Color Palettes**: 10 beautiful default colors with full customization support
+- **Flexible Sizing**: Configurable inner radius (10% to 90%) for thin rings or wide donuts
+- **Corner Radius**: Rounded segment corners for modern aesthetics
+- **Segment Spacing**: Configurable padding between segments for better visual separation
+- **Responsive Legend**: Adapts layout based on available space and content
+- **Tooltip Integration**: Rich tooltips with value, percentage, and label information
+
+**Perfect for:** Market share analysis, survey results, portfolio breakdowns, demographic data, any part-to-whole relationships.
+
+---
+
+#### ⭕ **ThinRingChart** - Minimalist Perfection
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Thin Ring (Light)</strong></td>
+    <td align="center"><strong>Thin Ring (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/thin_ring_chart_light.jpg" alt="Thin Ring Chart (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/thin_ring_chart_dark.jpg" alt="Thin Ring Chart (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+**Sometimes less is more.** The ThinRingChart strips away complexity while keeping all the essential functionality. Perfect for dashboards where space is premium but data clarity is paramount.
+
+**Key Features:**
+- **Ultra-Thin Design**: Configurable ring thickness (5px to 50px) for subtle or bold presentations
+- **Compact Legend**: Space-efficient legend design optimized for small screens
+- **Focus on Data**: Minimal visual clutter with maximum information density
+- **Clean Center Display**: Simple total value display without overwhelming details
+- **Selective Interaction**: Focused on essential interactions without feature bloat
+- **Fast Rendering**: Optimized for performance with large datasets
+- **Consistent Theming**: Seamless light/dark mode transitions
+- **Responsive Sizing**: Automatically adapts to container constraints
+
+**Perfect for:** Dashboard widgets, KPI displays, status indicators, mobile-first designs, anywhere you need data clarity in minimal space.
+
+---
+
+**🎯 Why These Charts Win:**
+
+- **Performance First**: All charts run at 60fps thanks to Skia rendering on the UI thread
+- **Gesture Native**: Real haptic feedback makes every interaction feel satisfying
+- **Battle Tested**: Each chart type has been refined through real-world usage
+- **Theme Consistent**: Seamless light/dark mode support across all chart types
+- **TypeScript Ready**: Full type safety with comprehensive prop interfaces
+- **Customizable**: Every color, size, and behavior can be tailored to your needs
+- **Responsive**: From iPhone SE to iPad Pro, they look perfect everywhere
+- **Accessible**: Built with accessibility in mind from day one
+
+**The secret sauce?** Victory Native XL + React Native Skia + years of "why does this chart lag on Android?" debugging sessions. The result: charts that feel as smooth as native iOS animations, even on budget Android devices.
 
 ### 🎨 UI Components Showcase
 <table width="100%">
@@ -148,7 +280,338 @@ Interactive charts that make data exploration fun. Drag across the bar chart to 
   </tr>
 </table>
 
-A living style guide of every component in the kit. This isn't just for show - it's actually useful during development. Need to see how a button looks in dark mode? Want to test modal behaviors? It's all here, interactive and theme-aware.
+**A comprehensive collection of battle-tested UI components.** Every component has been refined through real-world usage, handles edge cases gracefully, and feels native on both platforms. No more wrestling with third-party components that break on Android or look weird in dark mode.
+
+#### 🔘 **Button** - The Foundation of Every App
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Button Variants (Light)</strong></td>
+    <td align="center"><strong>Button Variants (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/button_component_light.png" alt="Button Component (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/button_component_dark.png" alt="Button Component (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+**The button that handles everything you forgot to handle.** Loading states that don't cause layout shifts, haptic feedback that feels satisfying, and variants that work in every context. Built with accessibility in mind from day one.
+
+**Key Features:**
+- **4 Visual Variants**: `primary`, `secondary`, `outline`, `ghost` - each with perfect theme adaptation
+- **3 Size Options**: `small`, `medium`, `large` with proportional padding and typography
+- **Smart Loading States**: Lottie spinner with layout preservation - no jumping buttons
+- **Haptic Feedback**: Satisfying press animations with spring physics
+- **Layout Stability**: Minimum width calculations prevent content shifts during loading
+- **Accessibility Ready**: Full screen reader support with semantic labels
+- **Theme Consistency**: Seamless light/dark mode with proper contrast ratios
+- **TypeScript Complete**: Full type safety with comprehensive prop interfaces
+
+**Perfect for:** CTA buttons, form submissions, navigation actions, any interaction that needs to feel premium.
+
+---
+
+#### 📝 **Input & Form Components** - Data Entry Done Right
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Form Inputs (Light)</strong></td>
+    <td align="center"><strong>Form Inputs (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/input_components_light.jpg" alt="Input Components (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/input_components_dark.jpg" alt="Input Components (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+**Forms that don't make users cry.** Smart validation, error states that actually help, and keyboard handling that works on every Android device (yes, even the weird ones).
+
+**Input Component Features:**
+- **2 Visual Styles**: `default` border style and `filled` background style
+- **Smart Error Display**: Reserved space prevents layout jumps during validation
+- **Proper Labeling**: Semantic labels with optimal spacing and typography
+- **Theme Integration**: Consistent styling across light/dark modes
+- **Platform Optimization**: Different placeholder colors and focus states per platform
+
+**PhoneInput Component Features:**
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Phone Input (Light)</strong></td>
+    <td align="center"><strong>Phone Input (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/phone_input_light.png" alt="Phone Input (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/phone_input_dark.png" alt="Phone Input (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+- **International Support**: 200+ countries with proper flag displays and calling codes
+- **Smart Keyboard**: Responsive modal positioning that adapts to keyboard visibility
+- **Search & Filter**: Real-time country search with popular countries prioritization
+- **Validation Ready**: Built-in phone number validation with country-specific rules
+- **Accessibility**: Screen reader support with proper country announcements
+- **Theme Responsive**: Dark mode support with proper contrast ratios
+
+**DatePicker Component Features:**
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Date Picker (Light)</strong></td>
+    <td align="center"><strong>Date Picker (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/date_picker_light.png" alt="Date Picker (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/date_picker_dark.png" alt="Date Picker (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+- **Range Selection**: Single date or date range selection with intuitive UX
+- **Theme Adaptive**: Custom colors that follow your app's theme perfectly
+- **Gesture Friendly**: Smooth scrolling and navigation with haptic feedback
+- **Flexible Config**: Min/max dates, custom styling, localization support
+- **Mobile Optimized**: Touch targets sized for fat fingers, not mouse cursors
+
+**Perfect for:** Registration forms, profile editing, booking systems, any data collection that needs to feel effortless.
+
+---
+
+#### 🎭 **Modal & Overlays** - Context Without Confusion
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Modal System (Light)</strong></td>
+    <td align="center"><strong>Modal System (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/modal_components_light.png" alt="Modal Components (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/modal_components_dark.png" alt="Modal Components (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+**Modals that feel native, not like web popups.** Spring animations, proper backdrop handling, and keyboard-aware positioning. Users actually enjoy interacting with these.
+
+**Modal Component Features:**
+- **4 Semantic Types**: `error`, `success`, `info`, `warning` with appropriate color coding
+- **Smart Animation**: Spring-based animations that feel natural and responsive
+- **Flexible Actions**: Primary/secondary button configurations with custom handlers
+- **Backdrop Control**: Configurable dismiss behavior - tap outside or button-only
+- **Visual Hierarchy**: Accent bars and typography that guide user attention
+- **Keyboard Safe**: Proper handling of keyboard appearance on Android
+- **Theme Consistent**: Perfect contrast ratios and color schemes for both themes
+
+**PermissionModal Features:**
+- **Permission Flow**: Guided permission request with clear explanations
+- **System Integration**: Deep links to system settings when permissions are denied
+- **User Education**: Clear messaging about why permissions are needed
+- **Fallback Handling**: Graceful degradation when permissions are unavailable
+
+**Perfect for:** Confirmations, alerts, permission requests, any context that needs immediate attention without navigation.
+
+---
+
+#### 📱 **Interactive Components** - Touch That Responds
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Interactive UI (Light)</strong></td>
+    <td align="center"><strong>Interactive UI (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/interactive_components_light.png" alt="Interactive Components (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/interactive_components_dark.png" alt="Interactive Components (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+**Components that respond like they should.** Every touch feels intentional, every state change is smooth, and every interaction provides the right amount of feedback.
+
+**Dropdown Component Features:**
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Dropdown (Light)</strong></td>
+    <td align="center"><strong>Dropdown (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/dropdown_light.png" alt="Dropdown (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/dropdown_dark.png" alt="Dropdown (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+- **Multi-Select Support**: Single or multiple selection with visual indicators
+- **Search Integration**: Real-time filtering for large option lists
+- **Keyboard Navigation**: Full keyboard support for accessibility
+- **Custom Rendering**: Flexible item rendering with icons, descriptions, and badges
+- **Smart Positioning**: Auto-positioning to avoid screen edges and keyboard
+- **Performance Optimized**: Virtual scrolling for thousands of options
+
+**Switch Component Features:**
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Switch (Light)</strong></td>
+    <td align="center"><strong>Switch (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/switch_light.png" alt="Switch (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/switch_dark.png" alt="Switch (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+- **Platform Native**: iOS-style switches that feel natural on both platforms
+- **Smooth Animation**: 60fps transitions with proper easing curves
+- **Accessible**: Full screen reader support with state announcements
+- **Theme Adaptive**: Colors that automatically adjust to light/dark mode
+
+**Avatar Component Features:**
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Avatar (Light)</strong></td>
+    <td align="center"><strong>Avatar (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/avatar_light.png" alt="Avatar (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/avatar_dark.png" alt="Avatar (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+- **Multiple Sources**: Image URLs, local assets, or fallback initials
+- **Smart Fallbacks**: Graceful handling of failed image loads
+- **Size Variants**: Predefined sizes or custom dimensions
+- **Status Indicators**: Online/offline badges with customizable positions
+- **Performance**: Efficient image caching and loading states
+
+**ExpandableView Features:**
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>ExpandableView (Light)</strong></td>
+    <td align="center"><strong>ExpandableView (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/expandable_view_light.jpg" alt="ExpandableView (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/expandable_view_dark.jpg" alt="ExpandableView (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+- **Smooth Expansion**: Height animations that don't cause layout thrashing
+- **Content Aware**: Automatically measures content for perfect animations
+- **Nested Support**: Expandable views inside expandable views (because why not?)
+- **Gesture Friendly**: Tap anywhere to expand/collapse
+
+**Perfect for:** Settings screens, filters, user profiles, any interface that needs progressive disclosure.
+
+---
+
+#### 🎨 **Specialized Components** - The Power Tools
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Specialized Tools (Light)</strong></td>
+    <td align="center"><strong>Specialized Tools (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/specialized_components_light.png" alt="Specialized Components (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/specialized_components_dark.png" alt="Specialized Components (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+**The components that solve specific problems beautifully.** Document viewing, clipboard operations, theme switching, and animations - all the things that usually take weeks to get right.
+
+**PDFViewer Features:**
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>PDF Viewer (Light)</strong></td>
+    <td align="center"><strong>PDF Viewer (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/pdf_viewer_light.png" alt="PDF Viewer (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/pdf_viewer_dark.png" alt="PDF Viewer (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+- **Full Document Support**: View PDFs with zoom, pan, and page navigation
+- **Download Integration**: Save PDFs to device with proper file handling
+- **Platform Optimized**: Native PDF rendering on both iOS and Android
+- **Loading States**: Smooth loading indicators and error handling
+- **Share Integration**: Built-in sharing with system share sheet
+- **Memory Efficient**: Large document handling without crashes
+
+**ClipboardInput Features:**
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Clipboard Input (Light)</strong></td>
+    <td align="center"><strong>Clipboard Input (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/clipboard_input_light.png" alt="Clipboard Input (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/clipboard_input_dark.png" alt="Clipboard Input (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+- **One-Tap Copy**: Smart clipboard operations with visual feedback
+- **Content Validation**: Real-time validation for different content types
+- **Error Prevention**: Visual indicators for invalid content before copying
+- **Toast Integration**: Success/failure feedback that doesn't interrupt flow
+- **Format Support**: API keys, tokens, codes, URLs - all handled properly
+
+**LottieAnimation Features:**
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Lottie Animation (Light)</strong></td>
+    <td align="center"><strong>Lottie Animation (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/lottie_animation_light.png" alt="Lottie Animation (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/lottie_animation_dark.png" alt="Lottie Animation (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+- **Cross-Platform**: Optimized JSON for Android, dotLottie for iOS
+- **Performance First**: 60fps animations that don't block the main thread
+- **Size Variants**: Small, medium, large presets or custom dimensions
+- **Theme Integration**: Dynamic color adaptation for light/dark modes
+- **Safe Rendering**: Error boundaries and fallbacks for animation failures
+- **Memory Management**: Efficient loading and cleanup for complex animations
+
+**ThemeSelector Features:**
+
+<table width="100%">
+  <tr>
+    <td align="center"><strong>Theme Selector (Light)</strong></td>
+    <td align="center"><strong>Theme Selector (Dark)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/theme_selector_light.jpg" alt="Theme Selector (Light Mode)" width="100%"></td>
+    <td><img src="assets/readme/theme_selector_dark.jpg" alt="Theme Selector (Dark Mode)" width="100%"></td>
+  </tr>
+</table>
+
+- **Live Preview**: See theme changes in real-time before applying
+- **System Integration**: Respects system dark mode preferences
+- **Smooth Transitions**: Theme changes animate smoothly across the entire app
+- **Persistence**: Theme choices saved and restored between app launches
+
+**Perfect for:** Document apps, productivity tools, media applications, any app that needs specialized interactions.
+
+---
+
+**🎯 Why These Components Win:**
+
+- **Battle Tested**: Each component has survived real-world usage in production apps
+- **Platform Parity**: They work the same on iOS and Android (finally!)
+- **Performance Obsessed**: Every animation runs at 60fps, every interaction feels instant
+- **Accessibility First**: Screen readers, keyboard navigation, high contrast - it all just works
+- **TypeScript Native**: Full type safety with IntelliSense that actually helps
+- **Theme Consistent**: Perfect light/dark mode support without compromises
+- **Error Resilient**: Graceful handling of edge cases you haven't thought of yet
+- **Memory Safe**: No memory leaks, no infinite re-renders, no performance surprises
+
+**The secret sauce?** 15 years of debugging "why does this button not work on Android 8?" combined with obsessive attention to the details that make interactions feel magical.
 
 ### 📅 Calendar View
 <table width="100%">
