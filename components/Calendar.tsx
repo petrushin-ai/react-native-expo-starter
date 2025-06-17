@@ -1,4 +1,5 @@
 import { Colors } from '@/constants/Colors'
+import { FLOATING_TAB_BAR_COMPENSATION } from '@/constants/Layout'
 import { useColorScheme } from '@/hooks/useColorScheme'
 import { useResponsiveColumns } from '@/hooks/useResponsive'
 import { CalendarDayType, CalendarEvent, CalendarEventDay, MyCalendarItem } from '@/types/calendar'
@@ -6,6 +7,7 @@ import { addDays, addMonths, format, isBefore, isSameDay, isSameMonth, parseISO,
 import * as Haptics from 'expo-haptics'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Dimensions, NativeScrollEvent, NativeSyntheticEvent, Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
+
 
 interface CalendarProps {
     days: MyCalendarItem[]
@@ -1029,7 +1031,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
-        paddingBottom: 100,
+        paddingBottom: FLOATING_TAB_BAR_COMPENSATION,
     },
     calendarContainer: {
         paddingHorizontal: CALENDAR_PADDING,

@@ -1,6 +1,7 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { BurgerMenuButton } from '@/components/ui/BurgerMenuButton';
 import { Modal } from '@/components/ui/Modal';
+import { FLOATING_TAB_BAR_COMPENSATION } from '@/constants/Layout';
 import { useSession } from '@/contexts/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -47,7 +48,10 @@ export default function ProfileScreen() {
 
     return (
         <>
-            <ScrollView style={[styles.container, isDark && styles.containerDark]}>
+            <ScrollView
+                style={[styles.container, isDark && styles.containerDark]}
+                contentContainerStyle={{ paddingBottom: FLOATING_TAB_BAR_COMPENSATION }}
+            >
                 <View style={styles.content}>
                     {/* Profile Header Section */}
                     <View style={styles.profileHeaderSection}>
@@ -241,7 +245,6 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingTop: 60,
         paddingHorizontal: 20,
-        paddingBottom: 40,
     },
     textDark: {
         color: '#fff',

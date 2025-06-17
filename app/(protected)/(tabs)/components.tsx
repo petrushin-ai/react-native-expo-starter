@@ -11,6 +11,7 @@ import { Modal } from '@/components/ui/Modal';
 import PDFViewer, { PDFActionButton, PDFViewerModal } from '@/components/ui/PDFViewer';
 import { PhoneInput, isValidPhoneNumber, type ICountry } from '@/components/ui/PhoneInput';
 import { Switch } from '@/components/ui/Switch';
+import { FLOATING_TAB_BAR_COMPENSATION } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useFormValidation, validationRules } from '@/hooks/useFormValidation';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -393,7 +394,10 @@ export default function ComponentsScreen() {
                 barStyle={isDark ? 'light-content' : 'dark-content'}
                 backgroundColor={isDark ? '#111827' : '#F9FAFB'}
             />
-            <ScrollView style={[styles.container, isDark && styles.containerDark]}>
+            <ScrollView
+                style={[styles.container, isDark && styles.containerDark]}
+                contentContainerStyle={{ paddingBottom: FLOATING_TAB_BAR_COMPENSATION }}
+            >
                 <View style={styles.content}>
                     <Text style={[styles.pageTitle, isDark && styles.pageTitleDark]}>
                         Components

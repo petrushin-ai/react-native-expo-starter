@@ -1,6 +1,7 @@
 import { BurgerMenuButton } from '@/components/ui/BurgerMenuButton';
 import { Switch } from '@/components/ui/Switch';
 import { ThemeSelector } from '@/components/ui/ThemeSelector';
+import { FLOATING_TAB_BAR_COMPENSATION } from '@/constants/Layout';
 import {
     PermissionConfig,
     permissionDescriptions,
@@ -166,7 +167,10 @@ export default function SettingsScreen() {
 
     return (
         <>
-            <ScrollView style={[styles.container, isDark && styles.containerDark]}>
+            <ScrollView
+                style={[styles.container, isDark && styles.containerDark]}
+                contentContainerStyle={{ paddingBottom: FLOATING_TAB_BAR_COMPENSATION }}
+            >
                 <View style={styles.content}>
                     <Text style={[styles.title, isDark && styles.textDark]}>Settings</Text>
 

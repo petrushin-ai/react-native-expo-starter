@@ -1,3 +1,4 @@
+import { FLOATING_TAB_BAR_COMPENSATION } from '@/constants/Layout';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, useNavigation, useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
@@ -236,7 +237,11 @@ export default function ChartsScreen() {
                 barStyle={isDark ? 'light-content' : 'dark-content'}
                 backgroundColor={isDark ? '#111827' : '#F9FAFB'}
             />
-            <ScrollView showsVerticalScrollIndicator={false} style={[styles.container, isDark && styles.containerDark]}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                style={[styles.container, isDark && styles.containerDark]}
+                contentContainerStyle={{ paddingBottom: FLOATING_TAB_BAR_COMPENSATION }}
+            >
                 <View style={styles.content}>
                     <View style={styles.welcomeSection}>
                         <Text style={[styles.title, isDark && styles.textDark]}>

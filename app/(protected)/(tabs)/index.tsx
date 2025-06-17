@@ -16,6 +16,7 @@ import Reanimated, {
 import { HelloWave } from '@/components/HelloWave';
 import { BurgerMenuButton } from '@/components/ui/BurgerMenuButton';
 import { LottieAnimation } from '@/components/ui/LottieAnimation';
+import { FLOATING_TAB_BAR_COMPENSATION } from '@/constants/Layout';
 import { useSplash } from '@/contexts/SplashContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -430,12 +431,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: FLOATING_TAB_BAR_COMPENSATION,
   },
   content: {
     flex: 1,
     paddingTop: 60,
     paddingHorizontal: 20,
-    paddingBottom: 40,
   },
   welcomeSection: {
     marginBottom: 40,

@@ -5,6 +5,7 @@ import { Platform } from 'react-native';
 import { AnimatedTabButton } from '@/components/ui/AnimatedTabButton';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
+import { TAB_BAR_BOTTOM_MARGIN, TAB_BAR_HEIGHT } from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
@@ -36,9 +37,9 @@ export default function TabLayout() {
             // Floating tab bar design for iOS
             backgroundColor: tabBarBackgroundColor,
             paddingTop: 28,
-            height: 110,
+            height: TAB_BAR_HEIGHT,
             marginHorizontal: 10,
-            marginBottom: 22,
+            marginBottom: TAB_BAR_BOTTOM_MARGIN,
             borderRadius: 55,
             paddingHorizontal: 12,
             position: 'absolute',
@@ -54,9 +55,9 @@ export default function TabLayout() {
             // Floating tab bar design for Android and web
             backgroundColor: tabBarBackgroundColor,
             paddingTop: 23,
-            height: 110,
+            height: TAB_BAR_HEIGHT,
             marginHorizontal: 10,
-            marginBottom: 25,
+            marginBottom: TAB_BAR_BOTTOM_MARGIN,
             borderRadius: 55,
             paddingHorizontal: 20,
             position: 'absolute',

@@ -22,6 +22,10 @@ const MAPPING = {
   'gearshape.fill': 'settings',
   'square.grid.3x3.fill': 'grid-view',
   'chart.bar.fill': 'bar-chart',
+  'calendar': 'event',
+  'line.3.horizontal': 'menu',
+  'xmark': 'close',
+  'sparkles': 'auto-awesome',
 } as IconMapping;
 
 /**
