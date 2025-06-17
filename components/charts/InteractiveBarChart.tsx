@@ -47,7 +47,7 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     appearAnimationType = 'spring',
     appearAnimationDuration = 800, // 30% quicker than 2000ms (2000 * 0.7 = 1400ms)
     appearAnimationStagger = true,
-    appearAnimationStaggerDelay = 150, // Increased for more pronounced stagger
+    appearAnimationStaggerDelay = 50, // Increased for more pronounced stagger
     onAppearAnimationComplete,
 }) => {
     // Responsive dimensions calculation
