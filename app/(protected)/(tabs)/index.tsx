@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useDrawerStatus } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Easing, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -95,6 +96,18 @@ export default function HomeScreen() {
     (navigation as any).navigate('calendar');
   };
 
+  const handleTelegramPress = () => {
+    Linking.openURL('https://t.me/wedigital');
+  };
+
+  const handleGitHubPress = () => {
+    Linking.openURL('https://github.com/petrushin.ai');
+  };
+
+  const handleEmailPress = () => {
+    Linking.openURL('mailto:petrushin.a@live.ru');
+  };
+
   // Pull-to-refresh handler
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -136,7 +149,7 @@ export default function HomeScreen() {
               <HelloWave trigger={waveAnimationTrigger} />
             </View>
             <Text style={[styles.subtitle, isDark && styles.textDark]}>
-              Your modern React Native app is ready to go. Explore the features and start building something amazing!
+              This carefully crafted bootstrap combines the latest Expo & React Native versions with battle-tested components. Hours of debugging and integration work went into creating this production-ready UI kit for you!
             </Text>
           </View>
 
@@ -297,6 +310,39 @@ export default function HomeScreen() {
             <Text style={[styles.kawaiSubtext, isDark && styles.textDark]}>
               Ganbatte! You're doing great, keep coding! 🐱✨
             </Text>
+          </View>
+
+          {/* Credits Section */}
+          <View style={[styles.creditsSection, isDark && styles.creditsSectionDark]}>
+            <Text style={[styles.creditsTitle, isDark && styles.textDark]}>
+              Made with ❤️ by
+            </Text>
+
+            <View style={styles.creditsContainer}>
+              <TouchableOpacity
+                style={[styles.creditItem, isDark && styles.creditItemDark]}
+                onPress={handleTelegramPress}
+              >
+                <Ionicons name="send" size={20} color="#0088cc" />
+                <Text style={[styles.creditText, isDark && styles.textDark]}>@wedigital</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.creditItem, isDark && styles.creditItemDark]}
+                onPress={handleGitHubPress}
+              >
+                <Ionicons name="logo-github" size={20} color={isDark ? '#fff' : '#333'} />
+                <Text style={[styles.creditText, isDark && styles.textDark]}>petrushin.ai</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.creditItem, isDark && styles.creditItemDark]}
+                onPress={handleEmailPress}
+              >
+                <Ionicons name="mail" size={20} color="#ea4335" />
+                <Text style={[styles.creditText, isDark && styles.textDark]}>petrushin.a@live.ru</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -530,5 +576,48 @@ const styles = StyleSheet.create({
   },
   actionButtonTitleDark: {
     color: '#6B7280',
+  },
+  creditsSection: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    marginTop: 70,
+    paddingTop: 50,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  creditsSectionDark: {
+    borderTopColor: '#374151',
+  },
+  creditsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 40,
+  },
+  creditsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  creditItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    gap: 6,
+  },
+  creditItemDark: {
+    backgroundColor: '#2d2d2d',
+    borderColor: '#374151',
+  },
+  creditText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
   },
 });
