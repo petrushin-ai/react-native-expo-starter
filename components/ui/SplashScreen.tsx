@@ -1,7 +1,7 @@
 import * as SplashScreenAPI from 'expo-splash-screen';
-import LottieView from 'lottie-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, StyleSheet, Text, View } from 'react-native';
+import { LottieAnimation, LottieView } from './LottieAnimation';
 
 interface SplashScreenProps {
     onFinish: () => void;
@@ -44,6 +44,9 @@ export default function SplashScreen({ onFinish, isReady }: SplashScreenProps) {
         }
     }, [isReady, isLayoutReady, fadeAnim, onFinish]);
 
+    // Calculate animation size with proper Android handling
+    const animationSize = Math.min(screenWidth * 0.6, 250);
+
     return (
         <Animated.View
             style={[styles.container, { opacity: fadeAnim }]}
@@ -51,13 +54,16 @@ export default function SplashScreen({ onFinish, isReady }: SplashScreenProps) {
             pointerEvents="none"
         >
             <View style={styles.content}>
-                <LottieView
+                <LottieAnimation
                     ref={lottieRef}
-                    style={styles.animation}
-                    source={require('../../assets/lottie/splash.lottie')}
+                    animationName="splash"
+                    width={animationSize}
+                    height={animationSize}
                     autoPlay
                     loop
-                    resizeMode="contain"
+                    androidOptimized={true}
+                    enableSafeMode={true}
+                    style={styles.animation}
                 />
                 <View style={styles.textContainer}>
                     <Text style={styles.appName}>React Native Expo</Text>
@@ -87,8 +93,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 40,
     },
     animation: {
-        width: Math.min(screenWidth * 0.6, 250),
-        height: Math.min(screenWidth * 0.6, 250),
+        // Remove explicit width/height since they're now handled by LottieAnimation component
+        alignSelf: 'center',
     },
     textContainer: {
         marginTop: 30,

@@ -362,7 +362,7 @@ export default function HomeScreen() {
           <View style={[styles.kawaiCard, isDark && styles.kawaiCardDark]}>
             <View style={styles.skyBackground}>
               <LottieAnimation
-                source={require('@/assets/lottie/splash.lottie')}
+                animationName="splash"
                 autoPlay
                 loop
                 size="medium"

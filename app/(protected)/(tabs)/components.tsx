@@ -960,28 +960,34 @@ export default function ComponentsScreen() {
                                 <View style={styles.lottieItem}>
                                     <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Small</Text>
                                     <LottieAnimation
-                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        animationName="spinner"
                                         size="small"
                                         autoPlay={lottieAutoPlay}
                                         loop={lottieLoop}
+                                        androidOptimized={true}
+                                        enableSafeMode={true}
                                     />
                                 </View>
                                 <View style={styles.lottieItem}>
                                     <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Medium</Text>
                                     <LottieAnimation
-                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        animationName="spinner"
                                         size="medium"
                                         autoPlay={lottieAutoPlay}
                                         loop={lottieLoop}
+                                        androidOptimized={true}
+                                        enableSafeMode={true}
                                     />
                                 </View>
                                 <View style={styles.lottieItem}>
                                     <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Large</Text>
                                     <LottieAnimation
-                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        animationName="spinner"
                                         size="large"
                                         autoPlay={lottieAutoPlay}
                                         loop={lottieLoop}
+                                        androidOptimized={true}
+                                        enableSafeMode={true}
                                     />
                                 </View>
                             </View>
@@ -994,10 +1000,12 @@ export default function ComponentsScreen() {
                             <View style={styles.lottieControlContainer}>
                                 <LottieAnimation
                                     ref={lottieRef1}
-                                    source={require('@/assets/lottie/spinner.lottie')}
+                                    animationName="spinner"
                                     size="medium"
                                     autoPlay={false}
                                     loop={false}
+                                    androidOptimized={true}
+                                    enableSafeMode={true}
                                 />
                                 <View style={styles.lottieButtons}>
                                     <Button
@@ -1027,16 +1035,18 @@ export default function ComponentsScreen() {
                                 <View style={styles.lottieItem}>
                                     <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Default</Text>
                                     <LottieAnimation
-                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        animationName="spinner"
                                         size="medium"
                                         autoPlay={lottieAutoPlay}
                                         loop={lottieLoop}
+                                        androidOptimized={true}
+                                        enableSafeMode={true}
                                     />
                                 </View>
                                 <View style={styles.lottieItem}>
                                     <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Blue Theme</Text>
                                     <LottieAnimation
-                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        animationName="spinner"
                                         size="medium"
                                         autoPlay={lottieAutoPlay}
                                         loop={lottieLoop}
@@ -1044,12 +1054,14 @@ export default function ComponentsScreen() {
                                         colorFilters={[
                                             { keypath: "**", color: isDark ? "#60A5FA" : "#3B82F6" }
                                         ]}
+                                        androidOptimized={true}
+                                        enableSafeMode={true}
                                     />
                                 </View>
                                 <View style={styles.lottieItem}>
                                     <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Green Theme</Text>
                                     <LottieAnimation
-                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        animationName="spinner"
                                         size="medium"
                                         autoPlay={lottieAutoPlay}
                                         loop={lottieLoop}
@@ -1057,6 +1069,8 @@ export default function ComponentsScreen() {
                                         colorFilters={[
                                             { keypath: "**", color: isDark ? "#34D399" : "#10B981" }
                                         ]}
+                                        androidOptimized={true}
+                                        enableSafeMode={true}
                                     />
                                 </View>
                             </View>
@@ -1064,7 +1078,7 @@ export default function ComponentsScreen() {
                                 <View style={styles.lottieItem}>
                                     <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Red Theme</Text>
                                     <LottieAnimation
-                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        animationName="spinner"
                                         size="medium"
                                         autoPlay={lottieAutoPlay}
                                         loop={lottieLoop}
@@ -1072,12 +1086,14 @@ export default function ComponentsScreen() {
                                         colorFilters={[
                                             { keypath: "**", color: isDark ? "#F87171" : "#EF4444" }
                                         ]}
+                                        androidOptimized={true}
+                                        enableSafeMode={true}
                                     />
                                 </View>
                                 <View style={styles.lottieItem}>
                                     <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Purple Theme</Text>
                                     <LottieAnimation
-                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        animationName="spinner"
                                         size="medium"
                                         autoPlay={lottieAutoPlay}
                                         loop={lottieLoop}
@@ -1085,12 +1101,14 @@ export default function ComponentsScreen() {
                                         colorFilters={[
                                             { keypath: "**", color: isDark ? "#A78BFA" : "#8B5CF6" }
                                         ]}
+                                        androidOptimized={true}
+                                        enableSafeMode={true}
                                     />
                                 </View>
                                 <View style={styles.lottieItem}>
                                     <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>Orange Theme</Text>
                                     <LottieAnimation
-                                        source={require('@/assets/lottie/spinner.lottie')}
+                                        animationName="spinner"
                                         size="medium"
                                         autoPlay={lottieAutoPlay}
                                         loop={lottieLoop}
@@ -1098,6 +1116,8 @@ export default function ComponentsScreen() {
                                         colorFilters={[
                                             { keypath: "**", color: isDark ? "#FB923C" : "#F97316" }
                                         ]}
+                                        androidOptimized={true}
+                                        enableSafeMode={true}
                                     />
                                 </View>
                             </View>

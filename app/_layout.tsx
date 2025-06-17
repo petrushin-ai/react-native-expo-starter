@@ -80,21 +80,19 @@ function AppContent() {
   }
 
   return (
-    <>
-      <CustomThemeProvider>
-        <SessionProvider>
-          <NotificationProvider>
-            <ThemedApp />
-          </NotificationProvider>
-        </SessionProvider>
-      </CustomThemeProvider>
+    <CustomThemeProvider>
+      <SessionProvider>
+        <NotificationProvider>
+          <ThemedApp />
+        </NotificationProvider>
+      </SessionProvider>
       {showSplash && (
         <CustomSplashScreen
           onFinish={onSplashFinish}
           isReady={appIsReady}
         />
       )}
-    </>
+    </CustomThemeProvider>
   );
 }
 

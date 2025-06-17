@@ -272,7 +272,7 @@ export function Button({
                     ]}>
                         {loading && (
                             <LottieAnimation
-                                source={require('@/assets/lottie/spinner.lottie')}
+                                animationName="spinner"
                                 width={getSpinnerSize().width}
                                 height={getSpinnerSize().height}
                                 autoPlay={true}
