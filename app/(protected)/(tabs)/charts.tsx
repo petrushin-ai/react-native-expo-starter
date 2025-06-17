@@ -169,7 +169,7 @@ export default function ChartsScreen() {
             <Stack.Screen
                 options={{
                     headerShown: true,
-                    title: 'Interactive Charts',
+                    title: 'Charts',
                     headerStyle: {
                         backgroundColor: isDark ? '#111827' : '#F9FAFB',
                     },

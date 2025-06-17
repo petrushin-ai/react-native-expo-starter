@@ -137,7 +137,7 @@ export default function ComponentsScreen() {
             <Stack.Screen
                 options={{
                     headerShown: true,
-                    title: 'UI Components',
+                    title: 'UI',
                     headerStyle: {
                         backgroundColor: isDark ? '#111827' : '#F9FAFB',
                     },
@@ -179,6 +179,9 @@ export default function ComponentsScreen() {
             />
             <ScrollView style={[styles.container, isDark && styles.containerDark]}>
                 <View style={styles.content}>
+                    <Text style={[styles.pageTitle, isDark && styles.pageTitleDark]}>
+                        Components
+                    </Text>
 
                     {/* Button Components */}
                     <View style={styles.section}>
@@ -748,6 +751,17 @@ const styles = StyleSheet.create({
     content: {
         paddingHorizontal: 24,
         paddingVertical: 32,
+    },
+    pageTitle: {
+        fontSize: 32,
+        fontWeight: '700',
+        color: '#111827',
+        marginBottom: 32,
+        letterSpacing: -0.5,
+        textAlign: 'left',
+    },
+    pageTitleDark: {
+        color: '#F9FAFB',
     },
     title: {
         fontSize: 32,
