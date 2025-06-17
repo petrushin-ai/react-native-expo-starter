@@ -305,7 +305,7 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
 
         // Note: onBarPress is now called during dragging in updateTooltipAndSelection
         // This ensures real-time selection updates while dragging
-    }, [isActive, state.x.value, data, onBarPress, showTooltip]);
+    }, [isActive, data, onBarPress, showTooltip]); // Removed state.x.value to prevent Reanimated warning
 
     // Default configuration with enhanced padding for tooltips
     const defaultConfig = {

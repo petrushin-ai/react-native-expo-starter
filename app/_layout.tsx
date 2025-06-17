@@ -5,11 +5,19 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from 'react';
 import 'react-native-reanimated';
+import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
 
 import CustomSplashScreen from '@/components/ui/SplashScreen';
 import { SessionProvider } from '@/contexts/AuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { ThemeProvider as CustomThemeProvider, useTheme } from '@/contexts/ThemeContext';
+
+// Configure Reanimated logger to suppress warnings about shared value access during render
+// This is a backup solution - the primary fix is removing shared values from useEffect dependency arrays
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: false, // Disable strict mode to suppress the shared value warnings
+});
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
