@@ -60,6 +60,13 @@ export default function ProtectedLayout() {
                             title: 'Home',
                         }}
                     />
+                    <Drawer.Screen
+                        name="calendar"
+                        options={{
+                            drawerLabel: 'Calendar',
+                            title: 'Calendar',
+                        }}
+                    />
                 </Drawer>
             </GestureHandlerRootView>
 

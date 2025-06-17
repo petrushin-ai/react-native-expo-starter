@@ -27,6 +27,7 @@ const drawerItems: DrawerItem[] = [
     { name: 'index', title: 'Home', icon: 'house.fill', route: '/(protected)/(tabs)' },
     { name: 'charts', title: 'Charts', icon: 'chart.bar.fill', route: '/(protected)/(tabs)/charts' },
     { name: 'components', title: 'Components', icon: 'square.grid.3x3.fill', route: '/(protected)/(tabs)/components' },
+    { name: 'calendar', title: 'Calendar', icon: 'calendar', route: '/(protected)/calendar' },
     { name: 'profile', title: 'Profile', icon: 'person.fill', route: '/(protected)/(tabs)/profile' },
     { name: 'settings', title: 'Settings', icon: 'gearshape.fill', route: '/(protected)/(tabs)/settings' },
 ];
