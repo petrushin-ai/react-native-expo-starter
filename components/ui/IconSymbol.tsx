@@ -21,6 +21,7 @@ const MAPPING = {
   'person.fill': 'person',
   'gearshape.fill': 'settings',
   'square.grid.3x3.fill': 'grid-view',
+  'chart.bar.fill': 'bar-chart',
 } as IconMapping;
 
 /**

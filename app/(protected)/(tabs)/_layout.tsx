@@ -21,6 +21,13 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '500',
+          marginTop: 4,
+        },
+        tabBarIconStyle: {
+          marginBottom: 2,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 0,
         },
         headerShown: false,
         tabBarButton: AnimatedTabButton,
@@ -28,14 +35,14 @@ export default function TabLayout() {
           ios: {
             // Use solid background on iOS for better theme support
             backgroundColor: tabBarBackgroundColor,
-            paddingTop: 8,
-            height: 95, // Increased height for labels and better tap targets
+            paddingTop: 18,
+            height: 100, // Increased height for labels and better tap targets
           },
           default: {
             // Use solid background color for Android and web
             backgroundColor: tabBarBackgroundColor,
-            paddingTop: 8,
-            height: 75, // Increased height for labels and better tap targets
+            paddingTop: 22,
+            height: 85, // Increased height for labels and better tap targets
           },
         }),
       }}>
