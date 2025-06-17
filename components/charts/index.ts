@@ -1,6 +1,7 @@
 // Export chart components
 export { default as GestureLineChart } from './GestureLineChart';
 export { default as InteractiveBarChart } from './InteractiveBarChart';
+export { default as InteractiveRingChart } from './InteractiveRingChart';
 
 // Export all types
 export type {
@@ -10,7 +11,10 @@ export type {
     // Utility types
     ChartTheme, GestureLineChartProps,
     // Component props types
-    InteractiveBarChartProps, LineChartConfig,
+    InteractiveBarChartProps, InteractiveRingChartProps, LegendConfig, LegendItem, LineChartConfig,
     // Configuration types
-    LineDataItem
+    LineDataItem, RingChartConfig,
+    // Ring chart types
+    RingDataItem
 } from './types';
+

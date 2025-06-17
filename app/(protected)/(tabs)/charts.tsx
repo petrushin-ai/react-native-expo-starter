@@ -6,11 +6,15 @@ import { Dimensions, ScrollView, StatusBar, StyleSheet, TouchableOpacity } from 
 import {
     GestureLineChart,
     InteractiveBarChart,
+    InteractiveRingChart,
     type BarChartConfig,
     type BarDataItem,
     type ChartTheme,
+    type LegendItem,
     type LineChartConfig,
-    type LineDataItem
+    type LineDataItem,
+    type RingChartConfig,
+    type RingDataItem
 } from '@/components/charts';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -54,7 +58,12 @@ const generateLineChartData = (): LineDataItem[] => [
     { value: 95, label: 'Oct' },
 ];
 
-
+const generateRingChartData = (): RingDataItem[] => [
+    { label: 'Mobile', value: 45, color: '#3B82F6' },
+    { label: 'Desktop', value: 35, color: '#10B981' },
+    { label: 'Tablet', value: 15, color: '#F59E0B' },
+    { label: 'Other', value: 5, color: '#EF4444' },
+];
 
 // Chart configuration factories for Victory Native XL
 const createBarChartConfig = (theme: ChartTheme): BarChartConfig => ({
@@ -92,7 +101,19 @@ const createLineChartConfig = (theme: ChartTheme): LineChartConfig => ({
     spacing: Math.max(18, (safeChartWidth - 60) / 10), // Dynamic spacing based on safe width
 });
 
-
+const createRingChartConfig = (theme: ChartTheme): RingChartConfig => ({
+    width: 300,
+    height: 300,
+    innerRadius: '45%',
+    isAnimated: true,
+    animationDuration: 1200,
+    animateOnDataChange: true,
+    onDataChangeAnimationDuration: 600,
+    padAngle: 3,
+    cornerRadius: 4,
+    enableGradients: false,
+    showLabels: false,
+});
 
 export default function ChartsScreen() {
     const colorScheme = useColorScheme();
@@ -113,10 +134,12 @@ export default function ChartsScreen() {
     // Generate data with theme awareness and refresh key for forcing regeneration
     const barData = useMemo(() => generateBarChartData(colorScheme), [colorScheme, refreshKey]);
     const lineData = useMemo(() => generateLineChartData(), [refreshKey]);
+    const ringData = useMemo(() => generateRingChartData(), [refreshKey]);
 
     // Create configurations
     const barConfig = useMemo(() => createBarChartConfig(colorScheme), [colorScheme]);
     const lineConfig = useMemo(() => createLineChartConfig(colorScheme), [colorScheme]);
+    const ringConfig = useMemo(() => createRingChartConfig(colorScheme), [colorScheme]);
 
     // Enhanced event handlers with real-time selection updates
     const handleBarPress = (item: BarDataItem, index: number) => {
@@ -301,6 +324,42 @@ export default function ChartsScreen() {
                     showDataPointTooltip={false}
                 />
 
+                {/* Interactive Ring Chart */}
+                <InteractiveRingChart
+                    data={ringData}
+                    config={ringConfig}
+                    title="Device Usage Distribution"
+                    description="Ring chart • Click legend to view details in center • Total shows all data"
+                    theme={colorScheme}
+                    showLegend={true}
+                    showCenterValue={true}
+                    centerValue="100%"
+                    centerLabel="Total"
+                    centerTextSize={24}
+                    centerTextColor={isDark ? '#F9FAFB' : '#111827'}
+                    enableAppearAnimation={true}
+                    appearAnimationType="spring"
+                    appearAnimationDuration={1200}
+                    appearAnimationStagger={true}
+                    appearAnimationStaggerDelay={150}
+                    legendConfig={{
+                        position: 'bottom',
+                        showValues: true,
+                        showPercentages: true,
+                        fontSize: 14,
+                        fontWeight: '500',
+                        textColor: isDark ? '#F9FAFB' : '#374151',
+                        highlightTextColor: isDark ? '#60A5FA' : '#3B82F6',
+                        itemSpacing: 8,
+                        rowSpacing: 12,
+                        indicatorSize: 12,
+                        indicatorShape: 'circle',
+                    }}
+                    onLegendItemPress={(item: LegendItem, index: number) => {
+                        console.log('Ring chart legend item pressed:', item.label, item.value);
+                    }}
+                />
+
 
             </ScrollView>
 
@@ -308,7 +367,7 @@ export default function ChartsScreen() {
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
                 title="Interactive Charts Showcase"
-                message="This page demonstrates interactive chart components with gesture support, animations, and theme awareness. Features include multiple interpolation types (natural, cardinal, step, linear), configurable data point sizes (3px to 8px), static data point tooltips that hide during dragging, enhanced dynamic tooltips, real-time selection feedback, responsive design, and individual data point toggles for line charts. Use the refresh button to regenerate data and each chart's toggle button to control static data points visibility."
+                message="This page demonstrates interactive chart components with gesture support, animations, and theme awareness. Features include multiple interpolation types (natural, cardinal, step, linear), configurable data point sizes (3px to 8px), static data point tooltips that hide during dragging, enhanced dynamic tooltips, real-time selection feedback, responsive design, individual data point toggles for line charts, and interactive ring charts with legend highlighting and center value display. Use the refresh button to regenerate data and each chart's toggle button to control static data points visibility."
                 type="info"
                 primaryButtonText="Got it"
                 secondaryButtonText="Close"

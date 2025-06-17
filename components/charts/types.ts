@@ -30,7 +30,14 @@ export interface LineDataItem {
     originalIndex?: number;
 }
 
-
+export interface RingDataItem {
+    label: string;      // segment label
+    value: number;      // segment value (must be number)
+    color: string;      // segment color (required for ring charts)
+    // Additional metadata for interactions
+    originalIndex?: number;
+    percentage?: number; // calculated percentage (auto-calculated)
+}
 
 // Victory Native XL Chart Configuration Types
 export interface VictoryBarChartConfig {
@@ -115,7 +122,48 @@ export interface LineChartConfig {
     onPress?: (item: LineDataItem, index: number) => void;
 }
 
+export interface RingChartConfig {
+    // Chart dimensions
+    width?: number;
+    height?: number;
+    size?: number; // Chart size (defaults to canvas width/height)
 
+    // Ring/donut specific
+    innerRadius?: number | string; // Inner radius for donut effect (number or percentage like "50%")
+    outerRadius?: number;          // Outer radius
+    padAngle?: number;             // Separation between slices in degrees
+    cornerRadius?: number;         // Corner radius for rounded slices
+
+    // Angular configuration
+    startAngle?: number;           // Starting angle (default: 0)
+    endAngle?: number;             // Ending angle (default: 360)
+    circleSweepDegrees?: number;   // How many degrees to draw (default: 360)
+
+    // Animations
+    isAnimated?: boolean;
+    animationDuration?: number;
+    animateOnDataChange?: boolean;
+    onDataChangeAnimationDuration?: number;
+
+    // Slice styling
+    strokeWidth?: number;
+    strokeColor?: string;
+
+    // Labels on slices
+    showLabels?: boolean;
+    labelFont?: any; // SkFont from react-native-skia
+    labelColor?: string;
+    labelRadiusOffset?: number; // Distance from center for labels
+    labelPosition?: 'centroid' | 'startAngle' | 'endAngle';
+    labelPlacement?: 'parallel' | 'perpendicular' | 'vertical';
+
+    // Gradients and effects
+    enableGradients?: boolean;
+    gradientOpacity?: number; // 0-1
+
+    // Interaction
+    onSlicePress?: (item: RingDataItem, index: number) => void;
+}
 
 // Component Props Types for Victory Native XL
 export interface InteractiveBarChartProps {
@@ -194,7 +242,92 @@ export interface GestureLineChartProps {
     onAppearAnimationComplete?: () => void; // Optional - callback when animation completes
 }
 
+// Legend types for ring chart
+export interface LegendItem {
+    label: string;
+    color: string;
+    value: number;
+    percentage?: number;
+    isHighlighted?: boolean;
+    originalIndex: number;
+}
 
+export interface LegendConfig {
+    position?: 'right' | 'bottom' | 'left' | 'top';
+    alignment?: 'start' | 'center' | 'end';
+    itemSpacing?: number;
+    rowSpacing?: number;
+    itemsPerRow?: number;
+    showValues?: boolean;
+    showPercentages?: boolean;
+    fontSize?: number;
+    fontWeight?: string;
+    textColor?: string;
+    highlightTextColor?: string;
+    backgroundColor?: string;
+    borderRadius?: number;
+    padding?: number;
+    indicatorSize?: number;
+    indicatorShape?: 'circle' | 'square' | 'line';
+    onItemPress?: (item: LegendItem, index: number) => void;
+}
+
+export interface InteractiveRingChartProps {
+    data: RingDataItem[];
+    config?: RingChartConfig;
+    title?: string;
+    description?: string;
+    theme?: 'light' | 'dark';
+
+    // Ring chart specific props
+    selectedIndex?: number | null;
+    highlightedIndex?: number | null; // For legend highlighting
+    onSlicePress?: (item: RingDataItem, index: number) => void;
+
+    // Legend configuration
+    showLegend?: boolean;
+    legendConfig?: LegendConfig;
+    onLegendItemPress?: (item: LegendItem, index: number) => void;
+
+    // Center content (for donut charts)
+    showCenterValue?: boolean;
+    centerValue?: string | number;
+    centerLabel?: string;
+    centerTextSize?: number;
+    centerTextColor?: string;
+
+    // Tooltip configuration
+    showTooltip?: boolean;
+    tooltipConfig?: {
+        showValue?: boolean;
+        showPercentage?: boolean;
+        showLabel?: boolean;
+        currencySymbol?: string;
+        currencyPosition?: 'before' | 'after';
+        formatValue?: (value: number) => string;
+        backgroundColor?: string;
+        textColor?: string;
+        borderRadius?: number;
+        fontSize?: number;
+        fontWeight?: string;
+        paddingHorizontal?: number;
+        paddingVertical?: number;
+        minWidth?: number;
+        autoHide?: boolean;
+        autoHideDelay?: number;
+    };
+
+    // Chart layout configuration
+    padding?: number | { left?: number; right?: number; top?: number; bottom?: number };
+
+    // Appearing animation configuration
+    enableAppearAnimation?: boolean;
+    appearAnimationType?: 'timing' | 'spring';
+    appearAnimationDuration?: number;
+    appearAnimationStagger?: boolean;
+    appearAnimationStaggerDelay?: number;
+    onAppearAnimationComplete?: () => void;
+}
 
 // Legacy types for backward compatibility
 export interface BarChartConfig extends VictoryBarChartConfig { }
