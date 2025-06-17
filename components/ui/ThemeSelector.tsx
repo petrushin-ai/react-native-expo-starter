@@ -2,6 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+
+import ExpandableView from '@/components/ui/ExpandableView';
 import { Switch } from '@/components/ui/Switch';
 import { useTheme, type ThemeMode } from '@/contexts/ThemeContext';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -116,13 +118,19 @@ export function ThemeSelector({ compact = false }: ThemeSelectorProps) {
                 ))}
             </View>
 
-            {themeMode === 'system' && (
-                <View style={styles.systemInfo}>
-                    <Text style={[styles.systemInfoText, { color: mutedTextColor }]}>
-                        Currently using {colorScheme} mode based on your device settings
+            <ExpandableView expanded={themeMode !== 'system'}>
+                <TouchableOpacity
+                    style={[styles.resetButton, { borderColor }]}
+                    onPress={() => handleThemeChange('system')}
+                    accessibilityLabel="Reset theme to system default"
+                >
+                    <Ionicons name="refresh-outline" size={16} color={mutedTextColor} />
+                    <Text style={[styles.resetButtonText, { color: mutedTextColor }]}>
+                        Reset to System Default
                     </Text>
-                </View>
-            )}
+                </TouchableOpacity>
+            </ExpandableView>
+
         </View>
     );
 }
@@ -133,6 +141,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         padding: 16,
         marginVertical: 8,
+        marginBottom: 40,
     },
     compactContainer: {
         flexDirection: 'row',
@@ -203,15 +212,18 @@ const styles = StyleSheet.create({
         fontSize: 14,
         marginTop: 2,
     },
-    systemInfo: {
-        marginTop: 12,
-        padding: 12,
+    resetButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 16,
         borderRadius: 8,
-        backgroundColor: 'rgba(0,0,0,0.05)',
+        borderWidth: 1,
+        marginTop: 16,
     },
-    systemInfoText: {
-        fontSize: 14,
-        textAlign: 'center',
-        fontStyle: 'italic',
+    resetButtonText: {
+        fontSize: 16,
+        fontWeight: '500',
+        marginLeft: 8,
     },
 }); 

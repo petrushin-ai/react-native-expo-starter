@@ -9,9 +9,11 @@ import {
     permissionsDebugMode
 } from '@/constants/permissionsConfig';
 import { useNotificationContext } from '@/contexts/NotificationContext';
+
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useStartupPermissions } from '@/hooks/useStartupPermissions';
+
 import { useDrawerStatus } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
@@ -29,6 +31,7 @@ import {
 
 export default function SettingsScreen() {
     const colorScheme = useColorScheme();
+
     const isDark = colorScheme === 'dark';
     const navigation = useNavigation();
     const drawerStatus = useDrawerStatus();
@@ -169,6 +172,8 @@ export default function SettingsScreen() {
 
                     {/* Theme Section */}
                     <ThemeSelector />
+
+
 
                     {/* Push Notifications Section */}
                     {notificationsSupported && (
@@ -516,4 +521,5 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '500',
     },
+
 }); 
