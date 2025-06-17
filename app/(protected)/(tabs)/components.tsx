@@ -6,6 +6,7 @@ import ExpandableView from '@/components/ui/ExpandableView';
 import { Input } from '@/components/ui/Input';
 import { LottieAnimation, LottieView } from '@/components/ui/LottieAnimation';
 import { Modal } from '@/components/ui/Modal';
+import PDFViewer, { PDFActionButton, PDFViewerModal } from '@/components/ui/PDFViewer';
 import { PhoneInput, isValidPhoneNumber, type ICountry } from '@/components/ui/PhoneInput';
 import { Switch } from '@/components/ui/Switch';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -60,6 +61,16 @@ export default function ComponentsScreen() {
     const [selectedPhoneCountry3, setSelectedPhoneCountry3] = useState<ICountry | null>(null);
     const [phoneValue4, setPhoneValue4] = useState<string>('');
     const [selectedPhoneCountry4, setSelectedPhoneCountry4] = useState<ICountry | null>(null);
+
+    // PDF Viewer states
+    const [pdfModalVisible, setPdfModalVisible] = useState(false);
+
+    // Sample PDF URLs for demonstration
+    const samplePDFs = {
+        smallPDF: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        largePDF: 'https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf',
+        formPDF: 'https://www.irs.gov/pub/irs-pdf/fw4.pdf',
+    };
 
     // Dropdown data
     const basicOptions: DropdownItem[] = [
@@ -1264,6 +1275,134 @@ export default function ComponentsScreen() {
                             </View>
                         )}
                     </View>
+
+                    {/* PDF Viewer Component */}
+                    <View style={styles.section}>
+                        <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+                            PDF Viewer
+                        </Text>
+                        <Text style={[styles.description, isDark && styles.descriptionDark]}>
+                            View PDF documents with theme-aware styling and interactive controls.
+                        </Text>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Full PDF Viewer
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Complete PDF viewer with view and download buttons
+                            </Text>
+
+                            <PDFViewer
+                                url={samplePDFs.smallPDF}
+                                title="Sample PDF Document"
+                                viewButtonText="View PDF"
+                                downloadButtonText="Download"
+                                onViewStart={() => console.log('Starting PDF view...')}
+                                onDownloadEnd={(success) => console.log('Download result:', success)}
+                            />
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Button Variants
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Different button styles and configurations
+                            </Text>
+
+                            <View style={styles.componentGroup}>
+                                <PDFViewer
+                                    url={samplePDFs.largePDF}
+                                    title="Technical Document"
+                                    variant="secondary"
+                                    size="large"
+                                />
+                            </View>
+
+                            <View style={styles.componentGroup}>
+                                <PDFViewer
+                                    url={samplePDFs.formPDF}
+                                    title="Form Document"
+                                    variant="outline"
+                                    size="small"
+                                    showViewButton={true}
+                                    showDownloadButton={false}
+                                />
+                            </View>
+
+                            <View style={styles.componentGroup}>
+                                <PDFViewer
+                                    url={samplePDFs.smallPDF}
+                                    title="Download Only"
+                                    variant="ghost"
+                                    showViewButton={false}
+                                    showDownloadButton={true}
+                                    downloadButtonText="Save PDF"
+                                />
+                            </View>
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Action Buttons
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Compact icon buttons for space-efficient layouts
+                            </Text>
+
+                            <View style={styles.iconRow}>
+                                <View style={styles.iconItem}>
+                                    <PDFActionButton
+                                        type="view"
+                                        url={samplePDFs.smallPDF}
+                                        title="Small PDF"
+                                        size={28}
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        View
+                                    </Text>
+                                </View>
+                                <View style={styles.iconItem}>
+                                    <PDFActionButton
+                                        type="download"
+                                        url={samplePDFs.largePDF}
+                                        title="Large PDF"
+                                        size={28}
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Download
+                                    </Text>
+                                </View>
+                                <View style={styles.iconItem}>
+                                    <PDFActionButton
+                                        type="view"
+                                        url={null}
+                                        title="Disabled"
+                                        size={28}
+                                    />
+                                    <Text style={[styles.iconLabel, isDark && styles.iconLabelDark]}>
+                                        Disabled
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Modal Trigger
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Open PDF via modal trigger
+                            </Text>
+
+                            <Button
+                                title="Open PDF Modal"
+                                onPress={() => setPdfModalVisible(true)}
+                                variant="outline"
+                            />
+                        </View>
+                    </View>
                 </View>
             </ScrollView>
 
@@ -1275,6 +1414,13 @@ export default function ComponentsScreen() {
                 type="info"
                 primaryButtonText="Got it"
                 secondaryButtonText="Close"
+            />
+
+            <PDFViewerModal
+                visible={pdfModalVisible}
+                onClose={() => setPdfModalVisible(false)}
+                url={samplePDFs.formPDF}
+                title="Sample PDF Form"
             />
         </>
     );
@@ -1493,5 +1639,13 @@ const styles = StyleSheet.create({
     },
     variantSubtitleDark: {
         color: '#9CA3AF',
+    },
+    pdfViewerContainer: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    pdfViewer: {
+        flex: 1,
+        height: 300,
     },
 }); 
