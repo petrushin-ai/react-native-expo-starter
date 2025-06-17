@@ -56,7 +56,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="components"
         options={{
-          title: 'Components',
+          title: 'UI',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="square.grid.3x3.fill" color={color} />,
         }}
       />

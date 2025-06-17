@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        paddingTop: 60,
+        paddingTop: 30,
         paddingHorizontal: 20,
         paddingBottom: 40,
     },
@@ -438,11 +438,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#333',
         marginBottom: 8,
+        textAlign: 'center',
     },
     subtitle: {
         fontSize: 16,
         color: '#666',
         lineHeight: 24,
+        textAlign: 'center',
     },
     textDark: {
         color: '#fff',
