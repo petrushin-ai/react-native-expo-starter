@@ -6,8 +6,8 @@ import Animated, {
     Extrapolate,
     interpolate,
     runOnJS,
+    useAnimatedReaction,
     useAnimatedStyle,
-    useDerivedValue,
     useSharedValue,
     withSpring,
     withTiming
@@ -269,15 +269,17 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
         }
     };
 
-    // Use derived value to track changes and update tooltip and selection
-    useDerivedValue(() => {
-        if (isActive && data.length > 0) {
-            const xValue = state.x.value.value;
-            const yValue = state.y.value.value.value;
-            updateTooltipAndSelection(xValue, yValue);
+    // Use animated reaction to track changes and update tooltip and selection
+    useAnimatedReaction(
+        () => state.x.value,
+        () => {
+            if (isActive && data.length > 0) {
+                const xValue = state.x.value.value;
+                const yValue = state.y.value.value.value;
+                updateTooltipAndSelection(xValue, yValue);
+            }
         }
-        return null;
-    });
+    );
 
     // Enhanced gesture state management for instant response
     useEffect(() => {

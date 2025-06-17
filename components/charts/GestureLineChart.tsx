@@ -6,8 +6,8 @@ import Animated, {
     Extrapolate,
     interpolate,
     runOnJS,
+    useAnimatedReaction,
     useAnimatedStyle,
-    useDerivedValue,
     useSharedValue,
     withSpring,
     withTiming
@@ -308,15 +308,17 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
         }
     };
 
-    // Use derived value to track changes and update tooltip
-    useDerivedValue(() => {
-        if (isActive && data.length > 0) {
-            const xValue = state.x.value.value;
-            const yValue = state.y.y.value.value;
-            updateTooltip(xValue, yValue);
+    // Use animated reaction to track changes and update tooltip
+    useAnimatedReaction(
+        () => state.x.value,
+        () => {
+            if (isActive && data.length > 0) {
+                const xValue = state.x.value.value;
+                const yValue = state.y.y.value.value;
+                updateTooltip(xValue, yValue);
+            }
         }
-        return null;
-    });
+    );
 
     // Enhanced gesture state management for instant response
     useEffect(() => {
