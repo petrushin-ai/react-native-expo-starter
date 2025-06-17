@@ -33,16 +33,34 @@ export default function TabLayout() {
         tabBarButton: AnimatedTabButton,
         tabBarStyle: Platform.select({
           ios: {
-            // Use solid background on iOS for better theme support
+            // Floating tab bar design for iOS
             backgroundColor: tabBarBackgroundColor,
-            paddingTop: 18,
-            height: 100, // Increased height for labels and better tap targets
+            paddingTop: 28,
+            height: 110,
+            marginHorizontal: 10,
+            marginBottom: 22,
+            borderRadius: 55,
+            paddingHorizontal: 12,
+            position: 'absolute',
+            shadowColor: '#000',
+            shadowOffset: {
+              width: 0,
+              height: 10,
+            },
+            shadowOpacity: 0.12,
+            shadowRadius: 20,
           },
           default: {
-            // Use solid background color for Android and web
+            // Floating tab bar design for Android and web
             backgroundColor: tabBarBackgroundColor,
-            paddingTop: 22,
-            height: 85, // Increased height for labels and better tap targets
+            paddingTop: 23,
+            height: 110,
+            marginHorizontal: 10,
+            marginBottom: 25,
+            borderRadius: 55,
+            paddingHorizontal: 20,
+            position: 'absolute',
+            elevation: 10,
           },
         }),
       }}>
