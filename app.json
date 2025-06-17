@@ -12,7 +12,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.itdept-betterplace.react-native-expo",
       "infoPlist": {
-        "NSUserNotificationUsageDescription": "This app uses notifications to keep you updated with important information."
+        "NSUserNotificationUsageDescription": "This app uses notifications to keep you updated with important information.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses location services to provide location-based features.",
+        "NSLocationWhenInUseUsageDescription": "This app uses location services to provide location-based features.",
+        "NSLocationAlwaysUsageDescription": "This app uses location services to provide location-based features."
       }
     },
     "android": {
@@ -25,8 +28,7 @@
       "permissions": [
         "NOTIFICATIONS",
         "VIBRATE"
-      ],
-      "googleServicesFile": "./google-services.json"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -53,7 +55,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/notification-icon.png",
+          "icon": "./assets/images/icon.png",
           "color": "#ffffff",
           "defaultChannel": "default",
           "sounds": []
