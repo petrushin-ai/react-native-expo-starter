@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/Button';
 import { DarkModePreview } from '@/components/ui/DarkModePreview';
 import { DatePicker } from '@/components/ui/DatePicker';
+import { Dropdown, DropdownItem } from '@/components/ui/Dropdown';
 import ExpandableView from '@/components/ui/ExpandableView';
 import { Input } from '@/components/ui/Input';
 import { LottieAnimation, LottieView } from '@/components/ui/LottieAnimation';
@@ -42,6 +43,45 @@ export default function ComponentsScreen() {
     const [singleSelectedDate, setSingleSelectedDate] = useState<Date | null>(null);
     const [rangeStartDate, setRangeStartDate] = useState<Date | null>(null);
     const [rangeEndDate, setRangeEndDate] = useState<Date | null>(null);
+
+    // Dropdown states
+    const [singleDropdownValue, setSingleDropdownValue] = useState<string>('');
+    const [multiDropdownValue, setMultiDropdownValue] = useState<string[]>([]);
+    const [countryValue, setCountryValue] = useState<string>('');
+    const [categoryValue, setCategoryValue] = useState<string>('');
+
+    // Dropdown data
+    const basicOptions: DropdownItem[] = [
+        { label: 'Option 1', value: '1' },
+        { label: 'Option 2', value: '2' },
+        { label: 'Option 3', value: '3' },
+        { label: 'Option 4', value: '4' },
+        { label: 'Option 5', value: '5' },
+    ];
+
+    const categoryOptions: DropdownItem[] = [
+        { label: 'Technology', value: 'tech' },
+        { label: 'Design', value: 'design' },
+        { label: 'Marketing', value: 'marketing' },
+        { label: 'Business', value: 'business' },
+        { label: 'Finance', value: 'finance' },
+        { label: 'Education', value: 'education' },
+        { label: 'Health', value: 'health' },
+        { label: 'Entertainment', value: 'entertainment' },
+    ];
+
+    const countryOptions: DropdownItem[] = [
+        { label: 'United States', value: 'us' },
+        { label: 'United Kingdom', value: 'uk' },
+        { label: 'Canada', value: 'ca' },
+        { label: 'Australia', value: 'au' },
+        { label: 'Germany', value: 'de' },
+        { label: 'France', value: 'fr' },
+        { label: 'Japan', value: 'jp' },
+        { label: 'South Korea', value: 'kr' },
+        { label: 'Brazil', value: 'br' },
+        { label: 'India', value: 'in' },
+    ];
 
     // Lottie animation refs for manual control
     const lottieRef1 = useRef<LottieView>(null);
@@ -247,6 +287,12 @@ export default function ComponentsScreen() {
         setSingleSelectedDate(null);
         setRangeStartDate(null);
         setRangeEndDate(null);
+
+        // Reset Dropdown states
+        setSingleDropdownValue('');
+        setMultiDropdownValue([]);
+        setCountryValue('');
+        setCategoryValue('');
 
         demoForm.resetForm();
     };
@@ -462,6 +508,133 @@ export default function ComponentsScreen() {
                                 variant="filled"
                             />
                         </View>
+                    </View>
+
+                    {/* Dropdown Components */}
+                    <View style={styles.section}>
+                        <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+                            Dropdown
+                        </Text>
+                        <Text style={[styles.description, isDark && styles.descriptionDark]}>
+                            Dropdown and multi-select components with search functionality, theme-aware styling, and form validation support. Built with react-native-element-dropdown.
+                        </Text>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Single Selection
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Standard dropdown for selecting a single option
+                            </Text>
+
+                            <Dropdown
+                                label="Basic Dropdown"
+                                placeholder="Choose an option"
+                                data={basicOptions}
+                                value={singleDropdownValue}
+                                onChange={(item: DropdownItem) => setSingleDropdownValue(item.value)}
+                            />
+
+                            <Dropdown
+                                label="Country Selection"
+                                placeholder="Select your country"
+                                data={countryOptions}
+                                value={countryValue}
+                                onChange={(item: DropdownItem) => setCountryValue(item.value)}
+                                search={true}
+                                searchPlaceholder="Search countries..."
+                            />
+
+                            <Dropdown
+                                label="Category with Search"
+                                placeholder="Select category"
+                                data={categoryOptions}
+                                value={categoryValue}
+                                onChange={(item: DropdownItem) => setCategoryValue(item.value)}
+                                search={true}
+                                searchPlaceholder="Search categories..."
+                                maxHeight={200}
+                            />
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Multi Selection
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Dropdown that allows selecting multiple options with chips
+                            </Text>
+
+                            <Dropdown
+                                mode="multi"
+                                label="Multiple Categories"
+                                placeholder="Select multiple categories"
+                                data={categoryOptions}
+                                value={multiDropdownValue}
+                                onChange={(items: string[]) => setMultiDropdownValue(items)}
+                                search={true}
+                                searchPlaceholder="Search categories..."
+                            />
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                States & Validation
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Error states and disabled dropdowns
+                            </Text>
+
+                            <Dropdown
+                                label="Disabled Dropdown"
+                                placeholder="This dropdown is disabled"
+                                data={basicOptions}
+                                value=""
+                                onChange={() => { }}
+                                disable={true}
+                            />
+
+                            <Dropdown
+                                label="Dropdown with Error"
+                                placeholder="Select an option"
+                                data={basicOptions}
+                                value=""
+                                onChange={() => { }}
+                                error="This field is required"
+                                touched={true}
+                            />
+                        </View>
+
+                        {/* Show selected values */}
+                        {(singleDropdownValue || countryValue || categoryValue || multiDropdownValue.length > 0) && (
+                            <View style={[styles.expandableContent, isDark && styles.expandableContentDark]}>
+                                <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                    Selected Values
+                                </Text>
+                                {singleDropdownValue && (
+                                    <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                        Basic: {basicOptions.find(opt => opt.value === singleDropdownValue)?.label}
+                                    </Text>
+                                )}
+                                {countryValue && (
+                                    <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                        Country: {countryOptions.find(opt => opt.value === countryValue)?.label}
+                                    </Text>
+                                )}
+                                {categoryValue && (
+                                    <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                        Category: {categoryOptions.find(opt => opt.value === categoryValue)?.label}
+                                    </Text>
+                                )}
+                                {multiDropdownValue.length > 0 && (
+                                    <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                        Multiple: {multiDropdownValue.map(val =>
+                                            categoryOptions.find(opt => opt.value === val)?.label
+                                        ).join(', ')}
+                                    </Text>
+                                )}
+                            </View>
+                        )}
                     </View>
 
                     {/* Modal Component */}

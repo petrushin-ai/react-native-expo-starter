@@ -44,6 +44,7 @@
     "react-dom": "19.0.0",
     "react-native": "0.79.3",
     "react-native-calendar-picker": "^8.0.5",
+    "react-native-element-dropdown": "^2.12.4",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
