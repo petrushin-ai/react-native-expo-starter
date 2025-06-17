@@ -1,5 +1,6 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
+import ClipboardInput from '@/components/ui/ClipboardInput';
 import { DarkModePreview } from '@/components/ui/DarkModePreview';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { Dropdown, DropdownItem } from '@/components/ui/Dropdown';
@@ -65,6 +66,15 @@ export default function ComponentsScreen() {
 
     // PDF Viewer states
     const [pdfModalVisible, setPdfModalVisible] = useState(false);
+
+    // ClipboardInput states
+    const [editableUsername, setEditableUsername] = useState('john_doe_2024');
+    const [clipboardErrorTouched, setClipboardErrorTouched] = useState(false);
+
+    // Sample data for clipboard inputs
+    const sampleApiKey = 'sk-1234567890abcdef1234567890abcdef1234567890abcdef';
+    const samplePromoCode = 'SAVE20OFF';
+    const sampleReferralCode = 'REF-ABC123XYZ';
 
     // Sample PDF URLs for demonstration
     const samplePDFs = {
@@ -327,6 +337,10 @@ export default function ComponentsScreen() {
         setPhoneValue4('');
         setSelectedPhoneCountry4(null);
 
+        // Reset ClipboardInput states
+        setEditableUsername('john_doe_2024');
+        setClipboardErrorTouched(false);
+
         demoForm.resetForm();
     };
 
@@ -539,6 +553,131 @@ export default function ComponentsScreen() {
                                 label="Filled Variant"
                                 placeholder="Filled input style"
                                 variant="filled"
+                            />
+                        </View>
+                    </View>
+
+                    {/* ClipboardInput Components */}
+                    <View style={styles.section}>
+                        <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+                            Clipboard Input
+                        </Text>
+                        <Text style={[styles.description, isDark && styles.descriptionDark]}>
+                            Input fields with built-in copy functionality and animated feedback. Perfect for API keys, promo codes, referral links, and other shareable content. Features theme-aware styling and smooth copy animations.
+                        </Text>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Read-Only Inputs
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Non-editable inputs for displaying shareable content like API keys and promo codes. Click to select all text for manual copying.
+                            </Text>
+
+                            <ClipboardInput
+                                label="API Key"
+                                value={sampleApiKey}
+                                editable={false}
+                                placeholder="Your API key will appear here"
+                                onCopySuccess={() => console.log('API key copied successfully!')}
+                            />
+
+                            <ClipboardInput
+                                label="Promo Code"
+                                value={samplePromoCode}
+                                editable={false}
+                                placeholder="Promo code"
+                                onCopySuccess={() => console.log('Promo code copied!')}
+                            />
+
+                            <ClipboardInput
+                                label="Referral Code"
+                                value={sampleReferralCode}
+                                editable={false}
+                                placeholder="Referral code"
+                                onCopySuccess={() => console.log('Referral code copied!')}
+                            />
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Editable Input
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Editable input that allows both typing and copying. Perfect for usernames, URLs, or any content that users might want to modify and share.
+                            </Text>
+
+                            <ClipboardInput
+                                label="Username"
+                                value={editableUsername}
+                                editable={true}
+                                onChangeText={setEditableUsername}
+                                placeholder="Enter your username"
+                                onCopySuccess={() => console.log('Username copied!')}
+                            />
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                States & Validation
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Error states and validation support
+                            </Text>
+
+                            <ClipboardInput
+                                label="Required Field"
+                                value=""
+                                editable={true}
+                                placeholder="This field is required"
+                                error="This field cannot be empty"
+                                touched={clipboardErrorTouched}
+                                onChangeText={() => setClipboardErrorTouched(true)}
+                            />
+
+                            <ClipboardInput
+                                label="No Copy Button"
+                                value="This input has no copy button"
+                                editable={true}
+                                showCopyButton={false}
+                                placeholder="No copy functionality"
+                            />
+
+                            <ClipboardInput
+                                label="Empty Value"
+                                value=""
+                                editable={false}
+                                placeholder="Copy button hidden when empty"
+                            />
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Usage Examples
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Common use cases for clipboard inputs
+                            </Text>
+
+                            <ClipboardInput
+                                label="Wallet Address"
+                                value="0x1234567890abcdef1234567890abcdef12345678"
+                                editable={false}
+                                placeholder="Wallet address"
+                            />
+
+                            <ClipboardInput
+                                label="Invite Link"
+                                value="https://myapp.com/invite/abc123xyz"
+                                editable={false}
+                                placeholder="Invite link"
+                            />
+
+                            <ClipboardInput
+                                label="Support Code"
+                                value="SUP-2024-001234"
+                                editable={false}
+                                placeholder="Support code"
                             />
                         </View>
                     </View>
