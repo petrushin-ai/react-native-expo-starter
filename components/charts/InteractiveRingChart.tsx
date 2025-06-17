@@ -53,7 +53,7 @@ const InteractiveRingChart: React.FC<InteractiveRingChartProps> = ({
     onAppearAnimationComplete,
 }) => {
     // Responsive dimensions calculation
-    const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+    const { width: screenWidth } = Dimensions.get('window');
 
     // Early validation - ensure we have valid data and screen dimensions
     if (!data || !Array.isArray(data) || data.length === 0 || !screenWidth || screenWidth <= 0) {
@@ -259,20 +259,22 @@ const InteractiveRingChart: React.FC<InteractiveRingChartProps> = ({
     // Get the effective highlighted index
     const effectiveHighlightedIndex = highlightedIndex ?? internalHighlightedIndex;
 
-    // Responsive layout calculations
-    const responsiveCalculations = useMemo(() => {
-        const containerMargins = 32; // marginHorizontal: 16 * 2
-        const containerPadding = 48; // padding: 24 * 2
-        const totalMargins = containerMargins + containerPadding;
-        const availableWidth = screenWidth - totalMargins;
+    // Better responsive calculation with grid-based approach
+    const responsiveCalculations = () => {
+        const baseMargins = 20; // Total horizontal margins (10px each side)
+        const cardPadding = 24; // Card internal padding (12px each side)
+        const availableWidth = Math.max(200, screenWidth - baseMargins - cardPadding); // Ensure minimum width
 
         // Ensure chart fits within available space with some buffer
         const chartSize = Math.min(availableWidth, screenWidth * 0.7, 300);
 
         return {
+            containerWidth: availableWidth,
             chartSize,
         };
-    }, [screenWidth]);
+    };
+
+    const responsiveDims = responsiveCalculations();
 
     // Chart animated style
     const chartAnimatedStyle = useAnimatedStyle(() => {
@@ -500,21 +502,95 @@ const InteractiveRingChart: React.FC<InteractiveRingChartProps> = ({
         );
     };
 
+    const styles = StyleSheet.create({
+        container: {
+            margin: 10, // Reduced from 16px
+            padding: 12, // Reduced from 20px
+            borderRadius: 16,
+            backgroundColor: Colors[theme]?.card || '#ffffff',
+            alignItems: 'center',
+            // Ensure container takes full available width with minimal margins
+            width: Math.max(200, screenWidth - 20), // Reduced from 32px with minimum width
+            alignSelf: 'center',
+        },
+        title: {
+            marginBottom: 2, // Reduced from 4px
+            textAlign: 'center',
+        },
+        description: {
+            marginBottom: 10, // Reduced from 16px
+            textAlign: 'center',
+            opacity: 0.7,
+            fontSize: 12,
+        },
+        chartContainer: {
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            width: '100%',
+        },
+        chartWrapper: {
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+        },
+        centerContent: {
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10,
+        },
+        centerValue: {
+            textAlign: 'center',
+            lineHeight: 36,
+        },
+        centerLabel: {
+            textAlign: 'center',
+            lineHeight: 20,
+            marginTop: 2,
+        },
+        legendContainer: {
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+        },
+        legendItem: {
+            marginBottom: 8,
+            alignItems: 'center',
+        },
+        legendIndicator: {
+            marginBottom: 4,
+        },
+        legendText: {
+            alignItems: 'center',
+        },
+        tooltip: {
+            position: 'absolute',
+            top: 10,
+            alignSelf: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 8,
+            zIndex: 1000,
+        },
+        tooltipText: {
+            color: '#ffffff',
+            fontSize: 12,
+            fontWeight: '500',
+        },
+    });
+
     return (
-        <ThemedView style={[
-            styles.container,
-            theme === 'dark' && styles.containerDark,
-            {
-                backgroundColor: Colors[theme]?.card || '#ffffff',
-            }
-        ]}>
-            {/* Header */}
-            <View style={styles.header}>
-                <ThemedText style={styles.title}>{title}</ThemedText>
-                {description && (
-                    <ThemedText style={styles.description}>{description}</ThemedText>
-                )}
-            </View>
+        <ThemedView style={styles.container}>
+            {title && (
+                <ThemedText type="subtitle" style={styles.title}>
+                    {title}
+                </ThemedText>
+            )}
+
+            {description && (
+                <ThemedText style={styles.description}>
+                    {description}
+                </ThemedText>
+            )}
 
             {/* Chart and Legend Container */}
             <View style={[
@@ -529,15 +605,15 @@ const InteractiveRingChart: React.FC<InteractiveRingChartProps> = ({
                 <View style={[
                     styles.chartWrapper,
                     {
-                        width: responsiveCalculations.chartSize,
-                        height: responsiveCalculations.chartSize,
+                        width: responsiveDims.chartSize,
+                        height: responsiveDims.chartSize,
                         alignSelf: 'center',
                     }
                 ]}>
                     <Animated.View style={[
                         {
-                            height: responsiveCalculations.chartSize,
-                            width: responsiveCalculations.chartSize,
+                            height: responsiveDims.chartSize,
+                            width: responsiveDims.chartSize,
                         },
                         chartAnimatedStyle
                     ]}>
@@ -578,90 +654,5 @@ const InteractiveRingChart: React.FC<InteractiveRingChartProps> = ({
         </ThemedView>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: '#ffffff',
-        borderRadius: 16,
-        padding: 24,
-        marginHorizontal: 16,
-        marginVertical: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
-    },
-    containerDark: {
-        backgroundColor: '#1F2937',
-        shadowColor: '#000',
-        shadowOpacity: 0.3,
-    },
-    header: {
-        marginBottom: 16,
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginBottom: 4,
-    },
-    description: {
-        fontSize: 14,
-        opacity: 0.7,
-    },
-    chartContainer: {
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        width: '100%',
-    },
-    chartWrapper: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-    },
-    centerContent: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 10,
-    },
-    centerValue: {
-        textAlign: 'center',
-        lineHeight: 36,
-    },
-    centerLabel: {
-        textAlign: 'center',
-        lineHeight: 20,
-        marginTop: 2,
-    },
-    legendContainer: {
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-    },
-    legendItem: {
-        marginBottom: 8,
-        alignItems: 'center',
-    },
-    legendIndicator: {
-        marginBottom: 4,
-    },
-    legendText: {
-        alignItems: 'center',
-    },
-    tooltip: {
-        position: 'absolute',
-        top: 10,
-        alignSelf: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 8,
-        zIndex: 1000,
-    },
-    tooltipText: {
-        color: '#ffffff',
-        fontSize: 12,
-        fontWeight: '500',
-    },
-});
 
 export default memo(InteractiveRingChart); 
