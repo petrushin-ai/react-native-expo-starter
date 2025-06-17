@@ -1,8 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useDrawerStatus } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import { BurgerMenuButton } from '@/components/ui/BurgerMenuButton';
@@ -15,6 +15,10 @@ export default function HomeScreen() {
   const isDrawerOpen = drawerStatus === 'open';
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+
+  // State for pull-to-refresh and wave animation
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [waveAnimationTrigger, setWaveAnimationTrigger] = useState(0);
 
   const handleBurgerPress = () => {
     if (isDrawerOpen) {
@@ -36,9 +40,37 @@ export default function HomeScreen() {
     (navigation as any).navigate('calendar');
   };
 
+  // Pull-to-refresh handler
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+
+    // Trigger wave animation
+    setWaveAnimationTrigger(prev => prev + 1);
+
+    // Simulate loading delay (like fetching fresh data)
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    setIsRefreshing(false);
+  }, []);
+
   return (
     <>
-      <ScrollView style={[styles.container, isDark && styles.containerDark]}>
+      <ScrollView
+        style={[styles.container, isDark && styles.containerDark]}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            tintColor={isDark ? '#6B7280' : '#2563EB'}
+            colors={[isDark ? '#6B7280' : '#2563EB']}
+            progressBackgroundColor={isDark ? '#2d2d2d' : '#fff'}
+            title="Refreshing..."
+            titleColor={isDark ? '#6B7280' : '#2563EB'}
+            progressViewOffset={50}
+          />
+        }
+      >
         <View style={styles.content}>
           {/* Welcome Section */}
           <View style={styles.welcomeSection}>
@@ -225,6 +257,9 @@ const styles = StyleSheet.create({
   },
   containerDark: {
     backgroundColor: '#1a1a1a',
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   content: {
     flex: 1,
