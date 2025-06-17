@@ -155,12 +155,12 @@ export interface InteractiveBarChartProps {
     showYAxis?: boolean;
     showFrame?: boolean;
     // Appearing animation configuration
-    enableAppearAnimation?: boolean;
-    appearAnimationType?: 'timing' | 'spring';
-    appearAnimationDuration?: number;
-    appearAnimationStagger?: boolean;
-    appearAnimationStaggerDelay?: number;
-    onAppearAnimationComplete?: () => void;
+    enableAppearAnimation?: boolean; // Optional - enables chart appearing animation
+    appearAnimationType?: 'timing' | 'spring'; // Optional - animation type
+    appearAnimationDuration?: number; // Optional - animation duration in ms
+    appearAnimationStagger?: boolean; // Optional - enables staggered appearance
+    appearAnimationStaggerDelay?: number; // Optional - delay between staggered items in ms
+    onAppearAnimationComplete?: () => void; // Optional - callback when animation completes
 }
 
 export interface GestureLineChartProps {
@@ -185,6 +185,13 @@ export interface GestureLineChartProps {
     showXAxis?: boolean;
     showYAxis?: boolean;
     showFrame?: boolean;
+    // Appearing animation configuration
+    enableAppearAnimation?: boolean; // Optional - enables chart appearing animation
+    appearAnimationType?: 'timing' | 'spring'; // Optional - animation type
+    appearAnimationDuration?: number; // Optional - animation duration in ms
+    appearAnimationStagger?: boolean; // Optional - enables staggered appearance
+    appearAnimationStaggerDelay?: number; // Optional - delay between staggered items in ms
+    onAppearAnimationComplete?: () => void; // Optional - callback when animation completes
 }
 
 

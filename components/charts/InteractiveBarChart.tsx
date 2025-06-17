@@ -17,6 +17,7 @@ import { Bar, CartesianChart, useChartPressState } from 'victory-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
+import { useChartAppearAnimation } from '@/hooks/useChartAppearAnimation';
 import type { InteractiveBarChartProps } from './types';
 
 // We'll use require for the font to avoid TypeScript issues with .ttf imports
@@ -43,11 +44,11 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     showYAxis = true,
     showFrame = false,
     // Appearing animation configuration
-    enableAppearAnimation = true,
+    enableAppearAnimation = false,
     appearAnimationType = 'spring',
-    appearAnimationDuration = 800, // 30% quicker than 2000ms (2000 * 0.7 = 1400ms)
+    appearAnimationDuration = 800,
     appearAnimationStagger = true,
-    appearAnimationStaggerDelay = 50, // Increased for more pronounced stagger
+    appearAnimationStaggerDelay = 50,
     onAppearAnimationComplete,
 }) => {
     // Responsive dimensions calculation
@@ -130,117 +131,14 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     const lastGestureTime = useSharedValue(0);
     const lastSelectionUpdateTime = useSharedValue(0);
 
-    // Appearing animation
-    const appearProgress = useSharedValue(enableAppearAnimation ? 0 : 1);
-    const hasTriggeredCallback = useSharedValue(false);
-    const [currentAnimatedData, setCurrentAnimatedData] = useState(data || []);
-
-    // Trigger appearing animation on mount
-    useEffect(() => {
-        if (enableAppearAnimation && data && data.length > 0) {
-            hasTriggeredCallback.value = false;
-            const animationConfig = appearAnimationType === 'spring'
-                ? withSpring(1, {
-                    damping: 20, // Increased damping for stronger ease-out
-                    stiffness: 60, // Further reduced stiffness for slower, smoother motion
-                    mass: 1.5 // Increased mass for more pronounced ease-out
-                })
-                : withTiming(1, {
-                    duration: appearAnimationDuration,
-                    easing: require('react-native-reanimated').Easing.bezier(0.16, 1, 0.3, 1) // Enhanced ease-out curve
-                });
-
-            appearProgress.value = animationConfig;
-        }
-    }, [enableAppearAnimation, appearAnimationType, appearAnimationDuration]);
-
-    // Restart animation when data changes
-    useEffect(() => {
-        if (!data || data.length === 0) {
-            setCurrentAnimatedData([]);
-            return;
-        }
-
-        if (enableAppearAnimation) {
-            appearProgress.value = 0;
-            hasTriggeredCallback.value = false;
-
-            const animationConfig = appearAnimationType === 'spring'
-                ? withSpring(1, {
-                    damping: 20, // Increased damping for stronger ease-out
-                    stiffness: 60, // Further reduced stiffness for slower, smoother motion
-                    mass: 1.5 // Increased mass for more pronounced ease-out
-                })
-                : withTiming(1, {
-                    duration: appearAnimationDuration,
-                    easing: require('react-native-reanimated').Easing.bezier(0.16, 1, 0.3, 1) // Enhanced ease-out curve
-                });
-
-            appearProgress.value = animationConfig;
-        } else {
-            // If animation is disabled, update data immediately
-            setCurrentAnimatedData(data);
-        }
-    }, [data, enableAppearAnimation, appearAnimationType, appearAnimationDuration]);
-
-    // Update animated data when progress changes
-    useDerivedValue(() => {
-        if (!data || data.length === 0) {
-            runOnJS(setCurrentAnimatedData)([]);
-            return;
-        }
-
-        if (!enableAppearAnimation) {
-            runOnJS(setCurrentAnimatedData)(data);
-            return;
-        }
-
-        const newData = data.map((item, index) => {
-            if (!item || typeof item.value !== 'number') {
-                return { ...item, value: 0 };
-            }
-
-            let progress = appearProgress.value;
-
-            // Apply stagger effect if enabled
-            if (appearAnimationStagger && data.length > 1) {
-                // Use a different approach that doesn't cause division by zero
-                const staggerDelay = index * appearAnimationStaggerDelay;
-                const totalAnimationTime = appearAnimationDuration + (data.length - 1) * appearAnimationStaggerDelay;
-                const normalizedStaggerDelay = staggerDelay / totalAnimationTime;
-
-                // Calculate effective progress with safe denominator
-                const adjustedProgress = Math.max(0, appearProgress.value - normalizedStaggerDelay);
-                const maxProgressRange = 1 - normalizedStaggerDelay;
-
-                // Ensure we don't divide by zero and handle edge cases
-                if (maxProgressRange > 0.001) {
-                    progress = Math.min(1, Math.max(0, adjustedProgress / maxProgressRange));
-                } else {
-                    // For the last items where the range is very small, use direct progress
-                    progress = Math.max(0, Math.min(1, appearProgress.value));
-                }
-            }
-
-            return {
-                ...item,
-                value: item.value * progress
-            };
-        });
-
-        runOnJS(setCurrentAnimatedData)(newData);
-    });
-
-    // Track animation completion and trigger callback
-    useDerivedValue(() => {
-        if (enableAppearAnimation &&
-            appearProgress.value >= 1 &&
-            !hasTriggeredCallback.value &&
-            onAppearAnimationComplete) {
-            hasTriggeredCallback.value = true;
-            runOnJS(onAppearAnimationComplete)();
-        }
-        return null;
+    // Use the reusable animation hook
+    const { animatedData: currentAnimatedData } = useChartAppearAnimation(data, {
+        enableAnimation: enableAppearAnimation,
+        animationType: appearAnimationType,
+        duration: appearAnimationDuration,
+        enableStagger: appearAnimationStagger,
+        staggerDelay: appearAnimationStaggerDelay,
+        onComplete: onAppearAnimationComplete
     });
 
     // Default tooltip configuration

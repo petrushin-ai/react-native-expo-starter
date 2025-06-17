@@ -17,6 +17,7 @@ import { Area, CartesianChart, Line, useChartPressState } from 'victory-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
+import { useChartAppearAnimation } from '@/hooks/useChartAppearAnimation';
 import type { GestureLineChartProps } from './types';
 
 // We'll use require for the font to avoid TypeScript issues with .ttf imports
@@ -44,6 +45,13 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
     showXAxis = true,
     showYAxis = true,
     showFrame = false,
+    // Appearing animation configuration
+    enableAppearAnimation = false,
+    appearAnimationType = 'spring',
+    appearAnimationDuration = 800,
+    appearAnimationStagger = true,
+    appearAnimationStaggerDelay = 50,
+    onAppearAnimationComplete,
 }) => {
     // Load font using Skia's useFont hook
     const font = useFont(SpaceMono, 12);
@@ -92,6 +100,16 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
     const lastGestureTime = useSharedValue(0);
     const smoothTransition = useSharedValue(0);
     const lastSelectionUpdateTime = useSharedValue(0);
+
+    // Use the reusable animation hook
+    const { animatedData: currentAnimatedData } = useChartAppearAnimation(data, {
+        enableAnimation: enableAppearAnimation,
+        animationType: appearAnimationType,
+        duration: appearAnimationDuration,
+        enableStagger: appearAnimationStagger,
+        staggerDelay: appearAnimationStaggerDelay,
+        onComplete: onAppearAnimationComplete
+    });
 
     // Default configuration with Victory Native XL settings
     const defaultConfig = {
@@ -181,13 +199,13 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
                 .map((point: any, index: number) => ({
                     x: point.x,
                     y: point.y,
-                    value: data[index]?.value || 0
+                    value: data[index]?.value || 0 // Use original data for tooltip values
                 }));
             setStaticTooltipPositions(positions);
         } else {
             setStaticTooltipPositions([]);
         }
-    }, [showDataPoints, showDataPointTooltip, data]);
+    }, [showDataPoints, showDataPointTooltip, data, currentAnimatedData]); // Include currentAnimatedData to update positions during animation
 
     // Default tooltip configuration
     const defaultTooltipConfig = {
@@ -280,7 +298,7 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
             }
             lastGestureTime.value = currentTime;
 
-            const formattedValue = formatValue(dataPoint.value); // Use actual data value
+            const formattedValue = formatValue(dataPoint.value); // Use actual data value (not animated)
             runOnJS(updateTooltipValueWithHaptic)(formattedValue, clampedIndex);
 
             // Call the provided callback if available
@@ -479,7 +497,7 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
     if (!data || data.length === 0) return null;
 
     // Transform data for Victory Native XL - following official docs pattern
-    const chartData = data.map((item, index) => ({
+    const chartData = currentAnimatedData.map((item, index) => ({
         x: index,
         y: item.value,
         label: item.label
