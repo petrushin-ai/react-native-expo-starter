@@ -78,9 +78,9 @@ const createBarChartConfig = (theme: ChartTheme): BarChartConfig => ({
         topRight: 6,
     },
     // Minimal domain padding for maximum bar space
-    domainPadding: { left: 12, right: 12, top: 25 },
+    domainPadding: { left: 18, right: 20, top: 25 },
     // Minimal padding that still shows all content
-    padding: { left: 10, right: 10, top: 15, bottom: 15 },
+    padding: { left: 4, right: 8, top: 15, bottom: 15 },
 });
 
 const createLineChartConfig = (theme: ChartTheme): LineChartConfig => ({
@@ -97,6 +97,7 @@ const createLineChartConfig = (theme: ChartTheme): LineChartConfig => ({
     startOpacity: 0.9,
     endOpacity: 0.2,
     spacing: Math.max(18, (safeChartWidth - 60) / 10), // Dynamic spacing based on safe width
+
 });
 
 const createRingChartConfig = (theme: ChartTheme): RingChartConfig => ({
@@ -456,7 +457,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         backgroundColor: '#fff',
         borderRadius: 12,
-        padding: 16,
+        padding: 14,
         borderWidth: 1,
         borderColor: '#E5E7EB',
     },

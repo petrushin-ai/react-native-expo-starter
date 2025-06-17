@@ -1,7 +1,7 @@
 import { Circle, LinearGradient, useFont, vec } from '@shopify/react-native-skia';
 import * as Haptics from 'expo-haptics';
 import React, { memo, useEffect, useRef, useState } from 'react';
-import { Dimensions, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
     Extrapolate,
     interpolate,
@@ -75,21 +75,7 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
     const [chartDimensions, setChartDimensions] = useState({ width: 300, height: 220 });
     const chartPointsRef = useRef<any>(null);
 
-    // Responsive dimensions calculation
-    const { width: screenWidth } = Dimensions.get('window');
 
-    // Better responsive calculation with grid-based approach
-    const responsiveCalculations = () => {
-        const baseMargins = 20; // Total horizontal margins (10px each side)
-        const cardPadding = 24; // Card internal padding (12px each side)
-        const availableWidth = screenWidth - baseMargins - cardPadding;
-
-        return {
-            containerWidth: availableWidth,
-        };
-    };
-
-    const responsiveDims = responsiveCalculations();
 
     // Fixed height following Victory Native XL best practices
     const chartHeight = config.height || 220;
@@ -120,10 +106,10 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
         thickness: config.thickness || 3,
         // Use provided padding or defaults
         padding: padding || {
-            left: 10,
-            right: 10,
+            left: 4,
+            right: 4,
             top: 10,
-            bottom: 10
+            bottom: 0
         },
         // Use provided domainPadding or defaults
         domainPadding: domainPadding || {
@@ -409,30 +395,35 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
 
     const styles = StyleSheet.create({
         container: {
-            margin: 10, // Reduced from 16px
-            padding: 12, // Reduced from 20px
-            borderRadius: 16,
+            margin: 0, // Remove margins for maximum width
+            padding: 0, // Remove padding for maximum width
+            borderRadius: 0,
             backgroundColor: Colors[theme].card,
             alignItems: 'center',
-            // Ensure container takes full available width with minimal margins
-            width: screenWidth - 20, // Reduced from 32px
+            // Use 100% width to fill parent container
+            width: '100%',
             alignSelf: 'center',
         },
         title: {
-            marginBottom: 2, // Reduced from 4px
+            marginBottom: 2,
             textAlign: 'center',
+            paddingHorizontal: 16, // Add padding only to text elements
         },
         description: {
-            marginBottom: 10, // Reduced from 16px
+            marginBottom: 10,
             textAlign: 'center',
             opacity: 0.7,
             fontSize: 12,
+            paddingHorizontal: 16, // Add padding only to text elements
         },
         toggleButton: {
             marginBottom: 16,
+            marginHorizontal: 16, // Add horizontal margin for toggle button
             paddingVertical: 8,
             paddingHorizontal: 16,
             borderRadius: 8,
+
+            marginTop: 30,
             backgroundColor: Colors[theme].surface,
         },
         toggleButtonText: {
@@ -440,7 +431,7 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
             fontWeight: '500',
         },
         chartContainer: {
-            width: responsiveDims.containerWidth,
+            width: '100%', // Use full available width
             height: chartHeight,
             position: 'relative',
             // Ensure proper overflow handling

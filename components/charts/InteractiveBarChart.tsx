@@ -1,7 +1,7 @@
 import { LinearGradient, useFont, vec } from '@shopify/react-native-skia';
 import * as Haptics from 'expo-haptics';
 import React, { memo, useEffect, useState } from 'react';
-import { Dimensions, Platform, StyleSheet, Text } from 'react-native';
+import { Platform, StyleSheet, Text } from 'react-native';
 import Animated, {
     Extrapolate,
     interpolate,
@@ -51,11 +51,8 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
     appearAnimationStaggerDelay = 50,
     onAppearAnimationComplete,
 }) => {
-    // Responsive dimensions calculation
-    const { width: screenWidth } = Dimensions.get('window');
-
-    // Early validation - ensure we have valid data and screen dimensions
-    if (!data || !Array.isArray(data) || data.length === 0 || !screenWidth || screenWidth <= 0) {
+    // Early validation - ensure we have valid data
+    if (!data || !Array.isArray(data) || data.length === 0) {
         return (
             <ThemedView style={{
                 margin: 10,
@@ -91,27 +88,6 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
 
     // Load font using Skia's useFont hook
     const font = useFont(SpaceMono, 12);
-
-    // Better responsive calculation with grid-based approach
-    const responsiveCalculations = () => {
-        const baseMargins = 20; // Reduced from 32px - Total horizontal margins (10px each side)
-        const cardPadding = 24; // Reduced from 40px - Card internal padding (12px each side)
-        const availableWidth = Math.max(200, screenWidth - baseMargins - cardPadding); // Ensure minimum width
-
-        // Calculate optimal spacing for data length with more aggressive space usage
-        const dataLength = Math.max(1, data?.length || 1); // Ensure at least 1 to avoid division by zero
-        const minBarWidth = 18; // Increased minimum bar width
-        const reservedPadding = 80; // Reduced from 120px for chart padding
-        const optimalBarWidth = Math.max(minBarWidth, Math.floor((availableWidth - reservedPadding) / dataLength));
-
-        return {
-            containerWidth: availableWidth,
-            barWidth: optimalBarWidth,
-            spacing: Math.max(2, Math.floor((availableWidth - (optimalBarWidth * dataLength)) / (dataLength + 1))), // Reduced min spacing
-        };
-    };
-
-    const responsiveDims = responsiveCalculations();
 
     // Set up chart press state for interactions
     const { state, isActive } = useChartPressState({
@@ -312,15 +288,15 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
         height: 220,
         // Use provided padding or enhanced defaults
         padding: padding || {
-            left: Math.max(12, responsiveDims?.spacing || 12),
-            right: Math.max(12, responsiveDims?.spacing || 12),
+            left: 12,
+            right: 12,
             top: showTooltip ? 50 : 30, // Increased top padding when tooltips are enabled
             bottom: 16
         },
         // Use provided domainPadding or enhanced defaults
         domainPadding: domainPadding || {
-            left: Math.max(8, (responsiveDims?.spacing || 12) / 2),
-            right: Math.max(8, (responsiveDims?.spacing || 12) / 2),
+            left: 8,
+            right: 8,
             top: showTooltip ? 60 : 30, // Increased top domain padding for tooltips
             bottom: 0
         },
@@ -476,27 +452,29 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
 
     const styles = StyleSheet.create({
         container: {
-            margin: 10, // Reduced from 16px
-            padding: 12, // Reduced from 20px
+            margin: 0, // Remove margins for maximum width
+            padding: 0, // Remove padding for maximum width
             borderRadius: 16,
             backgroundColor: Colors[theme]?.card || '#ffffff',
             alignItems: 'center',
-            // Ensure container takes full available width with minimal margins
-            width: Math.max(200, screenWidth - 20), // Reduced from 32px with minimum width
+            // Use 100% width to fill parent container
+            width: '100%',
             alignSelf: 'center',
         },
         title: {
-            marginBottom: 2, // Reduced from 4px
+            marginBottom: 2,
             textAlign: 'center',
+            paddingHorizontal: 16, // Add padding only to text elements
         },
         description: {
-            marginBottom: 10, // Reduced from 16px
+            marginBottom: 10,
             textAlign: 'center',
             opacity: 0.7,
             fontSize: 12,
+            paddingHorizontal: 16, // Add padding only to text elements
         },
         chartContainer: {
-            width: Math.max(200, responsiveDims?.containerWidth || 200),
+            width: '100%', // Use full available width
             height: safeConfig?.height || 220,
             position: 'relative',
             // Ensure proper overflow handling
@@ -504,8 +482,9 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             backgroundColor: 'transparent',
         },
         selectionInfo: {
-            marginTop: 8, // Reduced from 12px
-            padding: 6, // Reduced from 8px
+            marginTop: 8,
+            marginHorizontal: 16, // Add horizontal margin for selection info
+            padding: 6,
             borderRadius: 8,
             backgroundColor: Colors[theme]?.surface || '#f5f5f5',
         },
