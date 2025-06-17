@@ -519,17 +519,6 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
                 </ThemedText>
             )}
 
-            {showDataPointsToggle && (
-                <TouchableOpacity
-                    style={styles.toggleButton}
-                    onPress={handleToggleDataPoints}
-                >
-                    <ThemedText style={styles.toggleButtonText}>
-                        {showDataPoints ? 'Hide' : 'Show'} Data Points
-                    </ThemedText>
-                </TouchableOpacity>
-            )}
-
             <View
                 ref={chartContainerRef}
                 style={styles.chartContainer}
@@ -720,6 +709,17 @@ const GestureLineChart: React.FC<GestureLineChartProps> = ({
                     </>
                 )}
             </View>
+
+            {showDataPointsToggle && (
+                <TouchableOpacity
+                    style={styles.toggleButton}
+                    onPress={handleToggleDataPoints}
+                >
+                    <ThemedText style={styles.toggleButtonText}>
+                        {showDataPoints ? 'Hide' : 'Show'} Data Points
+                    </ThemedText>
+                </TouchableOpacity>
+            )}
         </ThemedView>
     );
 };

@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, useNavigation, useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { Dimensions, ScrollView, StatusBar, StyleSheet, TouchableOpacity } from 'react-native';
+import { Dimensions, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import {
     GestureLineChart,
@@ -16,8 +16,6 @@ import {
     type RingChartConfig,
     type RingDataItem
 } from '@/components/charts';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import { Modal } from '@/components/ui/Modal';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -115,6 +113,26 @@ const createRingChartConfig = (theme: ChartTheme): RingChartConfig => ({
     showLabels: false,
 });
 
+// Chart Card Wrapper Component
+interface ChartCardProps {
+    title: string;
+    description: string;
+    children: React.ReactNode;
+    isDark: boolean;
+}
+
+const ChartCard: React.FC<ChartCardProps> = ({ title, description, children, isDark }) => (
+    <View style={[styles.chartCard, isDark && styles.chartCardDark]}>
+        <Text style={[styles.chartTitle, isDark && styles.textDark]}>
+            {title}
+        </Text>
+        <Text style={[styles.chartDescription, isDark && styles.textDark]}>
+            {description}
+        </Text>
+        {children}
+    </View>
+);
+
 export default function ChartsScreen() {
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
@@ -150,8 +168,6 @@ export default function ChartsScreen() {
     const handleLineDataPointPress = (item: LineDataItem, index: number) => {
         console.log('Line data point pressed:', item.label, item.value);
     };
-
-
 
     // Header handlers
     const handleRefresh = () => {
@@ -210,157 +226,181 @@ export default function ChartsScreen() {
                 backgroundColor={isDark ? '#111827' : '#F9FAFB'}
             />
             <ScrollView showsVerticalScrollIndicator={false} style={[styles.container, isDark && styles.containerDark]}>
-                <ThemedView style={styles.header}>
-                    <ThemedText type="title" style={styles.title}>
-                        Interactive Charts 2025
-                    </ThemedText>
-                    <ThemedText style={styles.subtitle}>
-                        Victory Native XL • Performance • Gestures
-                    </ThemedText>
-                </ThemedView>
+                <View style={styles.content}>
+                    <View style={styles.welcomeSection}>
+                        <Text style={[styles.title, isDark && styles.textDark]}>
+                            Interactive Charts
+                        </Text>
+                        <Text style={[styles.subtitle, isDark && styles.textDark]}>
+                            Victory Native XL • Performance • Gestures
+                        </Text>
+                    </View>
 
-                {/* Interactive Bar Chart with Enhanced Tooltips */}
-                <InteractiveBarChart
-                    data={barData}
-                    config={barConfig}
-                    title="Sales Performance Dashboard"
-                    description="Drag to see real-time selection • Enhanced tooltips • Currency formatting"
-                    theme={colorScheme}
-                    onBarPress={handleBarPress}
-                    selectedIndex={selectedBarIndex}
-                    showSelectionInfo={true}
-                    showTooltip={true}
-                    tooltipConfig={{
-                        currencySymbol: '$',
-                        currencyPosition: 'before',
-                        backgroundColor: isDark ? '#1F2937' : '#3B82F6',
-                        textColor: '#ffffff',
-                        borderRadius: 12,
-                        fontSize: 16,
-                        fontWeight: '600',
-                        paddingHorizontal: 14,
-                        paddingVertical: 8,
-                        minWidth: 60,
-                        autoHide: true,
-                        autoHideDelay: 2500,
-                    }}
-                />
+                    {/* Interactive Bar Chart with Enhanced Tooltips */}
+                    <ChartCard
+                        title="Sales Performance Dashboard"
+                        description="Drag to see real-time selection • Enhanced tooltips • Currency formatting"
+                        isDark={isDark}
+                    >
+                        <InteractiveBarChart
+                            data={barData}
+                            config={barConfig}
+                            theme={colorScheme}
+                            onBarPress={handleBarPress}
+                            selectedIndex={selectedBarIndex}
+                            showSelectionInfo={true}
+                            showTooltip={true}
+                            tooltipConfig={{
+                                currencySymbol: '$',
+                                currencyPosition: 'before',
+                                backgroundColor: isDark ? '#1F2937' : '#3B82F6',
+                                textColor: '#ffffff',
+                                borderRadius: 12,
+                                fontSize: 16,
+                                fontWeight: '600',
+                                paddingHorizontal: 14,
+                                paddingVertical: 8,
+                                minWidth: 60,
+                                autoHide: true,
+                                autoHideDelay: 2500,
+                            }}
+                        />
+                    </ChartCard>
 
-                {/* Gesture Line Chart */}
-                <GestureLineChart
-                    data={lineData}
-                    config={lineConfig}
-                    title="Performance Trends"
-                    description="Area chart • Default data points (4px) • Static tooltips"
-                    theme={colorScheme}
-                    onDataPointPress={handleLineDataPointPress}
-                    showDataPointsToggle={true}
-                    initialShowDataPoints={true}
-                    interpolationType="natural"
-                    dataPointSize={4}
-                    showDataPointTooltip={true}
-                />
+                    {/* Gesture Line Chart */}
+                    <ChartCard
+                        title="Performance Trends"
+                        description="Area chart • Default data points (4px) • Static tooltips"
+                        isDark={isDark}
+                    >
+                        <GestureLineChart
+                            data={lineData}
+                            config={lineConfig}
+                            theme={colorScheme}
+                            onDataPointPress={handleLineDataPointPress}
+                            showDataPointsToggle={true}
+                            initialShowDataPoints={true}
+                            interpolationType="natural"
+                            dataPointSize={4}
+                            showDataPointTooltip={true}
+                        />
+                    </ChartCard>
 
-                {/* Gesture Line Chart with Cardinal Interpolation */}
-                <GestureLineChart
-                    data={lineData}
-                    config={{
-                        ...lineConfig,
-                        areaChart: false,
-                        thickness: 3,
-                        startFillColor: isDark ? '#F59E0B' : '#F59E0B',
-                        endFillColor: isDark ? 'rgba(245, 158, 11, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                    }}
-                    title="Cardinal Interpolation Example"
-                    description="Cardinal splines • Small data points (3px) • No static tooltips"
-                    theme={colorScheme}
-                    onDataPointPress={handleLineDataPointPress}
-                    showDataPointsToggle={true}
-                    initialShowDataPoints={false}
-                    interpolationType="cardinal"
-                    dataPointSize={3}
-                    showDataPointTooltip={false}
-                />
+                    {/* Gesture Line Chart with Cardinal Interpolation */}
+                    <ChartCard
+                        title="Cardinal Interpolation Example"
+                        description="Cardinal splines • Small data points (3px) • No static tooltips"
+                        isDark={isDark}
+                    >
+                        <GestureLineChart
+                            data={lineData}
+                            config={{
+                                ...lineConfig,
+                                areaChart: false,
+                                thickness: 3,
+                                startFillColor: isDark ? '#F59E0B' : '#F59E0B',
+                                endFillColor: isDark ? 'rgba(245, 158, 11, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                            }}
+                            theme={colorScheme}
+                            onDataPointPress={handleLineDataPointPress}
+                            showDataPointsToggle={true}
+                            initialShowDataPoints={false}
+                            interpolationType="cardinal"
+                            dataPointSize={3}
+                            showDataPointTooltip={false}
+                        />
+                    </ChartCard>
 
-                {/* Gesture Line Chart with Step Interpolation */}
-                <GestureLineChart
-                    data={lineData}
-                    config={{
-                        ...lineConfig,
-                        areaChart: true,
-                        thickness: 2,
-                        startFillColor: isDark ? '#10B981' : '#10B981',
-                        endFillColor: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.15)',
-                    }}
-                    title="Step Interpolation Example"
-                    description="Step function • Large data points (6px) • Static tooltips"
-                    theme={colorScheme}
-                    onDataPointPress={handleLineDataPointPress}
-                    showDataPointsToggle={true}
-                    initialShowDataPoints={true}
-                    interpolationType="step"
-                    dataPointSize={6}
-                    showDataPointTooltip={true}
-                />
+                    {/* Gesture Line Chart with Step Interpolation */}
+                    <ChartCard
+                        title="Step Interpolation Example"
+                        description="Step function • Large data points (6px) • Static tooltips"
+                        isDark={isDark}
+                    >
+                        <GestureLineChart
+                            data={lineData}
+                            config={{
+                                ...lineConfig,
+                                areaChart: true,
+                                thickness: 2,
+                                startFillColor: isDark ? '#10B981' : '#10B981',
+                                endFillColor: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                            }}
+                            theme={colorScheme}
+                            onDataPointPress={handleLineDataPointPress}
+                            showDataPointsToggle={true}
+                            initialShowDataPoints={true}
+                            interpolationType="step"
+                            dataPointSize={6}
+                            showDataPointTooltip={true}
+                        />
+                    </ChartCard>
 
-                {/* Gesture Line Chart with Linear Interpolation */}
-                <GestureLineChart
-                    data={lineData}
-                    config={{
-                        ...lineConfig,
-                        areaChart: false,
-                        thickness: 3,
-                        startFillColor: isDark ? '#8B5CF6' : '#8B5CF6',
-                        endFillColor: isDark ? 'rgba(139, 92, 246, 0.1)' : 'rgba(139, 92, 246, 0.1)',
-                    }}
-                    title="Linear Interpolation Example"
-                    description="Straight lines • Extra large data points (8px) • No static tooltips"
-                    theme={colorScheme}
-                    onDataPointPress={handleLineDataPointPress}
-                    showDataPointsToggle={true}
-                    initialShowDataPoints={false}
-                    interpolationType="linear"
-                    dataPointSize={8}
-                    showDataPointTooltip={false}
-                />
+                    {/* Gesture Line Chart with Linear Interpolation */}
+                    <ChartCard
+                        title="Linear Interpolation Example"
+                        description="Straight lines • Extra large data points (8px) • No static tooltips"
+                        isDark={isDark}
+                    >
+                        <GestureLineChart
+                            data={lineData}
+                            config={{
+                                ...lineConfig,
+                                areaChart: false,
+                                thickness: 3,
+                                startFillColor: isDark ? '#8B5CF6' : '#8B5CF6',
+                                endFillColor: isDark ? 'rgba(139, 92, 246, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+                            }}
+                            theme={colorScheme}
+                            onDataPointPress={handleLineDataPointPress}
+                            showDataPointsToggle={true}
+                            initialShowDataPoints={false}
+                            interpolationType="linear"
+                            dataPointSize={8}
+                            showDataPointTooltip={false}
+                        />
+                    </ChartCard>
 
-                {/* Interactive Ring Chart */}
-                <InteractiveRingChart
-                    data={ringData}
-                    config={ringConfig}
-                    title="Device Usage Distribution"
-                    description="Ring chart • Click legend to view details in center • Total shows all data"
-                    theme={colorScheme}
-                    showLegend={true}
-                    showCenterValue={true}
-                    centerValue="100%"
-                    centerLabel="Total"
-                    centerTextSize={24}
-                    centerTextColor={isDark ? '#F9FAFB' : '#111827'}
-                    enableAppearAnimation={true}
-                    appearAnimationType="spring"
-                    appearAnimationDuration={1200}
-                    appearAnimationStagger={true}
-                    appearAnimationStaggerDelay={150}
-                    legendConfig={{
-                        position: 'bottom',
-                        showValues: true,
-                        showPercentages: true,
-                        fontSize: 14,
-                        fontWeight: '500',
-                        textColor: isDark ? '#F9FAFB' : '#374151',
-                        highlightTextColor: isDark ? '#60A5FA' : '#3B82F6',
-                        itemSpacing: 8,
-                        rowSpacing: 12,
-                        indicatorSize: 12,
-                        indicatorShape: 'circle',
-                    }}
-                    onLegendItemPress={(item: LegendItem, index: number) => {
-                        console.log('Ring chart legend item pressed:', item.label, item.value);
-                    }}
-                />
-
-
+                    {/* Interactive Ring Chart */}
+                    <ChartCard
+                        title="Device Usage Distribution"
+                        description="Ring chart • Click legend to view details in center • Total shows all data"
+                        isDark={isDark}
+                    >
+                        <InteractiveRingChart
+                            data={ringData}
+                            config={ringConfig}
+                            theme={colorScheme}
+                            showLegend={true}
+                            showCenterValue={true}
+                            centerValue="100%"
+                            centerLabel="Total"
+                            centerTextSize={24}
+                            centerTextColor={isDark ? '#F9FAFB' : '#111827'}
+                            enableAppearAnimation={true}
+                            appearAnimationType="spring"
+                            appearAnimationDuration={1200}
+                            appearAnimationStagger={true}
+                            appearAnimationStaggerDelay={150}
+                            legendConfig={{
+                                position: 'bottom',
+                                showValues: true,
+                                showPercentages: true,
+                                fontSize: 14,
+                                fontWeight: '500',
+                                textColor: isDark ? '#F9FAFB' : '#374151',
+                                highlightTextColor: isDark ? '#60A5FA' : '#3B82F6',
+                                itemSpacing: 8,
+                                rowSpacing: 12,
+                                indicatorSize: 12,
+                                indicatorShape: 'circle',
+                            }}
+                            onLegendItemPress={(item: LegendItem, index: number) => {
+                                console.log('Ring chart legend item pressed:', item.label, item.value);
+                            }}
+                        />
+                    </ChartCard>
+                </View>
             </ScrollView>
 
             <Modal
@@ -384,20 +424,54 @@ const styles = StyleSheet.create({
     containerDark: {
         backgroundColor: '#111827',
     },
-    header: {
-        padding: 20,
-        alignItems: 'center' as const,
+    content: {
+        flex: 1,
+        paddingTop: 60,
+        paddingHorizontal: 20,
+        paddingBottom: 40,
+    },
+    welcomeSection: {
+        marginBottom: 40,
     },
     title: {
-        textAlign: 'center' as const,
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: '#333',
         marginBottom: 8,
     },
     subtitle: {
-        textAlign: 'center' as const,
-        opacity: 0.7,
-        fontSize: 14,
+        fontSize: 16,
+        color: '#666',
+        lineHeight: 24,
+    },
+    textDark: {
+        color: '#fff',
     },
     headerButton: {
         padding: 8,
+    },
+    chartCard: {
+        marginBottom: 20,
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+    },
+    chartCardDark: {
+        backgroundColor: '#2d2d2d',
+        borderColor: '#374151',
+    },
+    chartTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 8,
+    },
+    chartDescription: {
+        fontSize: 14,
+        color: '#666',
+        lineHeight: 20,
+        marginBottom: 16,
     },
 }); 
