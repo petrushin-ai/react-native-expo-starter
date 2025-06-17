@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/Button';
 import { DarkModePreview } from '@/components/ui/DarkModePreview';
+import { DatePicker } from '@/components/ui/DatePicker';
 import ExpandableView from '@/components/ui/ExpandableView';
 import { Input } from '@/components/ui/Input';
 import { LottieAnimation, LottieView } from '@/components/ui/LottieAnimation';
@@ -36,6 +37,11 @@ export default function ComponentsScreen() {
     const [fetchDelay, setFetchDelay] = useState('2');
     const [fetchedData, setFetchedData] = useState<any>(null);
     const [fetchExpandableVisible, setFetchExpandableVisible] = useState(false);
+
+    // DatePicker states
+    const [singleSelectedDate, setSingleSelectedDate] = useState<Date | null>(null);
+    const [rangeStartDate, setRangeStartDate] = useState<Date | null>(null);
+    const [rangeEndDate, setRangeEndDate] = useState<Date | null>(null);
 
     // Lottie animation refs for manual control
     const lottieRef1 = useRef<LottieView>(null);
@@ -108,6 +114,118 @@ export default function ComponentsScreen() {
         }
     };
 
+    const handleSingleDateChange = (date: Date) => {
+        setSingleSelectedDate(date);
+    };
+
+    const handleRangeDateChange = (date: Date, type?: 'START_DATE' | 'END_DATE') => {
+        if (type === 'END_DATE') {
+            setRangeEndDate(date);
+        } else {
+            // Enhanced flexible range selection logic
+            const dateTime = date.getTime();
+            const startTime = rangeStartDate?.getTime();
+            const endTime = rangeEndDate?.getTime();
+
+            // Case 1: No dates selected yet - set as start date
+            if (!rangeStartDate && !rangeEndDate) {
+                setRangeStartDate(date);
+                setRangeEndDate(null);
+                return;
+            }
+
+            // Case 2: Only start date selected
+            if (rangeStartDate && !rangeEndDate && startTime) {
+                if (dateTime === startTime) {
+                    // Clicking on the same start date - clear selection
+                    setRangeStartDate(null);
+                } else if (dateTime < startTime) {
+                    // Clicking before start date - make it new start, old start becomes end
+                    setRangeStartDate(date);
+                    setRangeEndDate(rangeStartDate);
+                } else {
+                    // Clicking after start date - make it end date
+                    setRangeEndDate(date);
+                }
+                return;
+            }
+
+            // Case 3: Both dates selected - most flexible scenarios
+            if (rangeStartDate && rangeEndDate && startTime && endTime) {
+                // Clicking on start date - move start date closer to end or swap if needed
+                if (dateTime === startTime) {
+                    // Move start date to one day after, or swap if that would be invalid
+                    const nextDay = new Date(date);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    if (nextDay.getTime() <= endTime) {
+                        setRangeStartDate(nextDay);
+                    } else {
+                        // Swap: end becomes start, start becomes end
+                        setRangeStartDate(rangeEndDate);
+                        setRangeEndDate(date);
+                    }
+                }
+                // Clicking on end date - move end date closer to start or swap if needed
+                else if (dateTime === endTime) {
+                    // Move end date to one day before, or swap if that would be invalid
+                    const prevDay = new Date(date);
+                    prevDay.setDate(prevDay.getDate() - 1);
+                    if (prevDay.getTime() >= startTime) {
+                        setRangeEndDate(prevDay);
+                    } else {
+                        // Swap: start becomes end, end becomes start
+                        setRangeStartDate(date);
+                        setRangeEndDate(rangeStartDate);
+                    }
+                }
+                // Clicking on a date in the middle of range - split range or move closer end
+                else if (dateTime > startTime && dateTime < endTime) {
+                    // Find which end is closer and move that end to the clicked date
+                    const distanceToStart = dateTime - startTime;
+                    const distanceToEnd = endTime - dateTime;
+
+                    if (distanceToStart <= distanceToEnd) {
+                        // Closer to start - move start to clicked date
+                        setRangeStartDate(date);
+                    } else {
+                        // Closer to end - move end to clicked date
+                        setRangeEndDate(date);
+                    }
+                }
+                // Clicking outside current range - determine new range intelligently
+                else {
+                    if (dateTime < startTime) {
+                        // Before current range - extend start or create new range
+                        const distanceToStart = startTime - dateTime;
+                        const currentRangeSize = endTime - startTime;
+
+                        if (distanceToStart <= currentRangeSize) {
+                            // Close enough - extend the range
+                            setRangeStartDate(date);
+                        } else {
+                            // Far away - start new range
+                            setRangeStartDate(date);
+                            setRangeEndDate(null);
+                        }
+                    } else {
+                        // After current range - extend end or create new range
+                        const distanceToEnd = dateTime - endTime;
+                        const currentRangeSize = endTime - startTime;
+
+                        if (distanceToEnd <= currentRangeSize) {
+                            // Close enough - extend the range
+                            setRangeEndDate(date);
+                        } else {
+                            // Far away - start new range
+                            setRangeStartDate(date);
+                            setRangeEndDate(null);
+                        }
+                    }
+                }
+            }
+        }
+    };
+
     const handleRefresh = () => {
         // Reset all demo states
         setModalVisible(false);
@@ -124,6 +242,11 @@ export default function ComponentsScreen() {
         setFetchDelay('2');
         setFetchedData(null);
         setFetchExpandableVisible(false);
+
+        // Reset DatePicker states
+        setSingleSelectedDate(null);
+        setRangeStartDate(null);
+        setRangeEndDate(null);
 
         demoForm.resetForm();
     };
@@ -658,6 +781,75 @@ export default function ComponentsScreen() {
                                     onValueChange={setLottieLoop}
                                 />
                             </View>
+                        </View>
+                    </View>
+
+                    {/* DatePicker Components */}
+                    <View style={styles.section}>
+                        <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+                            Date Picker
+                        </Text>
+                        <Text style={[styles.description, isDark && styles.descriptionDark]}>
+                            Theme-aware date pickers with single date and range selection modes. Built with react-native-calendar-picker and styled to match the app's design system.
+                        </Text>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Single Date Selection
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Pick a single date from the calendar
+                            </Text>
+
+                            <DatePicker
+                                allowRangeSelection={false}
+                                selectedStartDate={singleSelectedDate}
+                                onDateChange={handleSingleDateChange}
+                                minDate={new Date()}
+                                startFromMonday={true}
+                            />
+
+                            {singleSelectedDate && (
+                                <View style={[styles.expandableContent, isDark && styles.expandableContentDark]}>
+                                    <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                        Selected date: {singleSelectedDate.toDateString()}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+
+                        <View style={styles.componentGroup}>
+                            <Text style={[styles.variantTitle, isDark && styles.variantTitleDark]}>
+                                Range Selection
+                            </Text>
+                            <Text style={[styles.variantSubtitle, isDark && styles.variantSubtitleDark]}>
+                                Select a date range (start and end dates)
+                            </Text>
+
+                            <DatePicker
+                                allowRangeSelection={true}
+                                allowBackwardRangeSelect={true}
+                                selectedStartDate={rangeStartDate}
+                                selectedEndDate={rangeEndDate}
+                                onDateChange={handleRangeDateChange}
+                                startFromMonday={true}
+                            />
+
+                            {(rangeStartDate || rangeEndDate) && (
+                                <View style={[styles.expandableContent, isDark && styles.expandableContentDark]}>
+                                    <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                        Start date: {rangeStartDate ? rangeStartDate.toDateString() : 'Not selected'}
+                                    </Text>
+                                    <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                        End date: {rangeEndDate ? rangeEndDate.toDateString() : 'Not selected'}
+                                    </Text>
+                                    {rangeStartDate && rangeEndDate && (
+                                        <Text style={[styles.expandableText, isDark && styles.expandableTextDark]}>
+                                            Duration: {Math.ceil((rangeEndDate.getTime() - rangeStartDate.getTime()) / (1000 * 60 * 60 * 24))} days
+                                        </Text>
+                                    )}
+                                </View>
+                            )}
                         </View>
                     </View>
 
