@@ -1,14 +1,16 @@
 <div align="center">
   <img src="assets/readme/logo.png" alt="React Native Expo Bootstrap" width="120" height="120">
   
-  <h1 align="center">React Native Expo Bootstrap</h1>
+  <h1 align="center">React Native Expo Starter Kit</h1>
+
+  by <a href="https://we-digital.studio">we:Digital</a>
   
   <p align="center">
     <strong>🚀 Production-Ready Mobile App Starter Kit</strong>
   </p>
   
   <p align="center">
-    A carefully crafted React Native Expo bootstrap that combines the latest technologies with battle-tested components
+    A carefully crafted React Native Expo 0.79.3 (SDK 53) bootstrap that combines the latest technologies with battle-tested cross-platform components
   </p>
   
   <p align="center">
@@ -32,7 +34,7 @@
 
 ---
 
-## 👋 Hey There, Fellow Developer!
+## 👋 Hey There!
 
 After 15 years in this wild ride we call software development, I've built my fair share of mobile apps. I've seen trends come and go, frameworks rise and fall, and "revolutionary" solutions that ended up being anything but. This bootstrap is the culmination of countless hours of trial, error, and "why the hell doesn't this work on Android?" moments.
 
