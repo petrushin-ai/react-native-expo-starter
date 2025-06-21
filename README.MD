@@ -97,8 +97,6 @@ Every component here exists because I needed it in a real project:
 - **Phone Input** that handles international formats without making you cry
 - **PDF Viewer** because someone always wants to show terms and conditions
 
-### 📅 **Calendar That Handles Real-World Complexity**
-Not just another date picker. This calendar handles multi-day events, lazy loads for performance, and actually looks good. Built for booking systems, scheduling apps, or anywhere you need more than just picking a date.
 
 ### 🔔 **Push Notifications That Work**
 Expo's push notification service just works. No more wrestling with FCM tokens, APNS certificates, or platform-specific code. The permission flow is user-friendly (because nobody likes aggressive permission requests), and there's even a test function so you can make sure everything's working.
@@ -615,19 +613,6 @@ The home screen is your app's first impression. This one nails it with a clean l
 
 **The secret sauce?** 15 years of debugging "why does this button not work on Android 8?" combined with obsessive attention to the details that make interactions feel magical.
 
-### 📅 Calendar View
-<table width="100%">
-  <tr>
-    <td align="center"><strong>Light Mode</strong></td>
-    <td align="center"><strong>Dark Mode</strong></td>
-  </tr>
-  <tr>
-    <td><img src="assets/readme/calendar_screen_light.png" alt="Calendar Screen (Light Mode)" width="100%"></td>
-    <td><img src="assets/readme/calendar_screen_dark.png" alt="Calendar Screen (Dark Mode)" width="100%"></td>
-  </tr>
-</table>
-
-A calendar that handles real-world complexity. Multi-day events, color-coded statuses, and smooth month transitions. Built with performance in mind - even with hundreds of events, scrolling stays smooth.
 
 ### 👤 Profile Management
 <table width="100%">
