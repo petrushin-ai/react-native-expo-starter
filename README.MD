@@ -843,7 +843,7 @@ The master switch for authentication. Perfect for building prototypes without au
 
 #### **EXPO_PUBLIC_AUTH_USERNAME** & **EXPO_PUBLIC_AUTH_PASSWORD**
 Demo credentials for development. Obviously, don't use these in production - they're just for quick testing.
-- **Default**: `admin` / `password123`
+- **Default**: `demo` / `demo`
 - **Usage**: Only when `AUTH_ENABLED=true`
 - **Note**: Replace with real auth service in production
 
