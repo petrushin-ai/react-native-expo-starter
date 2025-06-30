@@ -36,12 +36,12 @@ export default function TabLayout() {
           ios: {
             // Floating tab bar design for iOS
             backgroundColor: tabBarBackgroundColor,
-            paddingTop: 28,
+            paddingTop: 30,
             height: TAB_BAR_HEIGHT,
             marginHorizontal: 10,
             marginBottom: TAB_BAR_BOTTOM_MARGIN,
             borderRadius: 55,
-            paddingHorizontal: 12,
+            paddingHorizontal: 10,
             position: 'absolute',
             shadowColor: '#000',
             shadowOffset: {
@@ -54,12 +54,12 @@ export default function TabLayout() {
           default: {
             // Floating tab bar design for Android and web
             backgroundColor: tabBarBackgroundColor,
-            paddingTop: 23,
+            paddingTop: 18,
             height: TAB_BAR_HEIGHT,
             marginHorizontal: 10,
             marginBottom: TAB_BAR_BOTTOM_MARGIN,
             borderRadius: 55,
-            paddingHorizontal: 20,
+            paddingHorizontal: 15,
             position: 'absolute',
             elevation: 10,
           },

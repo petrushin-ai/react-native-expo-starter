@@ -6,7 +6,7 @@ import { Platform } from 'react-native';
  */
 
 // Tab bar dimensions
-export const TAB_BAR_HEIGHT = 110;
+export const TAB_BAR_HEIGHT = 75;
 
 // Platform-specific bottom margins for floating effect
 export const TAB_BAR_BOTTOM_MARGIN = Platform.select({
