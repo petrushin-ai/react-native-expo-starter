@@ -4,6 +4,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { BlurView } from 'expo-blur';
 import React from 'react';
 import {
+    Platform,
     Pressable,
     StyleSheet,
     View,
@@ -57,18 +58,15 @@ export function BurgerMenuButton({ onPress, isDrawerOpen = false }: BurgerMenuBu
                 onPressOut={handlePressOut}
                 style={({ pressed }) => [
                     styles.button,
-                    {
+                    Platform.OS === 'android' && styles.buttonAndroid,
+                    Platform.OS !== 'android' && {
                         backgroundColor: pressed
                             ? colors.tint + '20'
                             : colors.tint + '15',
                     }
                 ]}
             >
-                <BlurView
-                    intensity={20}
-                    style={styles.blurContainer}
-                    tint={isDark ? 'dark' : 'light'}
-                >
+                {Platform.OS === 'android' ? (
                     <Animated.View style={[styles.iconContainer, animatedButtonStyle]}>
                         <IconSymbol
                             name={isDrawerOpen ? "xmark" as any : "line.3.horizontal" as any}
@@ -77,7 +75,22 @@ export function BurgerMenuButton({ onPress, isDrawerOpen = false }: BurgerMenuBu
                             weight="medium"
                         />
                     </Animated.View>
-                </BlurView>
+                ) : (
+                    <BlurView
+                        intensity={20}
+                        style={styles.blurContainer}
+                        tint={isDark ? 'dark' : 'light'}
+                    >
+                        <Animated.View style={[styles.iconContainer, animatedButtonStyle]}>
+                            <IconSymbol
+                                name={isDrawerOpen ? "xmark" as any : "line.3.horizontal" as any}
+                                size={24}
+                                color={colors.tint}
+                                weight="medium"
+                            />
+                        </Animated.View>
+                    </BlurView>
+                )}
             </Pressable>
         </View>
     );
@@ -104,6 +117,17 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 8,
         elevation: 8,
+    },
+    buttonAndroid: {
+        shadowColor: 'transparent',
+        shadowOffset: {
+            width: 0,
+            height: 0,
+        },
+        shadowOpacity: 0,
+        shadowRadius: 0,
+        elevation: 0,
+        backgroundColor: 'transparent',
     },
     blurContainer: {
         flex: 1,
