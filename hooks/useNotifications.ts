@@ -48,8 +48,8 @@ export function useNotifications(): UseNotificationsResult {
     const [notificationPermissions, setNotificationPermissions] =
         useState<Notifications.NotificationPermissionsStatus | null>(null);
 
-    const notificationListener = useRef<Notifications.Subscription>();
-    const responseListener = useRef<Notifications.Subscription>();
+    const notificationListener = useRef<Notifications.Subscription | null>(null);
+    const responseListener = useRef<Notifications.Subscription | null>(null);
     const lastNotificationResponseData = Notifications.useLastNotificationResponse();
 
     const isSupported = isPushNotificationSupported();
@@ -95,8 +95,8 @@ export function useNotifications(): UseNotificationsResult {
                         textInput: 'textInput' in action ? action.textInput : undefined,
                         options: {
                             ...'options' in action ? action.options : {},
-                            opensAppToForeground: 'options' in action && action.options?.opensAppToForeground !== undefined
-                                ? action.options.opensAppToForeground
+                            opensAppToForeground: 'options' in action && (action.options as any)?.opensAppToForeground !== undefined
+                                ? (action.options as any).opensAppToForeground
                                 : true,
                         },
                     }))
